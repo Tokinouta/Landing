@@ -57,7 +57,7 @@ namespace CsharpVersion
         public static TrajactoryType TrajactoryConfig { get; set; } = TrajactoryType.TypeII;
 
         // 扰动类型配置
-        public static bool disturbance_type_I_flag = true; // 1 典型舰尾流扰动
+        public static bool DisturbanceTypeI = true; // 1 典型舰尾流扰动
 
         public static bool wind_enable = false; // 是否使能风场扰动 0:不使能 1:使能
         public static bool deck_enable = false; // 是否使能甲板运动补偿 0:不使能 1:使能

@@ -372,10 +372,10 @@ namespace CsharpVersion
             double CN_p = CN_p1 * current_alpha + CN_p0;
             double CN_r = CN_r1 * current_alpha + CN_r0;
             CN = CN_beta * current_beta
-                +CN_delta_r * current_delta_r
-                +CN_delta_a * current_delta_a
-                +wing_L / 2 / current_Vk * CN_p * current_p
-                +wing_L / 2 / current_Vk * CN_r * current_r; // yawing moment coefficient
+                + CN_delta_r * current_delta_r
+                + CN_delta_a * current_delta_a
+                + wing_L / 2 / current_Vk * CN_p * current_p
+                + wing_L / 2 / current_Vk * CN_r * current_r; // yawing moment coefficient
 
             //CY_alpha = CY_alpha;
             //CY_delta_tef = CY_delta_tef;
@@ -403,104 +403,110 @@ namespace CsharpVersion
             current_N = current_Q * wing_S * wing_L * CN;
         }
 
-        void updateState(double dt, disturbance, config)
+        void updateState(double dt, Disturbance disturbance)
         {
             calculatePneumaticParameters();
             calculateForceAndMoment();
 
-            disturbance.updateState(obj, config);
+            disturbance.updateState(this);
 
-            current_p_dot = 1 / (Ixx * Izz - Math.Pow(Ixz, 2)) * ((Iyy * Izz - Math.Pow(Izz, 2) - Math.Pow(Ixz, 2)) * current_q * current_r + (Ixx * Ixz + Izz * Ixz - Iyy * Ixz) * current_p * current_q...
-                + Izz * current_L...
-                +Ixz * current_N) ...
-                +disturbance.disturbance_p;
+            double current_p_dot = 1 / (Ixx * Izz - Math.Pow(Ixz, 2)) * ((Iyy * Izz - Math.Pow(Izz, 2) - Math.Pow(Ixz, 2)) * current_q * current_r
+                + (Ixx * Ixz + Izz * Ixz - Iyy * Ixz) * current_p * current_q
+                + Izz * current_L
+                + Ixz * current_N)
+                + disturbance.disturbance_p;
 
-            current_q_dot = 1 / Iyy * ((Izz - Ixx) * current_p * current_r - Ixz * Math.Pow(current_p, 2) + Ixz * Math.Pow(current_r, 2) + current_M)...
-                +disturbance.disturbance_q;
+            double current_q_dot = 1 / Iyy * ((Izz - Ixx) * current_p * current_r - Ixz * Math.Pow(current_p, 2)
+                + Ixz * Math.Pow(current_r, 2) + current_M)
+                + disturbance.disturbance_q;
 
-            current_r_dot = 1 / (Ixx * Izz - Math.Pow(Ixz, 2)) * ((Math.Pow(Ixx, 2) + Math.Pow(Ixz, 2) - Ixx * Iyy) * current_p * current_q + (Iyy * Ixz - Ixx * Ixz - Izz * Ixz) * current_q * current_r...
-                + Ixz * current_L...
-                +Ixx * current_N) ...
-                +disturbance.disturbance_r;
-            current_X4_dot = [current_p_dot, current_q_dot, current_r_dot]';
+            double current_r_dot = 1 / (Ixx * Izz - Math.Pow(Ixz, 2)) * ((Math.Pow(Ixx, 2) + Math.Pow(Ixz, 2) - Ixx * Iyy) * current_p * current_q
+                + (Iyy * Ixz - Ixx * Ixz - Izz * Ixz) * current_q * current_r
+                + Ixz * current_L
+                + Ixx * current_N)
+                + disturbance.disturbance_r;
+            Vector<double> current_X4_dot = vb.Dense(new[] { current_p_dot, current_q_dot, current_r_dot });
 
-            current_p = current_p + current_p_dot * dt;
-            current_q = current_q + current_q_dot * dt;
-            current_r = current_r + current_r_dot * dt;
+            current_p += current_p_dot * dt;
+            current_q += current_q_dot * dt;
+            current_r += current_r_dot * dt;
 
-            ev = XChangedEventArgs(dt, current_X4_dot);
-            notify(obj, "X4ChangedEvent", ev);
+            //ev = XChangedEventArgs(dt, current_X4_dot);
+            //notify(obj, "X4ChangedEvent", ev);
 
             // 欧拉角
-            current_phi_dot = current_p + tan(current_theta) * (current_q * Sin(current_phi) + current_r * Cos(current_phi));
-            current_theta_dot = current_q * Cos(current_phi) - current_r * Sin(current_phi);
-            current_psi_dot = 1 / Cos(current_theta) * (current_q * Sin(current_phi) + current_r * Cos(current_phi));
-            current_phi = current_phi + current_phi_dot * dt;
-            current_theta = current_theta + current_theta_dot * dt;
-            current_psi = current_psi + current_psi_dot * dt;
+            double current_phi_dot = current_p + Tan(current_theta) * (current_q * Sin(current_phi) + current_r * Cos(current_phi));
+            double current_theta_dot = current_q * Cos(current_phi) - current_r * Sin(current_phi);
+            double current_psi_dot = 1 / Cos(current_theta) * (current_q * Sin(current_phi) + current_r * Cos(current_phi));
+            current_phi += current_phi_dot * dt;
+            current_theta += current_theta_dot * dt;
+            current_psi += current_psi_dot * dt;
 
             // 绕质心运动学方程
-            current_beta_dot = current_p * Sin(current_alpha) - current_r * Cos(current_alpha) - derive_gamma * Sin(current_miu) + derive_kai * Cos(current_miu) * Cos(current_gamma);
-            current_miu_dot = (current_p * Cos(current_alpha) + current_r * Sin(current_alpha) + derive_gamma * Sin(current_beta) * Cos(current_miu) + derive_kai * (Sin(current_gamma) * ...
-                    Cos(current_beta) + Sin(current_beta) * Sin(current_miu) * Cos(current_gamma))) / Cos(current_beta);
-            current_alpha_dot = (current_q * Cos(current_beta) - (current_p * Cos(current_alpha) + current_r * Sin(current_alpha)) * Sin(current_beta) - derive_gamma * Cos(current_miu)...
-
-
+            double current_beta_dot = current_p * Sin(current_alpha) - current_r * Cos(current_alpha) - derive_gamma * Sin(current_miu) + derive_kai * Cos(current_miu) * Cos(current_gamma);
+            double current_miu_dot = (current_p * Cos(current_alpha) + current_r * Sin(current_alpha) + derive_gamma * Sin(current_beta) * Cos(current_miu) + derive_kai * (Sin(current_gamma)
+                * Cos(current_beta) + Sin(current_beta) * Sin(current_miu) * Cos(current_gamma))) / Cos(current_beta);
+            double current_alpha_dot = (current_q * Cos(current_beta) - (current_p * Cos(current_alpha) + current_r * Sin(current_alpha)) * Sin(current_beta) - derive_gamma * Cos(current_miu)
                     - derive_kai * Sin(current_miu) * Cos(current_gamma)) / Cos(current_beta);
 
-            current_X3_dot = [current_alpha_dot, current_beta_dot, current_miu_dot]';
-
-                // update state parameters
-            current_alpha = current_alpha + current_alpha_dot * dt;
-            current_beta = current_beta + current_beta_dot * dt;
-            current_miu = current_miu + current_miu_dot * dt;
-
-            ev = XChangedEventArgs(dt, current_X3_dot);
-            notify(obj, "X3ChangedEvent", ev);
-
-            // 质心动力方程
-            current_kai_dot = 1 / (m * current_Vk * Cos(current_gamma)) * (current_T * (Sin(current_alpha + engine_delta) * Sin(current_miu) - Cos(current_alpha + engine_delta)...
-                * Sin(current_beta) * Cos(current_miu))...
-                +current_C * Cos(current_miu)...
-                +current_Y * Sin(current_miu)) ...
-                +disturbance.disturbance_kai;
-            current_gamma_dot = -1 / (m * current_Vk) * (current_T * (-Sin(current_alpha + engine_delta) * Cos(current_miu) - Cos(current_alpha + engine_delta) * Sin(current_beta) * Sin(current_miu))...
-                + current_C * Sin(current_miu)...
-                -current_Y * Cos(current_miu)...
-                +m * g * Cos(current_gamma)) ...
-                +disturbance.disturbance_gamma;
-            current_X2_dot = [current_kai_dot, current_gamma_dot]';
-
-            current_Vk_dot = 1 / m * (current_T * Cos(current_alpha + engine_delta) * Cos(current_beta)...
-                - current_D...
-                -m * g * Sin(current_gamma)) +disturbance.disturbance_Vk;
+            Vector<double> current_X3_dot = vb.Dense(new[] { current_alpha_dot, current_beta_dot, current_miu_dot });
 
             // update state parameters
-            current_kai = current_kai + current_kai_dot * dt;
-            current_gamma = current_gamma + current_gamma_dot * dt;
+            current_alpha += current_alpha_dot * dt;
+            current_beta += current_beta_dot * dt;
+            current_miu += current_miu_dot * dt;
+
+            //ev = XChangedEventArgs(dt, current_X3_dot);
+            //notify(obj, "X3ChangedEvent", ev);
+
+            // 质心动力方程
+            double current_kai_dot = 1 / (m * current_Vk * Cos(current_gamma))
+                * (current_T * (Sin(current_alpha + engine_delta) * Sin(current_miu)
+                - Cos(current_alpha + engine_delta)
+                * Sin(current_beta) * Cos(current_miu))
+                + current_C * Cos(current_miu)
+                + current_Y * Sin(current_miu))
+                + disturbance.disturbance_kai;
+            double current_gamma_dot = -1 / (m * current_Vk)
+                * (current_T * (-Sin(current_alpha + engine_delta) * Cos(current_miu)
+                - Cos(current_alpha + engine_delta) * Sin(current_beta) * Sin(current_miu))
+                + current_C * Sin(current_miu)
+                - current_Y * Cos(current_miu)
+                + m * g * Cos(current_gamma))
+                + disturbance.disturbance_gamma;
+            Vector<double> current_X2_dot = vb.Dense(new[] { current_kai_dot, current_gamma_dot });
+
+            double current_Vk_dot = 1 / m * (current_T * Cos(current_alpha + engine_delta) * Cos(current_beta)
+                - current_D
+                - m * g * Sin(current_gamma))
+                + disturbance.disturbance_Vk;
+
+            // update state parameters
+            current_kai += current_kai_dot * dt;
+            current_gamma += current_gamma_dot * dt;
 
             // previous_delta_p = current_delta_p;
             current_delta_p = current_T / T_max;
-            current_Vk = current_Vk + current_Vk_dot * dt;
-            current_Q = 0.5 * rou * (current_Vk) ^ 2;
+            current_Vk += current_Vk_dot * dt;
+            current_Q = 0.5 * rou * Math.Pow(current_Vk, 2);
 
             derive_gamma = current_gamma_dot;
             derive_kai = current_kai_dot;
 
-            ev = XChangedEventArgs(dt, current_X2_dot);
-            notify(obj, "X2ChangedEvent", ev);
+            //ev = XChangedEventArgs(dt, current_X2_dot);
+            //notify(obj, "X2ChangedEvent", ev);
 
             // 质心运动方程
-            current_x_dot = current_Vk * Cos(current_gamma) * Cos(current_kai);
-            current_y_dot = current_Vk * Cos(current_gamma) * Sin(current_kai);
-            current_z_dot = -current_Vk * Sin(current_gamma);
-            current_X1_dot = [current_y_dot, current_z_dot]';
-                // update state parameters
-            current_position(1) = current_position(1) + current_x_dot * dt;
-            current_position(2) = current_position(2) + current_y_dot * dt;
-            current_position(3) = current_position(3) + current_z_dot * dt;
-            ev = XChangedEventArgs(dt, current_X1_dot);
-            notify(obj, "X1ChangedEvent", ev);
+            double current_x_dot = current_Vk * Cos(current_gamma) * Cos(current_kai);
+            double current_y_dot = current_Vk * Cos(current_gamma) * Sin(current_kai);
+            double current_z_dot = -current_Vk * Sin(current_gamma);
+            Vector<double> current_X1_dot = vb.Dense(new[] { current_y_dot, current_z_dot });
+            // update state parameters
+            current_position[0] += current_x_dot * dt;
+            current_position[1] += current_y_dot * dt;
+            current_position[2] += current_z_dot * dt;
+            //ev = XChangedEventArgs(dt, current_X1_dot);
+            //notify(obj, "X1ChangedEvent", ev);
         }
 
         void reset(Ship ship)
