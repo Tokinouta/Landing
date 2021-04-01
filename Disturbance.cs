@@ -18,7 +18,7 @@ namespace CsharpVersion
         double current_alpha_wind = 0; // angle of attck caused by wind
         double current_beta_wind = 0; // new added in mk4.1
         double wind_act_position = -800; // 考虑风场作用的距离，修改风场作用距离，要在此处和.m文件中同时修改
-        double wind_disturbance_start = 0; // 标记风场扰动开始的参数，1->系统加入风场扰动
+        public bool wind_disturbance_start = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
 
         Vector<double> cal_count;
         Vector<double> wind_model_state;
@@ -72,7 +72,7 @@ namespace CsharpVersion
             current_alpha_wind = 0; // angle of attck caused by wind
             current_beta_wind = 0; // new added in mk4.1
             wind_act_position = -800; // 考虑风场作用的距离，修改风场作用距离，要在此处和.m文件中同时修改
-            wind_disturbance_start = 0; // 标记风场扰动开始的参数，1->系统加入风场扰动
+            wind_disturbance_start = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
         }
 
         //void AddListener(fpl flightPathLoop)
@@ -96,7 +96,7 @@ namespace CsharpVersion
 
                 if (Math.Abs(current_position_ship[0] - current_position[0]) < Math.Abs(wind_act_position))
                 {
-                    wind_disturbance_start = 1;
+                    wind_disturbance_start = true;
                     current_alpha_wind = wind[step_count - wind_count] / (current_Vk);
                     current_beta_wind = -wind_lat[step_count - wind_count] / (current_Vk);
                 }
