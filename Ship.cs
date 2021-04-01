@@ -65,37 +65,37 @@ namespace CsharpVersion
             psi_s += omega_dz_2i * dt;
         }
 
-        void calculateCompensation(double dt, plane, positionLoop, config, step_count)
-        {
-            if (deck_enable)
-            {
-                if (deck_compensation_start_flag < deck_compensation_start_count)
-                {
-                    deck_compensation_start_flag++;
-                }
-                else
-                {
-                    deck_motion_count++;
-                    positionLoop.current_desired_X1(2) = positionLoop.current_desired_X1(2) - current_deck_control(step_count);
-                }
+        //void calculateCompensation(double dt, plane, positionLoop, config, step_count)
+        //{
+        //    if (deck_enable)
+        //    {
+        //        if (deck_compensation_start_flag < deck_compensation_start_count)
+        //        {
+        //            deck_compensation_start_flag++;
+        //        }
+        //        else
+        //        {
+        //            deck_motion_count++;
+        //            positionLoop.current_desired_X1(2) = positionLoop.current_desired_X1(2) - current_deck_control(step_count);
+        //        }
 
-                // lateral deck motion, new added in mk4.1
-                if (deck_compensation_start_flag_lat < deck_compensation_start_count_lat)
-                {
-                    deck_compensation_start_flag_lat++;
-                }
-                else
-                {
-                    deck_motion_count_lat++;
-                    positionLoop.current_desired_X1(1) = positionLoop.current_desired_X1(1) + current_deck_control_lat(step_count);
+        //        // lateral deck motion, new added in mk4.1
+        //        if (deck_compensation_start_flag_lat < deck_compensation_start_count_lat)
+        //        {
+        //            deck_compensation_start_flag_lat++;
+        //        }
+        //        else
+        //        {
+        //            deck_motion_count_lat++;
+        //            positionLoop.current_desired_X1(1) = positionLoop.current_desired_X1(1) + current_deck_control_lat(step_count);
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
 
         void record()
         {
-            notify(obj, "RecordShipStateEvent");
+            //notify(obj, "RecordShipStateEvent");
         }
 
 

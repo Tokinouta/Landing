@@ -37,6 +37,9 @@ namespace CsharpVersion
             var y3 = m.Solve(v);
             Console.WriteLine(w.Elapsed);
             Console.WriteLine(y3);
+            Ship ship = new Ship();
+            Plane pl = new Plane(ship);
+            Console.WriteLine("rarara");
         }
     }
 }

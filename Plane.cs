@@ -147,9 +147,9 @@ namespace CsharpVersion
 
         public Plane(Ship ship)
         {
-            //current_position_ship = ship.current_position_ship;
-            //theta_s = ship.theta_s;
-            //psi_s = ship.psi_s;
+            var current_position_ship = ship.current_position_ship;
+            double theta_s = ship.theta_s;
+            double psi_s = ship.psi_s;
 
             current_Q = 0.5 * rou * Math.Pow(current_Vk, 2);
             current_T = T_max * current_delta_p;
@@ -159,9 +159,10 @@ namespace CsharpVersion
             calculateForceAndMoment();
             initialize(ship);
             current_theta = current_gamma + current_alpha;
-            current_desired_position = [current_position(1), ideal_path(current_position, current_position_ship, theta_s, psi_s)]';
             current_delta_tef_desired = current_delta_tef;
-
+            current_desired_position = vb.Dense(3, current_position[0]);
+            current_desired_position.SetSubVector(
+                1, 2, HelperFunction.ideal_path(current_position, current_position_ship, theta_s, psi_s));
         }
 
         void addListeners()
@@ -540,7 +541,9 @@ namespace CsharpVersion
             calculateForceAndMoment();
             initialize(ship);
             current_theta = current_gamma + current_alpha;
-            current_desired_position = [current_position(1), ideal_path(current_position, current_position_ship, theta_s, psi_s)]';
+            current_desired_position = vb.Dense(3, current_position[0]);
+            current_desired_position.SetSubVector(
+                1, 2, HelperFunction.ideal_path(current_position, current_position_ship, theta_s, psi_s));
             current_delta_tef_desired = current_delta_tef;
         }
     }

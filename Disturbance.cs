@@ -75,16 +75,16 @@ namespace CsharpVersion
             wind_disturbance_start = 0; // 标记风场扰动开始的参数，1->系统加入风场扰动
         }
 
-        void AddListener(fpl flightPathLoop)
-        {
-            //addlistener(flightPathLoop, "RecordFlightPathLoopVarEvent", @updateWindSpeedEventHandler);
-        }
+        //void AddListener(fpl flightPathLoop)
+        //{
+        //    //addlistener(flightPathLoop, "RecordFlightPathLoopVarEvent", @updateWindSpeedEventHandler);
+        //}
 
-        void updateWindSpeedEventHandler(EventArgs e)
-        {
-            wind_estimation_NDO = e.data[4];
-            wind_estimation_NDO_lat = e.data[5];
-        }
+        //void updateWindSpeedEventHandler(EventArgs e)
+        //{
+        //    wind_estimation_NDO = e.data[4];
+        //    wind_estimation_NDO_lat = e.data[5];
+        //}
 
         public void updateWind(Plane plane, Ship ship, int step_count)
         {
