@@ -10,6 +10,7 @@ namespace CsharpVersion
     interface IControlModule
     {
         void calculateState(double dt, Vector<double> input);
+        void calculateState(double dt, Vector<double> input, Plane plane);
 
         void calculateObservation(Plane plane);
 

@@ -207,6 +207,11 @@ namespace CsharpVersion
             }
         }
 
+        public void calculateState(double dt, Vector<double> input, Plane plane)
+        {
+            throw new NotImplementedException();
+        }
+
         public void record()
         {
             //ev = XChangedEventArgs(dt, e3, derive_X3, previous_u3);

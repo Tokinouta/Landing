@@ -41,7 +41,7 @@ namespace CsharpVersion
 
         // Nonlinear Observer
         Vector<double> current_NDO_p_omega = vb.Dense(3, 0);
-        double NDO_d_omega_output;
+        Vector<double> NDO_d_omega_output;
 
         // 中间变量
         Vector<double> e4;
@@ -178,11 +178,11 @@ namespace CsharpVersion
             if (disturbance.wind_disturbance_start)
             {
                 // NDO_d_omega_output = NDO_d_gamma_b2f;
-                var NDO_d_omega_output = NDO_d_omega;
+                NDO_d_omega_output = NDO_d_omega;
             }
             else
             {
-                var NDO_d_omega_output = vb.Dense(3, 0);
+                NDO_d_omega_output = vb.Dense(3, 0);
             }
             //ev = XChangedEventArgs(NDO_d_omega);
             //notify(obj, "RecordAngularRateLoopVarEvent", ev);
@@ -260,6 +260,11 @@ namespace CsharpVersion
                 Console.WriteLine("请指定滤波器种类 id 41");
                 return;
             }
+        }
+
+        public void calculateState(double dt, Vector<double> input, Plane plane)
+        {
+            throw new NotImplementedException();
         }
 
         public void record()
