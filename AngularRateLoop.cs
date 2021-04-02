@@ -12,7 +12,10 @@ namespace CsharpVersion
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+        Plane plane;
+        Ship ship;
 
+        // Input Variable
         Vector<double> current_u3 = vb.Dense(3, 0);
 
         // State Variable
@@ -52,8 +55,11 @@ namespace CsharpVersion
         //event RecordAngularRateLoopEvent;
         //event RecordAngularRateLoopVarEvent
 
-        public AngularRateLoop(Plane plane)
+        public AngularRateLoop(Plane plane, Ship ship)
         {
+            this.plane = plane;
+            this.ship = ship;
+
             current_X4 = vb.Dense(new[]
                 { plane.current_p, plane.current_q, plane.current_r });
             current_Uact = vb.Dense(new[]
@@ -67,7 +73,7 @@ namespace CsharpVersion
             //addlistener(plane, 'X4ChangedEvent', @updateState);
         }
 
-        public void calculateFilter(double dt, Plane plane)
+        public void calculateFilter(double dt)
         {
             filter_Uact_previous = filter_Uact;
             //filter_Uact = 1 / 48 / (1 / 48 + dt * sample_num_rudder) * filter_Uact_previous
@@ -96,7 +102,7 @@ namespace CsharpVersion
             plane.current_delta_r = filter_Uact[2];
         }
 
-        public void calculateLimiter(double dt, Plane plane)
+        public void calculateLimiter(double dt)
         {
             //delta_e_range = plane.delta_e_range;
             //delta_e_rate_range = plane.delta_e_rate_range;
@@ -188,7 +194,7 @@ namespace CsharpVersion
             //notify(obj, "RecordAngularRateLoopVarEvent", ev);
         }
 
-        public void calculateObservation(Plane plane)
+        public void calculateObservation()
         {
             double F4_1 = 1 / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))
                 * ((Plane.Iyy * Plane.Izz - Math.Pow(Plane.Izz, 2) - Math.Pow(Plane.Ixz, 2)) * plane.current_r * plane.current_q
@@ -273,7 +279,7 @@ namespace CsharpVersion
             //notify(obj, "RecordAngularRateLoopEvent", ev);
         }
 
-        public void reset(Plane plane)
+        public void reset()
         {
             //current_p = plane.current_p;
             //current_q = plane.current_q;
@@ -304,7 +310,7 @@ namespace CsharpVersion
             current_NDO_p_omega = vb.Dense(3, 0);
         }
 
-        public void updateState(double dt, Plane plane, Disturbance disturbance)
+        public void updateState(double dt, Disturbance disturbance)
         {
             //dt = e.data{ 1};
             //current_X4_dot = e.data{ 2};

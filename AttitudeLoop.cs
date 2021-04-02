@@ -12,6 +12,9 @@ namespace CsharpVersion
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+        Plane plane;
+        Ship ship;
+        
         // Input Variable
         Vector<double> current_u2;
 
@@ -45,8 +48,11 @@ namespace CsharpVersion
 
         //event RecordAttitudeLoopEvent;
 
-        public AttitudeLoop(Plane plane)
+        public AttitudeLoop(Plane plane, Ship ship)
         {
+            this.plane = plane;
+            this.ship = ship;
+
             current_u2 = vb.Dense(new[] { plane.desired_alpha, 0, 0 });
             current_u3_index = mb.Dense(sample_num_u3, 3, 0); // p q r
             current_X3 = vb.Dense(new[]
@@ -56,7 +62,7 @@ namespace CsharpVersion
             //addlistener(plane, 'X3ChangedEvent', @updateState);
         }
 
-        public void calculateFilter(double dt, Plane plane)
+        public void calculateFilter(double dt)
         {
             current_u3_index.SetRow(current_u3_index_count, current_u3);
             current_u3_index_count++;
@@ -72,7 +78,7 @@ namespace CsharpVersion
             current_u3 = current_u3_index.ColumnSums() / sample_num_u3;
         }
 
-        public void calculateLimiter(double dt, Plane plane)
+        public void calculateLimiter(double dt)
         {
             //p_range = plane.p_range;
             //q_range = plane.q_range;
@@ -141,7 +147,7 @@ namespace CsharpVersion
             return;
         }
 
-        public void calculateObservation(Plane plane)
+        public void calculateObservation()
         {
             double current_alpha = plane.current_alpha;
             double current_beta = plane.current_beta;
@@ -218,7 +224,7 @@ namespace CsharpVersion
             //notify(obj, "RecordAttitudeLoopEvent", ev);
         }
 
-        public void reset(Plane plane)
+        public void reset()
         {
             current_u3_index_count = 1;
             current_u2 = vb.Dense(new[] { plane.desired_alpha, 0, 0 });
@@ -231,7 +237,7 @@ namespace CsharpVersion
             derive_X3 = vb.Dense(3, 0); //[theta,beta,miu]'
         }
 
-        public void updateState(double dt, Plane plane, Disturbance disturbance)
+        public void updateState(double dt, Disturbance disturbance)
         {
             // plane.current_v = [Sin(plane.current_miu), plane.current_alpha * Cos(plane.current_miu)]';
             //dt = e.data{ 1};

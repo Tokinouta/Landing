@@ -118,7 +118,7 @@ namespace CsharpVersion
             //addlistener(plane, 'X2ChangedEvent', @updateState);
         }
 
-        public void calculateFilter(double dt, Plane plane)
+        public void calculateFilter(double dt)
         {
             current_T_index[current_T_index_count] = plane.current_T;
             current_T_index_count++;
@@ -137,7 +137,7 @@ namespace CsharpVersion
             // current_delta_p = current_filter_delta_p;
         }
 
-        public void calculateLimiter(double dt, Plane plane)
+        public void calculateLimiter(double dt)
         {
             //delta_tef_range = plane.delta_tef_range;
             //delta_tef_rate_range = plane.delta_tef_rate_range;
@@ -319,7 +319,7 @@ namespace CsharpVersion
             //notify(obj, "RecordFlightPathLoopVarEvent", ev);
         }
 
-        public void calculateObservation(Plane plane)
+        public void calculateObservation()
         {
             //kai_b2f = plane.kai_b2f;
             //gamma_b2f = plane.gamma_b2f;
@@ -561,7 +561,7 @@ namespace CsharpVersion
             //notify(obj, "RecordFlightPathLoopEvent", ev);
         }
 
-        public void reset(Plane plane)
+        public void reset()
         {
             current_u1 = vb.Dense(2, 0);
             current_T_index = vb.Dense(sample_num_T, 0);
@@ -599,7 +599,7 @@ namespace CsharpVersion
             current_NDO_p_Vk = 0;
         }
 
-        public void updateState(double dt, Plane plane, Disturbance disturbance)
+        public void updateState(double dt, Disturbance disturbance)
         {
             //dt = e.data{ 1};
             //current_X2_dot = e.data{ 2};
