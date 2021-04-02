@@ -58,7 +58,7 @@ namespace CsharpVersion
 
         public PositionLoop(Plane plane, Ship ship)
         {
-            plane.
+            this.plane = plane;
             this.ship = ship;
             var current_position = plane.current_position;
             var current_desired_position = plane.current_desired_position;

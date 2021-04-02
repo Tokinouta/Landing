@@ -78,12 +78,12 @@ namespace CsharpVersion
             filter_Uact_previous = filter_Uact;
             //filter_Uact = 1 / 48 / (1 / 48 + dt * sample_num_rudder) * filter_Uact_previous
             //    + dt * sample_num_rudder / (1 / 48 + dt * sample_num_rudder) * current_Uact;
-            filter_Uact[0] = 1 / 48 / (1 / 48 + dt * sample_num_rudder) * filter_Uact_previous[0]
-                + dt * sample_num_rudder / (1 / 48 + dt * sample_num_rudder) * current_Uact[0];
-            filter_Uact[1] = 1 / 30 / (1 / 30 + dt * sample_num_rudder) * filter_Uact_previous[1]
-                + dt * sample_num_rudder / (1 / 30 + dt * sample_num_rudder) * current_Uact[1];
-            filter_Uact[2] = 1 / 40 / (1 / 40 + dt * sample_num_rudder) * filter_Uact_previous[2]
-                + dt * sample_num_rudder / (1 / 40 + dt * sample_num_rudder) * current_Uact[2];
+            filter_Uact[0] = 1 / 48.0 / (1 / 48.0 + dt * sample_num_rudder) * filter_Uact_previous[0]
+                + dt * sample_num_rudder / (1 / 48.0 + dt * sample_num_rudder) * current_Uact[0];
+            filter_Uact[1] = 1 / 30.0 / (1 / 30.0 + dt * sample_num_rudder) * filter_Uact_previous[1]
+                + dt * sample_num_rudder / (1 / 30.0 + dt * sample_num_rudder) * current_Uact[1];
+            filter_Uact[2] = 1 / 40.0 / (1 / 40.0 + dt * sample_num_rudder) * filter_Uact_previous[2]
+                + dt * sample_num_rudder / (1 / 40.0 + dt * sample_num_rudder) * current_Uact[2];
 
             current_Uact_index.SetRow(current_Uact_index_count, filter_Uact);
             current_Uact_index_count++;
@@ -170,6 +170,76 @@ namespace CsharpVersion
             {
                 current_Uact[2] = previous_Uact[2] + plane.delta_r_rate_range[1] * dt;
             }
+        }
+
+        public void calculateLimiter(double dt, int step_count)
+        {
+            //delta_e_range = plane.delta_e_range;
+            //delta_e_rate_range = plane.delta_e_rate_range;
+            //delta_a_range = plane.delta_a_range;
+            //delta_a_rate_range = plane.delta_a_rate_range;
+            //delta_r_range = plane.delta_r_range;
+            //delta_r_rate_range = plane.delta_r_rate_range;
+            // 舵面偏转角度限幅
+            if (current_Uact[0] < plane.delta_a_range[0])
+            {
+                Console.WriteLine($"Aileron over range bottom, {step_count}");
+                current_Uact[0] = plane.delta_a_range[0];
+            }
+            if (current_Uact[0] > plane.delta_a_range[1])
+            {
+                Console.WriteLine($"Aileron over range top, {step_count}");
+                current_Uact[0] = plane.delta_a_range[1];
+            }
+            if (current_Uact[1] < plane.delta_e_range[0])
+            {
+                Console.WriteLine($"Elevator over range bottom, {step_count}");
+                current_Uact[1] = plane.delta_e_range[0];
+            }
+            if (current_Uact[1] > plane.delta_e_range[1])
+            {
+                Console.WriteLine($"Elevator over range top, {step_count}");
+                current_Uact[1] = plane.delta_e_range[1];
+            }
+            if (current_Uact[2] < plane.delta_r_range[0])
+            {
+                Console.WriteLine($"Rudder over range bottom, {step_count}");
+                current_Uact[2] = plane.delta_r_range[0];
+            }
+            if (current_Uact[2] > plane.delta_r_range[1])
+            {
+                Console.WriteLine($"Rudder over range top, {step_count}");
+                current_Uact[2] = plane.delta_r_range[1];
+            }
+
+            // 舵面偏转角速度限制
+            var derive_Uact = (current_Uact - previous_Uact) / dt;
+
+            if (derive_Uact[0] < plane.delta_a_rate_range[0])
+            {
+                current_Uact[0] = previous_Uact[0] + plane.delta_a_rate_range[0] * dt;
+            }
+            if (derive_Uact[0] > plane.delta_a_rate_range[1])
+            {
+                current_Uact[0] = previous_Uact[0] + plane.delta_a_rate_range[1] * dt;
+            }
+            if (derive_Uact[1] < plane.delta_e_rate_range[0])
+            {
+                current_Uact[1] = previous_Uact[1] + plane.delta_e_rate_range[0] * dt;
+            }
+            if (derive_Uact[1] > plane.delta_e_rate_range[1])
+            {
+                current_Uact[1] = previous_Uact[1] + plane.delta_e_rate_range[1] * dt;
+            }
+            if (derive_Uact[2] < plane.delta_r_rate_range[0])
+            {
+                current_Uact[2] = previous_Uact[2] + plane.delta_r_rate_range[0] * dt;
+            }
+            if (derive_Uact[2] > plane.delta_r_rate_range[1])
+            {
+                current_Uact[2] = previous_Uact[2] + plane.delta_r_rate_range[1] * dt;
+            }
+
         }
 
         public void calculateNonlinearObserver(double dt, Disturbance disturbance)
@@ -266,11 +336,6 @@ namespace CsharpVersion
                 Console.WriteLine("请指定滤波器种类 id 41");
                 return;
             }
-        }
-
-        public void calculateState(double dt, Vector<double> input, Plane plane)
-        {
-            throw new NotImplementedException();
         }
 
         public void record(double dt)

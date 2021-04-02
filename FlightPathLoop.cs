@@ -45,7 +45,7 @@ namespace CsharpVersion
 
         // 滤波器参数
         int sample_num_T = 1;
-        int current_T_index_count = 1; // 推力
+        int current_T_index_count = 0; // 推力
         Vector<double> current_T_index;
 
         // 观测器输出变量
@@ -123,7 +123,7 @@ namespace CsharpVersion
             current_T_index[current_T_index_count] = plane.current_T;
             current_T_index_count++;
 
-            if (current_T_index_count > sample_num_T)
+            if (current_T_index_count >= sample_num_T)
             {
                 current_T_index_count = 0;
             }

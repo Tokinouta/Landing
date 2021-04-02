@@ -8,7 +8,7 @@ namespace CsharpVersion
 {
     class Simulation
     {
-        Plane plane;
+        public Plane plane;
         Ship ship;
         Disturbance disturbance;
         AttitudeLoop attitudeLoop;
@@ -55,9 +55,9 @@ namespace CsharpVersion
             {
                 // t1 = position_record(step_count,:);
                 // con = sum(t1.* t1) ~= sum(plane.current_position.* plane.current_position);
-                singleStep();
+            singleStep();//fclose(fid);
+
             }
-            //fclose(fid);
             Console.WriteLine(step_count);
         }
 
@@ -91,7 +91,7 @@ namespace CsharpVersion
 
             angularRateLoop.calculateState(dt, attitudeLoop.current_u3);
             angularRateLoop.calculateOutput();
-            angularRateLoop.calculateLimiter(dt);
+            angularRateLoop.calculateLimiter(dt, step_count);
             angularRateLoop.calculateFilter(dt);
 
             plane.updateState(dt, disturbance);
@@ -104,7 +104,7 @@ namespace CsharpVersion
             flightPathLoop.record(dt);
             attitudeLoop.record(dt);
             angularRateLoop.record(dt);
-            record.time_record.Add(current_time);
+            //record.time_record.Add(current_time);
         }
 
         void reset()

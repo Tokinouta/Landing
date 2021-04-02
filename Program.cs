@@ -42,7 +42,10 @@ namespace CsharpVersion
             Console.WriteLine("rarara");
 
             Simulation sim = new Simulation();
+            w.Restart();
             sim.simulate();
+            Console.WriteLine(w.Elapsed);
+            Console.WriteLine(sim.plane.current_position.ToString("G40"));
         }
     }
 }

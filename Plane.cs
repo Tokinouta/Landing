@@ -27,7 +27,7 @@ namespace CsharpVersion
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
         // 舵面角度及角速度限幅
         // 所有角度、角速度均以弧度为单位
-        public Vector<double> delta_e_range = vb.Dense(new double[] { 2.0, 3.0 }) * Pi / 180; // 升降舵角度范围
+        public Vector<double> delta_e_range = vb.Dense(new double[] { -24, 10.5 }) * Pi / 180; // 升降舵角度范围
         public Vector<double> delta_e_rate_range = vb.Dense(new double[] { -40, 40 }) * Pi / 180; // 升降舵角速度范围
         public Vector<double> delta_a_range = vb.Dense(new double[] { -25, 45 }) * Pi / 180;
         public Vector<double> delta_a_rate_range = vb.Dense(new double[] { -100, 100 }) * Pi / 180;
