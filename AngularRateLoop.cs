@@ -273,7 +273,7 @@ namespace CsharpVersion
             throw new NotImplementedException();
         }
 
-        public void record()
+        public void record(double dt)
         {
             //ev = XChangedEventArgs(dt, e4, filter_Uact, derive_X4);
             //notify(obj, "RecordAngularRateLoopEvent", ev);

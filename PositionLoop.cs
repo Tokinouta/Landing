@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CsharpVersion
 {
-    class PositionLoop : IControlModule
+    public class PositionLoop : IControlModule
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
@@ -17,13 +17,13 @@ namespace CsharpVersion
         Plane plane;
         Ship ship;
         // Input Variable
-        Vector<double> current_desired_X1;
+        public Vector<double> current_desired_X1;
 
         // State Variable
         Vector<double> current_X1;
 
         // Output Variable
-        Vector<double> current_u1 = vb.Dense(2, 0);
+        public Vector<double> current_u1 = vb.Dense(2, 0);
 
         // Interior Variable
         Matrix<double> epsilon_X1 = mb.DenseDiagonal(2, 2);
@@ -53,9 +53,9 @@ namespace CsharpVersion
 
         IPositionController controller;
 
-        //event X1ChangedEvent;
-        //event RecordPositionLoopEvent;
-        //event RecordPositionLoopVarEvent;
+        public event EventHandler<EventArgs> X1ChangedEvent;
+        public event EventHandler<EventArgs> RecordPositionLoopEvent;
+        public event EventHandler<EventArgs> RecordPositionLoopVarEvent;
 
         public PositionLoop(Plane plane, Ship ship)
         {
@@ -186,6 +186,11 @@ namespace CsharpVersion
 
         public void calculateOutput()
         {
+            throw new NotImplementedException();
+        }
+
+        public void calculateOutput(double dt, double current_time, int step_count)
+        {
             current_u1 = controller.CalculateOutput(dt, current_time, step_count);
             controller.InvokeRecordEvent();
         }
@@ -194,7 +199,8 @@ namespace CsharpVersion
         {
             if (Configuration.guidance_command_filter_flag)// 判断使用何种滤波器
             {                                                         // 使用指令滤波器
-                var derive2_X1 = -2 * epsilon_X1 * omega_X1 * derive_X1 - omega_X1.Power(2) * (filter_desired_X1 - current_desired_X1);
+                var derive2_X1 = -2 * epsilon_X1 * omega_X1 * derive_X1
+                    - omega_X1.Power(2) * (filter_desired_X1 - current_desired_X1);
                 derive_X1 += derive2_X1 * dt;
                 filter_desired_X1 += derive_X1 * dt;
                 epc = filter_desired_X1 - current_X1;
@@ -214,7 +220,7 @@ namespace CsharpVersion
             throw new NotImplementedException();
         }
 
-        public void record()
+        public void record(double dt)
         {
             //ev = XChangedEventArgs(epc, derive_X1, previous_desired_X1, ...
             //    previous_u1, dt);

@@ -23,7 +23,7 @@ namespace CsharpVersion
 
         void updateState(double dt, Disturbance disturbance);
 
-        void record();
+        void record(double dt);
 
         void reset();
     }

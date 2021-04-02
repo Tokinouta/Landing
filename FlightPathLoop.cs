@@ -24,7 +24,7 @@ namespace CsharpVersion
         Vector<double> current_X2;
 
         // Output Variable
-        Vector<double> current_u2;
+        public Vector<double> current_u2;
 
         // Interior Variable
         Matrix<double> epsilon_X2 = mb.DenseDiagonal(2, 0.7);
@@ -493,7 +493,7 @@ namespace CsharpVersion
             }
         }
 
-        public void calculateState(double dt, Vector<double> input, Plane plane)
+        public void calculateState(double dt, Vector<double> input)
         {
             current_u1 = input;
 
@@ -550,12 +550,7 @@ namespace CsharpVersion
             // current_delta_p = B_alpha \ (-F_alpha + k_alpha_backstepping * err_alpha - NDO_d_alpha); // 使用非线性方法控制油门，保持迎角
         }
 
-        public void calculateState(double dt, Vector<double> input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void record()
+        public void record(double dt)
         {
             //ev = XChangedEventArgs(dt, e2, current_err_alpha, derive_X2, previous_u2);
             //notify(obj, "RecordFlightPathLoopEvent", ev);

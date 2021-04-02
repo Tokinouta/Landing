@@ -22,7 +22,7 @@ namespace CsharpVersion
         Vector<double> current_X3;
 
         // Output Variable
-        Vector<double> current_u3 = vb.Dense(3, 0);
+        public Vector<double> current_u3 = vb.Dense(3, 0);
 
         // Interior Variable
         Matrix<double> epsilon_X3 = mb.DenseDiagonal(3, 0.7);
@@ -218,7 +218,7 @@ namespace CsharpVersion
             throw new NotImplementedException();
         }
 
-        public void record()
+        public void record(double dt)
         {
             //ev = XChangedEventArgs(dt, e3, derive_X3, previous_u3);
             //notify(obj, "RecordAttitudeLoopEvent", ev);

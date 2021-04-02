@@ -404,7 +404,7 @@ namespace CsharpVersion
             current_N = current_Q * wing_S * wing_L * CN;
         }
 
-        void updateState(double dt, Disturbance disturbance)
+        public void updateState(double dt, Disturbance disturbance)
         {
             calculatePneumaticParameters();
             calculateForceAndMoment();
@@ -510,7 +510,7 @@ namespace CsharpVersion
             //notify(obj, "X1ChangedEvent", ev);
         }
 
-        void reset(Ship ship)
+        public void reset(Ship ship)
         {
             var current_position_ship = ship.current_position_ship;
             double theta_s = ship.theta_s;
