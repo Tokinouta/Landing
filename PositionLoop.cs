@@ -53,13 +53,12 @@ namespace CsharpVersion
 
         IPositionController controller;
 
-        public event EventHandler<EventArgs> X1ChangedEvent;
         public event EventHandler<EventArgs> RecordPositionLoopEvent;
         public event EventHandler<EventArgs> RecordPositionLoopVarEvent;
 
         public PositionLoop(Plane plane, Ship ship)
         {
-            this.plane = plane;
+            plane.
             this.ship = ship;
             var current_position = plane.current_position;
             var current_desired_position = plane.current_desired_position;
@@ -241,6 +240,11 @@ namespace CsharpVersion
             //dt = e.data{ 1};
             //current_X1_dot = e.data{ 2};
             //current_X1 = current_X1 + current_X1_dot * dt;
+        }
+
+        public void OnUpdateState(object sender, XChangedEventArgs e)
+        {
+            current_X1 += e.Data * e.Dt;
         }
 
         public void calculatePrescribedParameter()

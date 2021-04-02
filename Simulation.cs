@@ -36,11 +36,17 @@ namespace CsharpVersion
             Console.WriteLine("text");
             // plane.addListeners(positionLoop, flightPathLoop, attitudeLoop, angularRateLoop);
             record = new SimulationRecord();
+
+            plane.X1ChangedEvent += positionLoop.OnUpdateState;
+            plane.X2ChangedEvent += flightPathLoop.OnUpdateState;
+            plane.X3ChangedEvent += attitudeLoop.OnUpdateState;
+            plane.X4ChangedEvent += angularRateLoop.OnUpdateState;
+
             //disturbance.AddListener(flightPathLoop);
             // addlistener(app, "simulationStep", "PostSet", @modifyFrequency);
         }
 
-        void simulate()
+        public void simulate()
         {
             //fid = fopen('out.txt', 'a');
             // load('position.mat');

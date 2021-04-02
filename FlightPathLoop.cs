@@ -600,5 +600,10 @@ namespace CsharpVersion
             //current_X2_dot = e.data{ 2};
             //current_X2 = current_X2 + current_X2_dot * dt;
         }
+
+        public void OnUpdateState(object sender, XChangedEventArgs e)
+        {
+            current_X2 += e.Data * e.Dt;
+        }
     }
 }

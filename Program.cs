@@ -40,6 +40,9 @@ namespace CsharpVersion
             Ship ship = new Ship();
             Plane pl = new Plane(ship);
             Console.WriteLine("rarara");
+
+            Simulation sim = new Simulation();
+            sim.simulate();
         }
     }
 }

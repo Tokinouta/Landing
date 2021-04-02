@@ -140,6 +140,11 @@ namespace CsharpVersion
 
 
         //event RecordPlaneStateEvent;
+        public event EventHandler<XChangedEventArgs> X1ChangedEvent;
+        public event EventHandler<XChangedEventArgs> X2ChangedEvent;
+        public event EventHandler<XChangedEventArgs> X3ChangedEvent;
+        public event EventHandler<XChangedEventArgs> X4ChangedEvent;
+
         //event X1ChangedEvent;
         //event X2ChangedEvent;
         //event X3ChangedEvent;
@@ -432,6 +437,7 @@ namespace CsharpVersion
             current_q += current_q_dot * dt;
             current_r += current_r_dot * dt;
 
+            X4ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X4_dot));
             //ev = XChangedEventArgs(dt, current_X4_dot);
             //notify(obj, "X4ChangedEvent", ev);
 
@@ -457,6 +463,7 @@ namespace CsharpVersion
             current_beta += current_beta_dot * dt;
             current_miu += current_miu_dot * dt;
 
+            X3ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X3_dot));
             //ev = XChangedEventArgs(dt, current_X3_dot);
             //notify(obj, "X3ChangedEvent", ev);
 
@@ -494,6 +501,7 @@ namespace CsharpVersion
             derive_gamma = current_gamma_dot;
             derive_kai = current_kai_dot;
 
+            X2ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X2_dot));
             //ev = XChangedEventArgs(dt, current_X2_dot);
             //notify(obj, "X2ChangedEvent", ev);
 
@@ -506,6 +514,8 @@ namespace CsharpVersion
             current_position[0] += current_x_dot * dt;
             current_position[1] += current_y_dot * dt;
             current_position[2] += current_z_dot * dt;
+
+            X1ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X1_dot));
             //ev = XChangedEventArgs(dt, current_X1_dot);
             //notify(obj, "X1ChangedEvent", ev);
         }
