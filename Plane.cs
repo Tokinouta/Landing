@@ -103,10 +103,7 @@ namespace CsharpVersion
         public double kai_b2f;
         public double gamma_b2f;
 
-
-
         // 气动力和力矩
-
         public double Y;
         public double D;
         public double C;

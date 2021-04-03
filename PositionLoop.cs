@@ -33,9 +33,9 @@ namespace CsharpVersion
         Matrix<double> k1_backstepping = mb.DenseOfDiagonalArray(new[] { 0.9, 0.2 });
 
         // 滤波器参数
-        readonly int _sampleNumber = 1; // 3
-        int filterU1BufferIndex = 1;
-        Matrix<double> filterU1Buffer; //
+        readonly int sampleNumber = 1; // 3
+        int U1FilterBufferIndex = 1;
+        Matrix<double> U1FilterBuffer; //
 
 
         // 观测器输出变量
@@ -99,22 +99,22 @@ namespace CsharpVersion
             //addlistener(plane, 'X1ChangedEvent', @updateState);
         }
 
-        public void calculateFilter(double dt)
+        public void CalculateFilter(double dt)
         {
-            filterU1Buffer.SetRow(filterU1BufferIndex, U1);
-            filterU1BufferIndex++;
+            U1FilterBuffer.SetRow(U1FilterBufferIndex, U1);
+            U1FilterBufferIndex++;
 
-            if (filterU1BufferIndex >= _sampleNumber)
+            if (U1FilterBufferIndex >= sampleNumber)
             {
-                filterU1BufferIndex = 0;
+                U1FilterBufferIndex = 0;
             }
-            U1 = filterU1Buffer.ColumnSums() / _sampleNumber;
+            U1 = U1FilterBuffer.ColumnSums() / sampleNumber;
 
             //current_u1(1) = sum(current_u1_index(:, 1)) / sample_num_u1; // kai
             //current_u1(2) = sum(current_u1_index(:, 2)) / sample_num_u1; // gamma
         }
 
-        public void calculateLimiter(double dt)
+        public void CalculateLimiter(double dt)
         {
             //kai_range = plane.kai_range;
             //gamma_range = plane.gamma_range;
@@ -163,12 +163,12 @@ namespace CsharpVersion
             }
         }
 
-        public void calculateNonlinearObserver(double dt, Disturbance disturbance)
+        public void CalculateNonlinearObserver(double dt, Disturbance disturbance)
         {
             throw new NotImplementedException();
         }
 
-        public void calculateObservation()
+        public void CalculateObservation()
         {
             //current_Vk = plane.current_Vk;
             //current_gamma = plane.current_gamma;
@@ -182,7 +182,7 @@ namespace CsharpVersion
             B1[1, 1] *= -1;
         }
 
-        public void calculateOutput()
+        public void CalculateOutput()
         {
             throw new NotImplementedException();
         }
@@ -193,7 +193,7 @@ namespace CsharpVersion
             controller.InvokeRecordEvent();
         }
 
-        public void calculateState(double dt, Vector<double> input)
+        public void CalculateState(double dt, Vector<double> input)
         {
             if (Configuration.guidance_command_filter_flag)// 判断使用何种滤波器
             {                                                         // 使用指令滤波器
@@ -213,14 +213,14 @@ namespace CsharpVersion
             }
         }
 
-        public void record(double dt)
+        public void Record(double dt)
         {
             //ev = XChangedEventArgs(epc, derive_X1, previous_desired_X1, ...
             //    previous_u1, dt);
             //notify(obj, "RecordPositionLoopEvent", ev);
         }
 
-        public void reset()
+        public void Reset()
         {
             X1 = _plane.Position.SubVector(1, 2);
             X1Desired = _plane.DesiredPosition.SubVector(1, 2); ;
@@ -229,7 +229,7 @@ namespace CsharpVersion
             controller.Reset();
         }
 
-        public void updateState(double dt, Disturbance disturbance)
+        public void UpdateState(double dt, Disturbance disturbance)
         {
             //dt = e.data{ 1};
             //current_X1_dot = e.data{ 2};

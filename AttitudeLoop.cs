@@ -16,25 +16,25 @@ namespace CsharpVersion
         Ship ship;
         
         // Input Variable
-        Vector<double> current_u2;
+        Vector<double> U2;
 
         // State Variable
-        public Vector<double> current_X3;
+        public Vector<double> X3;
 
         // Output Variable
-        public Vector<double> current_u3 = vb.Dense(3, 0);
+        public Vector<double> U3 = vb.Dense(3, 0);
 
         // Interior Variable
-        Matrix<double> epsilon_X3 = mb.DenseDiagonal(3, 0.7);
-        Matrix<double> omega_X3 = mb.DenseDiagonal(3, 40);
+        Matrix<double> epsilonX3 = mb.DenseDiagonal(3, 0.7);
+        Matrix<double> omegaX3 = mb.DenseDiagonal(3, 40);
 
         // 反步法参数
         Matrix<double> k3_backstepping = mb.DenseIdentity(3); // 1.0
 
         // 滤波器参数
-        int sample_num_u3 = 1;
-        int current_u3_index_count = 1;
-        Matrix<double> current_u3_index; // p q r
+        int sampleNumber = 1;
+        int U3FilterBufferIndex = 1;
+        Matrix<double> U3FilterBuffer; // p q r
 
         // 观测器输出变量
         Vector<double> F3;
@@ -42,9 +42,9 @@ namespace CsharpVersion
 
         // 中间变量
         Vector<double> e3;
-        Vector<double> filter_u2;
-        Vector<double> derive_X3 = vb.Dense(3, 0); //[theta,beta,miu]'
-        Vector<double> previous_u3;
+        Vector<double> filteredU2;
+        Vector<double> deriveX3 = vb.Dense(3, 0); //[theta,beta,miu]'
+        Vector<double> previousU3;
 
         //event RecordAttitudeLoopEvent;
 
@@ -53,32 +53,32 @@ namespace CsharpVersion
             this.plane = plane;
             this.ship = ship;
 
-            current_u2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
-            current_u3_index = mb.Dense(sample_num_u3, 3, 0); // p q r
-            current_X3 = vb.Dense(new[]
+            U2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
+            U3FilterBuffer = mb.Dense(sampleNumber, 3, 0); // p q r
+            X3 = vb.Dense(new[]
                 { plane.Alpha, plane.Beta, plane.Miu });
-            previous_u3 = current_u3;
-            filter_u2 = current_u2;
+            previousU3 = U3;
+            filteredU2 = U2;
             //addlistener(plane, 'X3ChangedEvent', @updateState);
         }
 
-        public void calculateFilter(double dt)
+        public void CalculateFilter(double dt)
         {
-            current_u3_index.SetRow(current_u3_index_count, current_u3);
-            current_u3_index_count++;
+            U3FilterBuffer.SetRow(U3FilterBufferIndex, U3);
+            U3FilterBufferIndex++;
 
-            if (current_u3_index_count >= sample_num_u3)
+            if (U3FilterBufferIndex >= sampleNumber)
             {
-                current_u3_index_count = 1;
+                U3FilterBufferIndex = 1;
             }
 
             //current_u3(1) = sum(current_u3_index(:, 1)) / sample_num_u3; // theta
             //current_u3(2) = sum(current_u3_index(:, 2)) / sample_num_u3; // beta
             //current_u3(3) = sum(current_u3_index(:, 3)) / sample_num_u3; // miu
-            current_u3 = current_u3_index.ColumnSums() / sample_num_u3;
+            U3 = U3FilterBuffer.ColumnSums() / sampleNumber;
         }
 
-        public void calculateLimiter(double dt)
+        public void CalculateLimiter(double dt)
         {
             //p_range = plane.p_range;
             //q_range = plane.q_range;
@@ -87,67 +87,67 @@ namespace CsharpVersion
             //q_rate_range = plane.q_rate_range;
             //r_rate_range = plane.r_rate_range;
 
-            if (current_u3[0] < plane.PRange[0])
+            if (U3[0] < plane.PRange[0])
             {
-                current_u3[0] = plane.PRange[0];
+                U3[0] = plane.PRange[0];
             }
-            if (current_u3[0] > plane.PRange[1])
+            if (U3[0] > plane.PRange[1])
             {
-                current_u3[0] = plane.PRange[1];
+                U3[0] = plane.PRange[1];
             }
-            if (current_u3[1] < plane.QRange[0])
+            if (U3[1] < plane.QRange[0])
             {
-                current_u3[1] = plane.QRange[0];
+                U3[1] = plane.QRange[0];
             }
-            if (current_u3[1] > plane.QRange[1])
+            if (U3[1] > plane.QRange[1])
             {
-                current_u3[1] = plane.QRange[1];
+                U3[1] = plane.QRange[1];
             }
-            if (current_u3[2] < plane.RRange[0])
+            if (U3[2] < plane.RRange[0])
             {
-                current_u3[2] = plane.RRange[0];
+                U3[2] = plane.RRange[0];
             }
-            if (current_u3[2] > plane.RRange[1])
+            if (U3[2] > plane.RRange[1])
             {
-                current_u3[2] = plane.RRange[1];
+                U3[2] = plane.RRange[1];
             }
 
             // Description    : p q r变化速率限制
             // p q r变化速率限制
-            var derive_u3 = (current_u3 - previous_u3) / dt;
+            var derive_u3 = (U3 - previousU3) / dt;
 
             if (derive_u3[0] < plane.PRateRange[0])
             {
-                current_u3[0] = previous_u3[0] + plane.PRateRange[0] * dt;
+                U3[0] = previousU3[0] + plane.PRateRange[0] * dt;
             }
             if (derive_u3[0] > plane.PRateRange[1])
             {
-                current_u3[0] = previous_u3[0] + plane.PRateRange[1] * dt;
+                U3[0] = previousU3[0] + plane.PRateRange[1] * dt;
             }
             if (derive_u3[1] < plane.QRateRange[0])
             {
-                current_u3[1] = previous_u3[1] + plane.QRateRange[0] * dt;
+                U3[1] = previousU3[1] + plane.QRateRange[0] * dt;
             }
             if (derive_u3[1] > plane.QRateRange[1])
             {
-                current_u3[1] = previous_u3[1] + plane.QRateRange[1] * dt;
+                U3[1] = previousU3[1] + plane.QRateRange[1] * dt;
             }
             if (derive_u3[2] < plane.RRateRange[0])
             {
-                current_u3[2] = previous_u3[2] + plane.RRateRange[0] * dt;
+                U3[2] = previousU3[2] + plane.RRateRange[0] * dt;
             }
             if (derive_u3[2] > plane.RRateRange[1])
             {
-                current_u3[2] = previous_u3[2] + plane.RRateRange[1] * dt;
+                U3[2] = previousU3[2] + plane.RRateRange[1] * dt;
             }
         }
 
-        public void calculateNonlinearObserver(double dt, Disturbance disturbance)
+        public void CalculateNonlinearObserver(double dt, Disturbance disturbance)
         {
             return;
         }
 
-        public void calculateObservation()
+        public void CalculateObservation()
         {
             double current_alpha = plane.Alpha;
             double current_beta = plane.Beta;
@@ -168,18 +168,18 @@ namespace CsharpVersion
                 { Cos(current_alpha) / Cos(current_beta), 0, Sin(current_alpha) / Cos(current_beta) }});
         }
 
-        public void calculateOutput()
+        public void CalculateOutput()
         {
             if (Configuration.AttitudeController == AttitudeConfig.IDLC)
             {
                 // 直接升力控制
                 if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)
                 {
-                    current_u3 = B3.Inverse() * (-F3 + k3_backstepping * e3 + derive_X3); //[p, q, r] nonlinear disturbance observer attitude环不使用DO
+                    U3 = B3.Inverse() * (-F3 + k3_backstepping * e3 + deriveX3); //[p, q, r] nonlinear disturbance observer attitude环不使用DO
                 }
                 else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
                 {
-                    current_u3 = B3.Inverse() * (-F3 + k3_backstepping * e3 + derive_X3); //[p, q, r] 不使用DO
+                    U3 = B3.Inverse() * (-F3 + k3_backstepping * e3 + deriveX3); //[p, q, r] 不使用DO
                 }
                 else
                 {
@@ -194,18 +194,18 @@ namespace CsharpVersion
             }
         }
 
-        public void calculateState(double dt, Vector<double> input)
+        public void CalculateState(double dt, Vector<double> input)
         {
-            current_u2 = input;
+            U2 = input;
 
             if (Configuration.attitude_command_filter_flag)// 判断使用何种滤波器
             {
                 // 使用指令滤波器
-                var derive2_X3 = -2 * epsilon_X3 * omega_X3 * derive_X3 - omega_X3.Power(2) * (filter_u2 - current_u2);
-                derive_X3 += derive2_X3 * dt;
-                filter_u2 += derive_X3 * dt;
-                e3 = filter_u2 - current_X3;
-                previous_u3 = current_u3;
+                var derive2_X3 = -2 * epsilonX3 * omegaX3 * deriveX3 - omegaX3.Power(2) * (filteredU2 - U2);
+                deriveX3 += derive2_X3 * dt;
+                filteredU2 += deriveX3 * dt;
+                e3 = filteredU2 - X3;
+                previousU3 = U3;
             }
             else
             {
@@ -218,26 +218,26 @@ namespace CsharpVersion
             throw new NotImplementedException();
         }
 
-        public void record(double dt)
+        public void Record(double dt)
         {
             //ev = XChangedEventArgs(dt, e3, derive_X3, previous_u3);
             //notify(obj, "RecordAttitudeLoopEvent", ev);
         }
 
-        public void reset()
+        public void Reset()
         {
-            current_u3_index_count = 1;
-            current_u2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
-            current_u3_index = mb.Dense(sample_num_u3, 3, 0); // p q r
-            current_X3 = vb.Dense(new[]
+            U3FilterBufferIndex = 1;
+            U2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
+            U3FilterBuffer = mb.Dense(sampleNumber, 3, 0); // p q r
+            X3 = vb.Dense(new[]
                 { plane.Alpha, plane.Beta, plane.Miu });
-            previous_u3 = current_u3;
-            filter_u2 = current_u2;
+            previousU3 = U3;
+            filteredU2 = U2;
 
-            derive_X3 = vb.Dense(3, 0); //[theta,beta,miu]'
+            deriveX3 = vb.Dense(3, 0); //[theta,beta,miu]'
         }
 
-        public void updateState(double dt, Disturbance disturbance)
+        public void UpdateState(double dt, Disturbance disturbance)
         {
             // plane.current_v = [Sin(plane.current_miu), plane.current_alpha * Cos(plane.current_miu)]';
             //dt = e.data{ 1};
@@ -247,7 +247,7 @@ namespace CsharpVersion
 
         public void OnUpdateState(object sender, XChangedEventArgs e)
         {
-            current_X3 += e.Data * e.Dt;
+            X3 += e.Data * e.Dt;
         }
     }
 }

@@ -133,33 +133,33 @@ namespace CsharpVersion
             step_count++;
             current_time = dt * step_count;
 
-            PositionLoop.calculateObservation();
-            FlightPathLoop.calculateObservation();
-            AttitudeLoop.calculateObservation();
-            AngularRateLoop.calculateObservation();
+            PositionLoop.CalculateObservation();
+            FlightPathLoop.CalculateObservation();
+            AttitudeLoop.CalculateObservation();
+            AngularRateLoop.CalculateObservation();
 
-            FlightPathLoop.calculateNonlinearObserver(dt, Disturbance);
-            AngularRateLoop.calculateNonlinearObserver(dt, Disturbance);
+            FlightPathLoop.CalculateNonlinearObserver(dt, Disturbance);
+            AngularRateLoop.CalculateNonlinearObserver(dt, Disturbance);
 
             PositionLoop.calculatePrescribedParameter();
             Ship.calculateCompensation(dt, PositionLoop, step_count);
-            PositionLoop.calculateState(dt, null);
+            PositionLoop.CalculateState(dt, null);
             PositionLoop.calculateOutput(dt, current_time, step_count);
-            PositionLoop.calculateLimiter(dt);
+            PositionLoop.CalculateLimiter(dt);
 
-            FlightPathLoop.calculateState(dt, PositionLoop.U1);
-            FlightPathLoop.calculateOutput();
-            FlightPathLoop.calculateLimiter(dt);
-            FlightPathLoop.calculateFilter(dt);
+            FlightPathLoop.CalculateState(dt, PositionLoop.U1);
+            FlightPathLoop.CalculateOutput();
+            FlightPathLoop.CalculateLimiter(dt);
+            FlightPathLoop.CalculateFilter(dt);
 
-            AttitudeLoop.calculateState(dt, FlightPathLoop.current_u2);
-            AttitudeLoop.calculateOutput();
-            AttitudeLoop.calculateLimiter(dt);
+            AttitudeLoop.CalculateState(dt, FlightPathLoop.U2);
+            AttitudeLoop.CalculateOutput();
+            AttitudeLoop.CalculateLimiter(dt);
 
-            AngularRateLoop.calculateState(dt, AttitudeLoop.current_u3);
-            AngularRateLoop.calculateOutput();
+            AngularRateLoop.CalculateState(dt, AttitudeLoop.U3);
+            AngularRateLoop.CalculateOutput();
             AngularRateLoop.calculateLimiter(dt, step_count);
-            AngularRateLoop.calculateFilter(dt);
+            AngularRateLoop.CalculateFilter(dt);
 
             Plane.UpdateState(dt, Disturbance);
             Ship.updateState(dt);
@@ -167,10 +167,10 @@ namespace CsharpVersion
 
             Plane.Record();
             Ship.record();
-            PositionLoop.record(dt);
-            FlightPathLoop.record(dt);
-            AttitudeLoop.record(dt);
-            AngularRateLoop.record(dt);
+            PositionLoop.Record(dt);
+            FlightPathLoop.Record(dt);
+            AttitudeLoop.Record(dt);
+            AngularRateLoop.Record(dt);
             //record.time_record.Add(current_time);
         }
 
@@ -180,10 +180,10 @@ namespace CsharpVersion
             current_time = 0;
             Ship.reset();
             Plane.Reset(Ship);
-            PositionLoop.reset();
-            FlightPathLoop.reset();
-            AttitudeLoop.reset();
-            AngularRateLoop.reset();
+            PositionLoop.Reset();
+            FlightPathLoop.Reset();
+            AttitudeLoop.Reset();
+            AngularRateLoop.Reset();
             Disturbance.reset();
         }
 

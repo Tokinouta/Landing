@@ -9,22 +9,22 @@ namespace CsharpVersion
 {
     interface IControlModule
     {
-        void calculateState(double dt, Vector<double> input);
+        void CalculateState(double dt, Vector<double> input);
 
-        void calculateObservation();
+        void CalculateObservation();
 
-        void calculateNonlinearObserver(double dt, Disturbance disturbance);
+        void CalculateNonlinearObserver(double dt, Disturbance disturbance);
 
-        void calculateOutput();
+        void CalculateOutput();
 
-        void calculateLimiter(double dt);
+        void CalculateLimiter(double dt);
 
-        void calculateFilter(double dt);
+        void CalculateFilter(double dt);
 
-        void updateState(double dt, Disturbance disturbance);
+        void UpdateState(double dt, Disturbance disturbance);
 
-        void record(double dt);
+        void Record(double dt);
 
-        void reset();
+        void Reset();
     }
 }
