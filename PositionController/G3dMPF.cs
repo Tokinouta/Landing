@@ -37,25 +37,25 @@ namespace CsharpVersion.PositionController
 
         public Vector<double> CalculateOutput(double dt, double current_time, int step_count)
         {
-            double theta_s = ship.theta_s;
-            double gamma_s = ship.gamma_s;
-            double psi_s = ship.psi_s;
-            double current_Vk = plane.current_Vk;
+            double theta_s = ship.Theta;
+            double gamma_s = ship.Gamma;
+            double psi_s = ship.Psi;
+            double current_Vk = plane.Vk;
 
             // 更新角度参数
-            double velocity_deck_total_x = ship.current_velocity_ship * Cos(psi_s);
-            double velocity_deck_total_y = ship.current_velocity_ship * Sin(psi_s) + ship.derive_deck_control_lat;
-            double velocity_deck_total_z = ship.derive_deck_control;
+            double velocity_deck_total_x = ship.Velocity * Cos(psi_s);
+            double velocity_deck_total_y = ship.Velocity * Sin(psi_s) + ship.DeriveDeckLateralControl;
+            double velocity_deck_total_z = ship.DeriveDeckControl;
             // 由于甲板纵向运动与侧向运动引起的P系航向角与爬升角,但由于P系始终保持水平，故这两个角度不需要增加至kai_f与gamma_f中
-            psi_dmc_p2i_y = Atan(ship.derive_deck_control_lat
+            psi_dmc_p2i_y = Atan(ship.DeriveDeckLateralControl
                 / Math.Sqrt(Math.Pow(velocity_deck_total_x, 2) + Math.Pow(velocity_deck_total_y, 2) + Math.Pow(velocity_deck_total_z, 2)));
-            psi_dmc_p2i_z = Atan(ship.derive_deck_control
+            psi_dmc_p2i_z = Atan(ship.DeriveDeckControl
                 / Math.Sqrt(Math.Pow(velocity_deck_total_x, 2) + Math.Pow(velocity_deck_total_y, 2) + Math.Pow(velocity_deck_total_z, 2)));
 
             double kai_f = -theta_s + psi_s;
             double gamma_f = gamma_s;
-            double kai_b2f = plane.current_kai - kai_f;
-            double gamma_b2f = plane.current_gamma - gamma_f;
+            double kai_b2f = plane.Chi - kai_f;
+            double gamma_b2f = plane.Gamma - gamma_f;
             plane.kai_b2f = kai_b2f;
             plane.gamma_b2f = gamma_b2f;
 
@@ -65,16 +65,16 @@ namespace CsharpVersion.PositionController
             double z_d_2p = (l_path_0 - l_path) * Sin(gamma_s);
             Vector<double> p_d_2p = vb.Dense(new double[] { x_d_2p, y_d_2p, z_d_2p }); // 期望点坐标 P系下表示
 
-            var current_deck_position_ship = ship.current_position_ship; // 甲板在I系下坐标，考虑甲板起伏与侧向偏移影响
+            var current_deck_position_ship = ship.Position; // 甲板在I系下坐标，考虑甲板起伏与侧向偏移影响
                                                                          // if (deck_compensation_start_flag > 0)
-            if (ship.deck_compensation_start_flag > (ship.deck_compensation_start_count - 1))
+            if (ship.DeckCompensationStartCount > (ship.DeckCompensationStartThreshold - 1))
             {
-                current_deck_position_ship[1] = current_deck_position_ship[1] + ship.current_deck_control_lat[step_count];
+                current_deck_position_ship[1] = current_deck_position_ship[1] + ship.CurrentDeckLateralControl[step_count];
             }
             // if (deck_compensation_start_flag_lat > 0)
-            if (ship.deck_compensation_start_flag_lat > (ship.deck_compensation_start_count_lat - 1))
+            if (ship.DeckCompensationLateralStartCount > (ship.DeckCompensationLateralStartThreshold - 1))
             {
-                current_deck_position_ship[2] -= ship.current_deck_control[step_count];
+                current_deck_position_ship[2] -= ship.CurrentDeckControl[step_count];
             }
 
             Matrix<double> R_i2p = mb.DenseOfArray(new double[,]{
@@ -87,7 +87,7 @@ namespace CsharpVersion.PositionController
                 { Cos(gamma_f) * Cos(kai_f), Cos(gamma_f) * Sin(kai_f), -Sin(gamma_f) },
                 { -Sin(kai_f), Cos(kai_f), 0 },
                 { Sin(gamma_f) * Cos(kai_f), Sin(gamma_f) * Sin(kai_f), Cos(gamma_f) } });
-            Vector<double> p_b_2f = R_i2f * (plane.current_position - p_d_2i); // 飞机在F坐标系中坐标
+            Vector<double> p_b_2f = R_i2f * (plane.Position - p_d_2i); // 飞机在F坐标系中坐标
             plane.x_b_2f = p_b_2f[0];
             plane.y_b_2f = p_b_2f[1];
             plane.z_b_2f = p_b_2f[2];
@@ -99,8 +99,8 @@ namespace CsharpVersion.PositionController
             double delta_d20_z = delta_d20_xyz[2];
 
             // 航母运动速度
-            double velocity_ship_x = ship.current_velocity_ship * Cos(psi_s); // x_ship_dot参数在dof_update.m文件中有定义
-            double velocity_ship_y = ship.current_velocity_ship * Sin(psi_s); // 有y_ship_dot参数在dof_update.m文件中有定义
+            double velocity_ship_x = ship.Velocity * Cos(psi_s); // x_ship_dot参数在dof_update.m文件中有定义
+            double velocity_ship_y = ship.Velocity * Sin(psi_s); // 有y_ship_dot参数在dof_update.m文件中有定义
 
             // 制导律
             double omega_dx_2i = ship.omega_dx_2i;
@@ -109,18 +109,18 @@ namespace CsharpVersion.PositionController
 
             l_path_dot = current_Vk * Cos(gamma_b2f) * Cos(kai_b2f)
                 - Cos(gamma_f) * Cos(kai_f) * (velocity_ship_x + omega_dy_2i * delta_d20_z - omega_dz_2i * delta_d20_y)
-                - Cos(gamma_f) * Sin(kai_f) * (velocity_ship_y + ship.derive_deck_control_lat + omega_dz_2i * delta_d20_x - omega_dx_2i * delta_d20_z)
-                + Sin(gamma_f) * (ship.derive_deck_control + omega_dx_2i * delta_d20_y - omega_dy_2i * delta_d20_x)
+                - Cos(gamma_f) * Sin(kai_f) * (velocity_ship_y + ship.DeriveDeckLateralControl + omega_dz_2i * delta_d20_x - omega_dx_2i * delta_d20_z)
+                + Sin(gamma_f) * (ship.DeriveDeckControl + omega_dx_2i * delta_d20_y - omega_dy_2i * delta_d20_x)
                 + k_x * plane.x_b_2f;
             double kai_b2f_desired = (1 / current_Vk)
                 * (-current_Vk * (Cos(gamma_b2f) * Sin(kai_b2f) - kai_b2f)
                 - Sin(kai_f) * (velocity_ship_x + omega_dy_2i * delta_d20_z - omega_dz_2i * delta_d20_y)
-                + Cos(kai_f) * (velocity_ship_y + ship.derive_deck_control_lat + omega_dz_2i * delta_d20_x - omega_dx_2i * delta_d20_z)
+                + Cos(kai_f) * (velocity_ship_y + ship.DeriveDeckLateralControl + omega_dz_2i * delta_d20_x - omega_dx_2i * delta_d20_z)
                 - k_y * plane.y_b_2f);
             double gamma_b2f_desired = (1 / current_Vk) * (-current_Vk * (Sin(gamma_b2f) - gamma_b2f) +
                             -Sin(gamma_f) * Cos(kai_f) * (velocity_ship_x + omega_dy_2i * delta_d20_z - omega_dz_2i * delta_d20_y)
-                - Sin(gamma_f) * Sin(kai_f) * (velocity_ship_y + ship.derive_deck_control_lat + omega_dz_2i * delta_d20_x - omega_dx_2i * delta_d20_z)
-                - Cos(gamma_f) * (ship.derive_deck_control + omega_dx_2i * delta_d20_y - omega_dy_2i * delta_d20_x)
+                - Sin(gamma_f) * Sin(kai_f) * (velocity_ship_y + ship.DeriveDeckLateralControl + omega_dz_2i * delta_d20_x - omega_dx_2i * delta_d20_z)
+                - Cos(gamma_f) * (ship.DeriveDeckControl + omega_dx_2i * delta_d20_y - omega_dy_2i * delta_d20_x)
                 + k_z * plane.z_b_2f);
 
             // 更新l_path

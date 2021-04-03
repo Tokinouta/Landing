@@ -61,9 +61,9 @@ namespace CsharpVersion
             this.ship = ship;
 
             current_X4 = vb.Dense(new[]
-                { plane.current_p, plane.current_q, plane.current_r });
+                { plane.P, plane.Q, plane.R });
             current_Uact = vb.Dense(new[]
-                { plane.current_delta_a, plane.current_delta_e, plane.current_delta_r });
+                { plane.DeltaA, plane.DeltaE, plane.DeltaR });
 
             current_Uact_index = mb.Dense(sample_num_rudder, 3, 0);
             filter_Uact = current_Uact;
@@ -97,9 +97,9 @@ namespace CsharpVersion
             //filter_Uact(1) = sum(current_Uact_index(:, 1)) / sample_num_rudder;
             //filter_Uact(2) = sum(current_Uact_index(:, 2)) / sample_num_rudder;
             //filter_Uact(3) = sum(current_Uact_index(:, 3)) / sample_num_rudder;
-            plane.current_delta_a = filter_Uact[0];
-            plane.current_delta_e = filter_Uact[1];
-            plane.current_delta_r = filter_Uact[2];
+            plane.DeltaA = filter_Uact[0];
+            plane.DeltaE = filter_Uact[1];
+            plane.DeltaR = filter_Uact[2];
         }
 
         public void calculateLimiter(double dt)
@@ -112,63 +112,63 @@ namespace CsharpVersion
             //delta_r_rate_range = plane.delta_r_rate_range;
             int step_count = 0;
             // 舵面偏转角度限幅
-            if (current_Uact[0] < plane.delta_a_range[0])
+            if (current_Uact[0] < plane.DeltaARange[0])
             {
                 Console.WriteLine($"Aileron over range bottom, {step_count}");
-                current_Uact[0] = plane.delta_a_range[0];
+                current_Uact[0] = plane.DeltaARange[0];
             }
-            if (current_Uact[0] > plane.delta_a_range[1])
+            if (current_Uact[0] > plane.DeltaARange[1])
             {
                 Console.WriteLine($"Aileron over range top, {step_count}");
-                current_Uact[0] = plane.delta_a_range[1];
+                current_Uact[0] = plane.DeltaARange[1];
             }
-            if (current_Uact[1] < plane.delta_e_range[0])
+            if (current_Uact[1] < plane.DeltaERange[0])
             {
                 Console.WriteLine($"Elevator over range bottom, {step_count}");
-                current_Uact[1] = plane.delta_e_range[0];
+                current_Uact[1] = plane.DeltaERange[0];
             }
-            if (current_Uact[1] > plane.delta_e_range[1])
+            if (current_Uact[1] > plane.DeltaERange[1])
             {
                 Console.WriteLine($"Elevator over range top, {step_count}");
-                current_Uact[1] = plane.delta_e_range[1];
+                current_Uact[1] = plane.DeltaERange[1];
             }
-            if (current_Uact[2] < plane.delta_r_range[0])
+            if (current_Uact[2] < plane.DeltaRRange[0])
             {
                 Console.WriteLine($"Rudder over range bottom, {step_count}");
-                current_Uact[2] = plane.delta_r_range[0];
+                current_Uact[2] = plane.DeltaRRange[0];
             }
-            if (current_Uact[2] > plane.delta_r_range[1])
+            if (current_Uact[2] > plane.DeltaRRange[1])
             {
                 Console.WriteLine($"Rudder over range top, {step_count}");
-                current_Uact[2] = plane.delta_r_range[1];
+                current_Uact[2] = plane.DeltaRRange[1];
             }
 
             // 舵面偏转角速度限制
             var derive_Uact = (current_Uact - previous_Uact) / dt;
 
-            if (derive_Uact[0] < plane.delta_a_rate_range[0])
+            if (derive_Uact[0] < plane.DeltaARateRange[0])
             {
-                current_Uact[0] = previous_Uact[0] + plane.delta_a_rate_range[0] * dt;
+                current_Uact[0] = previous_Uact[0] + plane.DeltaARateRange[0] * dt;
             }
-            if (derive_Uact[0] > plane.delta_a_rate_range[1])
+            if (derive_Uact[0] > plane.DeltaARateRange[1])
             {
-                current_Uact[0] = previous_Uact[0] + plane.delta_a_rate_range[1] * dt;
+                current_Uact[0] = previous_Uact[0] + plane.DeltaARateRange[1] * dt;
             }
-            if (derive_Uact[1] < plane.delta_e_rate_range[0])
+            if (derive_Uact[1] < plane.DeltaERateRange[0])
             {
-                current_Uact[1] = previous_Uact[1] + plane.delta_e_rate_range[0] * dt;
+                current_Uact[1] = previous_Uact[1] + plane.DeltaERateRange[0] * dt;
             }
-            if (derive_Uact[1] > plane.delta_e_rate_range[1])
+            if (derive_Uact[1] > plane.DeltaERateRange[1])
             {
-                current_Uact[1] = previous_Uact[1] + plane.delta_e_rate_range[1] * dt;
+                current_Uact[1] = previous_Uact[1] + plane.DeltaERateRange[1] * dt;
             }
-            if (derive_Uact[2] < plane.delta_r_rate_range[0])
+            if (derive_Uact[2] < plane.DeltaRRateRange[0])
             {
-                current_Uact[2] = previous_Uact[2] + plane.delta_r_rate_range[0] * dt;
+                current_Uact[2] = previous_Uact[2] + plane.DeltaRRateRange[0] * dt;
             }
-            if (derive_Uact[2] > plane.delta_r_rate_range[1])
+            if (derive_Uact[2] > plane.DeltaRRateRange[1])
             {
-                current_Uact[2] = previous_Uact[2] + plane.delta_r_rate_range[1] * dt;
+                current_Uact[2] = previous_Uact[2] + plane.DeltaRRateRange[1] * dt;
             }
         }
 
@@ -181,63 +181,63 @@ namespace CsharpVersion
             //delta_r_range = plane.delta_r_range;
             //delta_r_rate_range = plane.delta_r_rate_range;
             // 舵面偏转角度限幅
-            if (current_Uact[0] < plane.delta_a_range[0])
+            if (current_Uact[0] < plane.DeltaARange[0])
             {
                 Console.WriteLine($"Aileron over range bottom, {step_count}");
-                current_Uact[0] = plane.delta_a_range[0];
+                current_Uact[0] = plane.DeltaARange[0];
             }
-            if (current_Uact[0] > plane.delta_a_range[1])
+            if (current_Uact[0] > plane.DeltaARange[1])
             {
                 Console.WriteLine($"Aileron over range top, {step_count}");
-                current_Uact[0] = plane.delta_a_range[1];
+                current_Uact[0] = plane.DeltaARange[1];
             }
-            if (current_Uact[1] < plane.delta_e_range[0])
+            if (current_Uact[1] < plane.DeltaERange[0])
             {
                 Console.WriteLine($"Elevator over range bottom, {step_count}");
-                current_Uact[1] = plane.delta_e_range[0];
+                current_Uact[1] = plane.DeltaERange[0];
             }
-            if (current_Uact[1] > plane.delta_e_range[1])
+            if (current_Uact[1] > plane.DeltaERange[1])
             {
                 Console.WriteLine($"Elevator over range top, {step_count}");
-                current_Uact[1] = plane.delta_e_range[1];
+                current_Uact[1] = plane.DeltaERange[1];
             }
-            if (current_Uact[2] < plane.delta_r_range[0])
+            if (current_Uact[2] < plane.DeltaRRange[0])
             {
                 Console.WriteLine($"Rudder over range bottom, {step_count}");
-                current_Uact[2] = plane.delta_r_range[0];
+                current_Uact[2] = plane.DeltaRRange[0];
             }
-            if (current_Uact[2] > plane.delta_r_range[1])
+            if (current_Uact[2] > plane.DeltaRRange[1])
             {
                 Console.WriteLine($"Rudder over range top, {step_count}");
-                current_Uact[2] = plane.delta_r_range[1];
+                current_Uact[2] = plane.DeltaRRange[1];
             }
 
             // 舵面偏转角速度限制
             var derive_Uact = (current_Uact - previous_Uact) / dt;
 
-            if (derive_Uact[0] < plane.delta_a_rate_range[0])
+            if (derive_Uact[0] < plane.DeltaARateRange[0])
             {
-                current_Uact[0] = previous_Uact[0] + plane.delta_a_rate_range[0] * dt;
+                current_Uact[0] = previous_Uact[0] + plane.DeltaARateRange[0] * dt;
             }
-            if (derive_Uact[0] > plane.delta_a_rate_range[1])
+            if (derive_Uact[0] > plane.DeltaARateRange[1])
             {
-                current_Uact[0] = previous_Uact[0] + plane.delta_a_rate_range[1] * dt;
+                current_Uact[0] = previous_Uact[0] + plane.DeltaARateRange[1] * dt;
             }
-            if (derive_Uact[1] < plane.delta_e_rate_range[0])
+            if (derive_Uact[1] < plane.DeltaERateRange[0])
             {
-                current_Uact[1] = previous_Uact[1] + plane.delta_e_rate_range[0] * dt;
+                current_Uact[1] = previous_Uact[1] + plane.DeltaERateRange[0] * dt;
             }
-            if (derive_Uact[1] > plane.delta_e_rate_range[1])
+            if (derive_Uact[1] > plane.DeltaERateRange[1])
             {
-                current_Uact[1] = previous_Uact[1] + plane.delta_e_rate_range[1] * dt;
+                current_Uact[1] = previous_Uact[1] + plane.DeltaERateRange[1] * dt;
             }
-            if (derive_Uact[2] < plane.delta_r_rate_range[0])
+            if (derive_Uact[2] < plane.DeltaRRateRange[0])
             {
-                current_Uact[2] = previous_Uact[2] + plane.delta_r_rate_range[0] * dt;
+                current_Uact[2] = previous_Uact[2] + plane.DeltaRRateRange[0] * dt;
             }
-            if (derive_Uact[2] > plane.delta_r_rate_range[1])
+            if (derive_Uact[2] > plane.DeltaRRateRange[1])
             {
-                current_Uact[2] = previous_Uact[2] + plane.delta_r_rate_range[1] * dt;
+                current_Uact[2] = previous_Uact[2] + plane.DeltaRRateRange[1] * dt;
             }
 
         }
@@ -267,30 +267,30 @@ namespace CsharpVersion
         public void calculateObservation()
         {
             double F4_1 = 1 / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))
-                * ((Plane.Iyy * Plane.Izz - Math.Pow(Plane.Izz, 2) - Math.Pow(Plane.Ixz, 2)) * plane.current_r * plane.current_q
-                + (Plane.Ixx * Plane.Ixz + Plane.Izz * Plane.Ixz - Plane.Iyy * Plane.Ixz) * plane.current_p * plane.current_q
-                + Plane.Izz * (plane.current_L - plane.current_Q * Plane.wing_S * Plane.wing_L
-                * (plane.CL_delta_a * plane.current_delta_a + plane.CL_delta_r * plane.current_delta_r))
-                + Plane.Ixz * (plane.current_N - plane.current_Q * Plane.wing_S * Plane.wing_L
-                * (plane.CN_delta_r * plane.current_delta_r + plane.CN_delta_a * plane.current_delta_a)));
-            double F4_2 = 1 / Plane.Iyy * ((Plane.Izz - Plane.Ixx) * plane.current_p * plane.current_r
-                - Plane.Ixz * Math.Pow(plane.current_p, 2) + Plane.Ixz * Math.Pow(plane.current_r, 2)
-                + (plane.current_M - plane.current_Q * Plane.wing_S * Plane.wing_C
-                * (plane.CM_delta_e * plane.current_delta_e)));
+                * ((Plane.Iyy * Plane.Izz - Math.Pow(Plane.Izz, 2) - Math.Pow(Plane.Ixz, 2)) * plane.R * plane.Q
+                + (Plane.Ixx * Plane.Ixz + Plane.Izz * Plane.Ixz - Plane.Iyy * Plane.Ixz) * plane.P * plane.Q
+                + Plane.Izz * (plane.L - plane.Flow * Plane.WingS * Plane.WingL
+                * (plane.CL_delta_a * plane.DeltaA + plane.CL_delta_r * plane.DeltaR))
+                + Plane.Ixz * (plane.N - plane.Flow * Plane.WingS * Plane.WingL
+                * (plane.CN_delta_r * plane.DeltaR + plane.CN_delta_a * plane.DeltaA)));
+            double F4_2 = 1 / Plane.Iyy * ((Plane.Izz - Plane.Ixx) * plane.P * plane.R
+                - Plane.Ixz * Math.Pow(plane.P, 2) + Plane.Ixz * Math.Pow(plane.R, 2)
+                + (plane.M - plane.Flow * Plane.WingS * Plane.WingC
+                * (plane.CM_delta_e * plane.DeltaE)));
             double F4_3 = 1 / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))
-                * ((Math.Pow(Plane.Ixx, 2) + Math.Pow(Plane.Ixz, 2) - Plane.Ixx * Plane.Iyy) * plane.current_p * plane.current_q
-                + (Plane.Iyy * Plane.Ixz - Plane.Ixx * Plane.Ixz - Plane.Izz * Plane.Ixz) * plane.current_q * plane.current_r
-                + Plane.Ixz * (plane.current_L - plane.current_Q * Plane.wing_S * Plane.wing_L
-                * (plane.CL_delta_a * plane.current_delta_a + plane.CL_delta_r * plane.current_delta_r))
-                + Plane.Ixx * (plane.current_N - plane.current_Q * Plane.wing_S * Plane.wing_L
-                * (plane.CN_delta_r * plane.current_delta_r + plane.CN_delta_a * plane.current_delta_a)));
+                * ((Math.Pow(Plane.Ixx, 2) + Math.Pow(Plane.Ixz, 2) - Plane.Ixx * Plane.Iyy) * plane.P * plane.Q
+                + (Plane.Iyy * Plane.Ixz - Plane.Ixx * Plane.Ixz - Plane.Izz * Plane.Ixz) * plane.Q * plane.R
+                + Plane.Ixz * (plane.L - plane.Flow * Plane.WingS * Plane.WingL
+                * (plane.CL_delta_a * plane.DeltaA + plane.CL_delta_r * plane.DeltaR))
+                + Plane.Ixx * (plane.N - plane.Flow * Plane.WingS * Plane.WingL
+                * (plane.CN_delta_r * plane.DeltaR + plane.CN_delta_a * plane.DeltaA)));
             F4 = vb.Dense(new[] { F4_1, F4_2, F4_3 });
-            B4 = plane.current_Q * Plane.wing_S * mb.DenseOfArray(new[,] {
-                { Plane.wing_L * (Plane.Izz * plane.CL_delta_a + Plane.Ixz * plane.CN_delta_a) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)), 0,
-                    Plane.wing_L * (Plane.Izz * plane.CL_delta_r + Plane.Ixz * plane.CN_delta_r) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))},
-                { 0, Plane.wing_C* plane.CM_delta_e / Plane.Iyy, 0 },
-                { Plane.wing_L * (Plane.Ixz * plane.CL_delta_a + Plane.Ixx * plane.CN_delta_a) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)), 0,
-                    Plane.wing_L * (Plane.Ixz * plane.CL_delta_r + Plane.Ixx * plane.CN_delta_r) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)) } });
+            B4 = plane.Flow * Plane.WingS * mb.DenseOfArray(new[,] {
+                { Plane.WingL * (Plane.Izz * plane.CL_delta_a + Plane.Ixz * plane.CN_delta_a) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)), 0,
+                    Plane.WingL * (Plane.Izz * plane.CL_delta_r + Plane.Ixz * plane.CN_delta_r) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))},
+                { 0, Plane.WingC* plane.CM_delta_e / Plane.Iyy, 0 },
+                { Plane.WingL * (Plane.Ixz * plane.CL_delta_a + Plane.Ixx * plane.CN_delta_a) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)), 0,
+                    Plane.WingL * (Plane.Ixz * plane.CL_delta_r + Plane.Ixx * plane.CN_delta_r) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)) } });
         }
 
         public void calculateOutput()
@@ -354,9 +354,9 @@ namespace CsharpVersion
             //current_delta_r = plane.current_delta_r;
 
             current_X4 = vb.Dense(new[]
-                { plane.current_p, plane.current_q, plane.current_r });
+                { plane.P, plane.Q, plane.R });
             current_Uact = vb.Dense(new[]
-                { plane.current_delta_a, plane.current_delta_e, plane.current_delta_r });
+                { plane.DeltaA, plane.DeltaE, plane.DeltaR });
 
             current_Uact_index_count = 0;
             current_Uact_index = mb.Dense(sample_num_rudder, 3, 0);

@@ -90,9 +90,9 @@ namespace CsharpVersion
         {
             if (wind_enable)
             {
-                var current_position_ship = ship.current_position_ship;
-                var current_position = plane.current_position;
-                var current_Vk = plane.current_Vk;
+                var current_position_ship = ship.Position;
+                var current_position = plane.Position;
+                var current_Vk = plane.Vk;
 
                 if (Math.Abs(current_position_ship[0] - current_position[0]) < Math.Abs(wind_act_position))
                 {
@@ -119,21 +119,21 @@ namespace CsharpVersion
             double CM_alpha1 = plane.CM_alpha1;
             double CM_alpha2 = plane.CM_alpha2;
             double CN_beta = plane.CN_beta;
-            double current_alpha = plane.current_alpha;
-            double current_D = plane.current_D;
-            double current_gamma = plane.current_gamma;
-            double current_miu = plane.current_miu;
-            double current_Q = plane.current_Q;
-            double current_Vk = plane.current_Vk;
-            double current_Y = plane.current_Y;
+            double current_alpha = plane.Alpha;
+            double current_D = plane.D;
+            double current_gamma = plane.Gamma;
+            double current_miu = plane.Miu;
+            double current_Q = plane.Flow;
+            double current_Vk = plane.Vk;
+            double current_Y = plane.Y;
             double CY_alpha = plane.CY_alpha;
             double Ixx = Plane.Ixx;
             double Ixz = Plane.Ixz;
             double Iyy = Plane.Iyy;
             double Izz = Plane.Izz;
-            double m = Plane.m;
-            double wing_L = Plane.wing_L;
-            double wing_S = Plane.wing_S;
+            double m = Plane.Mass;
+            double wing_L = Plane.WingL;
+            double wing_S = Plane.WingS;
 
             if (wind_enable)
             {
@@ -197,8 +197,8 @@ namespace CsharpVersion
 
         void record(Plane plane, Ship ship, int step_count)
         {
-            double gamma_f = ship.gamma_s;
-            double gamma_b2f = plane.current_gamma - gamma_f;
+            double gamma_f = ship.Gamma;
+            double gamma_b2f = plane.Gamma - gamma_f;
             // 可以考虑用list存历史数据，但是这种方式可能有性能担忧，
             // 比如需要绘图的时候可能需要新开辟一块内存存数据，以及这样大规模的linq可能也不怎么快
             // 记录元素可以考虑用数组，不用向量
@@ -209,14 +209,14 @@ namespace CsharpVersion
             //var query = from r in rec
             //            select r[0];
             //var a = Vector<double>.Build.DenseOfEnumerable(query);
-            d_kai_b2f_record.Add((Cos(plane.current_gamma) / Cos(gamma_b2f)) * disturbance_kai);
+            d_kai_b2f_record.Add((Cos(plane.Gamma) / Cos(gamma_b2f)) * disturbance_kai);
             d_gamma_b2f_record.Add(disturbance_gamma);
             d_Vk_record.Add(disturbance_Vk);
             d_omega_record.Add(new[] { disturbance_p, disturbance_q, disturbance_r });
 
             if (wind_enable)
             {
-                if (Math.Abs(ship.current_position_ship[0] - plane.current_position[0]) < Math.Abs(wind_act_position))
+                if (Math.Abs(ship.Position[0] - plane.Position[0]) < Math.Abs(wind_act_position))
                 {
                     //wind_actual(end + 1) = wind(step_count - wind_count); // 实际风速
                     //wind_actual_lat(end + 1) = wind_lat(step_count - wind_count); // 实际风速

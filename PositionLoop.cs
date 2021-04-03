@@ -14,28 +14,28 @@ namespace CsharpVersion
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
 
-        Plane plane;
-        Ship ship;
+        Plane _plane;
+        Ship _ship;
         // Input Variable
-        public Vector<double> current_desired_X1;
+        public Vector<double> X1Desired;
 
         // State Variable
-        public Vector<double> current_X1;
+        public Vector<double> X1;
 
         // Output Variable
-        public Vector<double> current_u1 = vb.Dense(2, 0);
+        public Vector<double> U1 = vb.Dense(2, 0);
 
         // Interior Variable
-        Matrix<double> epsilon_X1 = mb.DenseDiagonal(2, 2);
-        Matrix<double> omega_X1 = mb.DenseDiagonal(2, 40);
+        readonly Matrix<double> epsilonX1 = mb.DenseDiagonal(2, 2);
+        readonly Matrix<double> omegaX1 = mb.DenseDiagonal(2, 40);
 
         // 反步法参数
         Matrix<double> k1_backstepping = mb.DenseOfDiagonalArray(new[] { 0.9, 0.2 });
 
         // 滤波器参数
-        int sample_num_u1 = 1; // 3
-        int current_u1_index_count = 1;
-        Matrix<double> current_u1_index; //
+        readonly int _sampleNumber = 1; // 3
+        int filterU1BufferIndex = 1;
+        Matrix<double> filterU1Buffer; //
 
 
         // 观测器输出变量
@@ -46,25 +46,24 @@ namespace CsharpVersion
         Vector<double> epp;
         Vector<double> epc;
         // filter_u3;
-        public Vector<double> derive_X1 = vb.Dense(2, 0); //[y,z]'
-        Vector<double> previous_u1;
-        Vector<double> previous_desired_X1;
-        Vector<double> filter_desired_X1;
-
-        IPositionController controller;
+        public Vector<double> deriveX1 = vb.Dense(2, 0); //[y,z]'
+        Vector<double> previousU1;
+        Vector<double> previousX1Desired;
+        Vector<double> filterdX1Desired;
+        readonly IPositionController controller;
 
         public event EventHandler<EventArgs> RecordPositionLoopEvent;
         public event EventHandler<EventArgs> RecordPositionLoopVarEvent;
 
         public PositionLoop(Plane plane, Ship ship)
         {
-            this.plane = plane;
-            this.ship = ship;
-            var current_position = plane.current_position;
-            var current_desired_position = plane.current_desired_position;
-            current_X1 = current_position.SubVector(1, 2);
-            current_desired_X1 = current_desired_position.SubVector(1, 2); ;
-            filter_desired_X1 = current_desired_X1;
+            _plane = plane;
+            _ship = ship;
+            //var current_position = plane.Position;
+            //var current_desired_position = plane.DesiredPosition;
+            X1 = plane.Position.SubVector(1, 2);
+            X1Desired = plane.DesiredPosition.SubVector(1, 2);
+            filterdX1Desired = X1Desired;
 
             // 判断使用何种控制器
             switch (Configuration.GuidanceController)
@@ -102,14 +101,14 @@ namespace CsharpVersion
 
         public void calculateFilter(double dt)
         {
-            current_u1_index.SetRow(current_u1_index_count,current_u1);
-            current_u1_index_count++;
+            filterU1Buffer.SetRow(filterU1BufferIndex, U1);
+            filterU1BufferIndex++;
 
-            if (current_u1_index_count >= sample_num_u1)
+            if (filterU1BufferIndex >= _sampleNumber)
             {
-                current_u1_index_count = 0;
+                filterU1BufferIndex = 0;
             }
-            current_u1 = current_u1_index.ColumnSums() / sample_num_u1;
+            U1 = filterU1Buffer.ColumnSums() / _sampleNumber;
 
             //current_u1(1) = sum(current_u1_index(:, 1)) / sample_num_u1; // kai
             //current_u1(2) = sum(current_u1_index(:, 2)) / sample_num_u1; // gamma
@@ -121,22 +120,22 @@ namespace CsharpVersion
             //gamma_range = plane.gamma_range;
             //kai_rate_range = plane.kai_rate_range;
             //gamma_rate_range = plane.gamma_rate_range;
-            // kai gamma变化幅度限制
-            if (current_u1[0] < plane.kai_range[0])
+            // chi gamma变化幅度限制
+            if (U1[0] < _plane.ChiRange[0])
             {
-                current_u1[0] = plane.kai_range[0];
+                U1[0] = _plane.ChiRange[0];
             }
-            if (current_u1[0] > plane.kai_range[1])
+            if (U1[0] > _plane.ChiRange[1])
             {
-                current_u1[0] = plane.kai_range[1];
+                U1[0] = _plane.ChiRange[1];
             }
-            if (current_u1[1] < plane.gamma_range[0])
+            if (U1[1] < _plane.GammaRange[0])
             {
-                current_u1[1] = plane.gamma_range[0];
+                U1[1] = _plane.GammaRange[0];
             }
-            if (current_u1[1] > plane.gamma_range[1])
+            if (U1[1] > _plane.GammaRange[1])
             {
-                current_u1[1] = plane.gamma_range[1];
+                U1[1] = _plane.GammaRange[1];
             }
 
             // ********************************************************************************************************
@@ -144,23 +143,23 @@ namespace CsharpVersion
             // Description    : kai gamma变化速率限制
             //********************************************************************************************************//
             // kai gamma变化速率限制
-            var derive_u1 = (current_u1 - previous_u1) / dt;
+            var derive_u1 = (U1 - previousU1) / dt;
 
-            if (derive_u1[0] < plane.kai_rate_range[0])
+            if (derive_u1[0] < _plane.ChiRateRange[0])
             {
-                current_u1[0] = previous_u1[0] + plane.kai_rate_range[0] * dt;
+                U1[0] = previousU1[0] + _plane.ChiRateRange[0] * dt;
             }
-            if (derive_u1[0] > plane.kai_rate_range[1])
+            if (derive_u1[0] > _plane.ChiRateRange[1])
             {
-                current_u1[0] = previous_u1[0] + plane.kai_rate_range[1] * dt;
+                U1[0] = previousU1[0] + _plane.ChiRateRange[1] * dt;
             }
-            if (derive_u1[1] < plane.gamma_rate_range[0])
+            if (derive_u1[1] < _plane.GammaRateRange[0])
             {
-                current_u1[1] = previous_u1[1] + plane.gamma_rate_range[0] * dt;
+                U1[1] = previousU1[1] + _plane.GammaRateRange[0] * dt;
             }
-            if (derive_u1[1] > plane.gamma_rate_range[1])
+            if (derive_u1[1] > _plane.GammaRateRange[1])
             {
-                current_u1[1] = previous_u1[1] + plane.gamma_rate_range[1] * dt;
+                U1[1] = previousU1[1] + _plane.GammaRateRange[1] * dt;
             }
         }
 
@@ -177,9 +176,9 @@ namespace CsharpVersion
 
             // 位置控制环
             F1 = vb.Dense(new[] {
-                plane.current_Vk * (Cos(plane.current_gamma) * Sin(plane.current_kai) - plane.current_kai),
-                -plane.current_Vk * (Sin(plane.current_gamma) - plane.current_gamma)});
-            B1 = mb.DenseDiagonal(2, plane.current_Vk);
+                _plane.Vk * (Cos(_plane.Gamma) * Sin(_plane.Chi) - _plane.Chi),
+                -_plane.Vk * (Sin(_plane.Gamma) - _plane.Gamma)});
+            B1 = mb.DenseDiagonal(2, _plane.Vk);
             B1[1, 1] *= -1;
         }
 
@@ -190,7 +189,7 @@ namespace CsharpVersion
 
         public void calculateOutput(double dt, double current_time, int step_count)
         {
-            current_u1 = controller.CalculateOutput(dt, current_time, step_count);
+            U1 = controller.CalculateOutput(dt, current_time, step_count);
             controller.InvokeRecordEvent();
         }
 
@@ -198,15 +197,15 @@ namespace CsharpVersion
         {
             if (Configuration.guidance_command_filter_flag)// 判断使用何种滤波器
             {                                                         // 使用指令滤波器
-                var derive2_X1 = -2 * epsilon_X1 * omega_X1 * derive_X1
-                    - omega_X1.Power(2) * (filter_desired_X1 - current_desired_X1);
-                derive_X1 += derive2_X1 * dt;
-                filter_desired_X1 += derive_X1 * dt;
-                epc = filter_desired_X1 - current_X1;
-                previous_desired_X1 = current_desired_X1;
-                previous_u1 = current_u1;
+                var derive2_X1 = -2 * epsilonX1 * omegaX1 * deriveX1
+                    - omegaX1.Power(2) * (filterdX1Desired - X1Desired);
+                deriveX1 += derive2_X1 * dt;
+                filterdX1Desired += deriveX1 * dt;
+                epc = filterdX1Desired - X1;
+                previousX1Desired = X1Desired;
+                previousU1 = U1;
 
-                epc /= Cos(-ship.theta_s + ship.psi_s);
+                epc /= Cos(-_ship.Theta + _ship.Psi);
             }
             else
             {
@@ -223,10 +222,10 @@ namespace CsharpVersion
 
         public void reset()
         {
-            current_X1 = plane.current_position.SubVector(1, 2);
-            current_desired_X1 = plane.current_desired_position.SubVector(1, 2); ;
-            filter_desired_X1 = current_desired_X1;
-            derive_X1 = vb.Dense(2, 0); //[y,z]'
+            X1 = _plane.Position.SubVector(1, 2);
+            X1Desired = _plane.DesiredPosition.SubVector(1, 2); ;
+            filterdX1Desired = X1Desired;
+            deriveX1 = vb.Dense(2, 0); //[y,z]'
             controller.Reset();
         }
 
@@ -239,7 +238,7 @@ namespace CsharpVersion
 
         public void OnUpdateState(object sender, XChangedEventArgs e)
         {
-            current_X1 += e.Data * e.Dt;
+            X1 += e.Data * e.Dt;
         }
 
         public void calculatePrescribedParameter()
@@ -249,15 +248,15 @@ namespace CsharpVersion
             //current_position_ship = ship.current_position_ship;
             //theta_s = ship.theta_s;
             //psi_s = ship.psi_s;
-            previous_desired_X1 = current_desired_X1;
+            previousX1Desired = X1Desired;
 
-            var current_desired_position = vb.Dense(3, plane.current_position[0]);
+            var current_desired_position = vb.Dense(3, _plane.Position[0]);
             current_desired_position.SetSubVector(
-                1, 2, HelperFunction.ideal_path(plane.current_position, ship.current_position_ship, ship.theta_s, ship.psi_s));
-            current_desired_X1 = current_desired_position.SubVector(1, 2);
-            epp = current_desired_X1 - plane.current_position.SubVector(1, 2); // 不使用滤波器得到的横向、纵向追踪误差，结果更准确 特别注意，此值用于反步法可能导致未考虑甲板运动补偿
+                1, 2, HelperFunction.ideal_path(_plane.Position, _ship.Position, _ship.Theta, _ship.Psi));
+            X1Desired = current_desired_position.SubVector(1, 2);
+            epp = X1Desired - _plane.Position.SubVector(1, 2); // 不使用滤波器得到的横向、纵向追踪误差，结果更准确 特别注意，此值用于反步法可能导致未考虑甲板运动补偿
 
-            epp /= Cos(-ship.theta_s + ship.psi_s);
+            epp /= Cos(-_ship.Theta + _ship.Psi);
         }
     }
 }

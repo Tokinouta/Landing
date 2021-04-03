@@ -10,45 +10,45 @@ namespace CsharpVersion
 {
     class Simulation
     {
-        public Plane plane;
-        Ship ship;
-        Disturbance disturbance;
-        AttitudeLoop attitudeLoop;
-        FlightPathLoop flightPathLoop;
-        PositionLoop positionLoop;
-        AngularRateLoop angularRateLoop;
-        SimulationRecord record;
-
         double frequency = 400; // 计算频率 Hz
         double dt; // 1 / f
         int step_count = 0;
         double current_time = 0;
 
+        public Ship Ship { get; set; }
+        public Plane Plane { get; set; }
+        public Disturbance Disturbance { get; set; }
+        public AttitudeLoop AttitudeLoop { get; set; }
+        public FlightPathLoop FlightPathLoop { get; set; }
+        public PositionLoop PositionLoop { get; set; }
+        public AngularRateLoop AngularRateLoop { get; set; }
+        public SimulationRecord Record { get; set; }
+
         public Simulation()
         {
-            initializeInitialParameters();
+            InitializeInitialParameters();
 
-            ship = new Ship();
-            plane = new Plane(ship);
-            disturbance = new Disturbance();
-            positionLoop = new PositionLoop(plane, ship);
-            flightPathLoop = new FlightPathLoop(plane, ship);
-            attitudeLoop = new AttitudeLoop(plane, ship);
-            angularRateLoop = new AngularRateLoop(plane, ship);
+            Ship = new Ship();
+            Plane = new Plane(Ship);
+            Disturbance = new Disturbance();
+            PositionLoop = new PositionLoop(Plane, Ship);
+            FlightPathLoop = new FlightPathLoop(Plane, Ship);
+            AttitudeLoop = new AttitudeLoop(Plane, Ship);
+            AngularRateLoop = new AngularRateLoop(Plane, Ship);
             Console.WriteLine("text");
             // plane.addListeners(positionLoop, flightPathLoop, attitudeLoop, angularRateLoop);
-            record = new SimulationRecord();
+            Record = new SimulationRecord();
 
-            plane.X1ChangedEvent += positionLoop.OnUpdateState;
-            plane.X2ChangedEvent += flightPathLoop.OnUpdateState;
-            plane.X3ChangedEvent += attitudeLoop.OnUpdateState;
-            plane.X4ChangedEvent += angularRateLoop.OnUpdateState;
+            Plane.X1ChangedEvent += PositionLoop.OnUpdateState;
+            Plane.X2ChangedEvent += FlightPathLoop.OnUpdateState;
+            Plane.X3ChangedEvent += AttitudeLoop.OnUpdateState;
+            Plane.X4ChangedEvent += AngularRateLoop.OnUpdateState;
 
             //disturbance.AddListener(flightPathLoop);
             // addlistener(app, "simulationStep", "PostSet", @modifyFrequency);
         }
 
-        public void simulate()
+        public void Simulate()
         {
             //fid = fopen('out.txt', 'a');
             // load('position.mat');
@@ -74,11 +74,11 @@ namespace CsharpVersion
             Matrix<double> u3_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "u3_record");
 
             Matrix<double> uact_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "uact_record");
-            while ((plane.current_position[0] - ship.current_position_ship[0]) < 0)
+            while ((Plane.Position[0] - Ship.Position[0]) < 0)
             {
                 // t1 = position_record(step_count,:);
                 // con = sum(t1.* t1) ~= sum(plane.current_position.* plane.current_position);
-                singleStep();//fclose(fid);
+                SingleStep();//fclose(fid);
                 //if (!position_record.Row(step_count - 1).Equals(plane.current_position))
                 //{
                 //    Console.WriteLine(step_count);
@@ -128,76 +128,76 @@ namespace CsharpVersion
             Console.WriteLine(step_count);
         }
 
-        void singleStep()
+        void SingleStep()
         {
             step_count++;
             current_time = dt * step_count;
 
-            positionLoop.calculateObservation();
-            flightPathLoop.calculateObservation();
-            attitudeLoop.calculateObservation();
-            angularRateLoop.calculateObservation();
+            PositionLoop.calculateObservation();
+            FlightPathLoop.calculateObservation();
+            AttitudeLoop.calculateObservation();
+            AngularRateLoop.calculateObservation();
 
-            flightPathLoop.calculateNonlinearObserver(dt, disturbance);
-            angularRateLoop.calculateNonlinearObserver(dt, disturbance);
+            FlightPathLoop.calculateNonlinearObserver(dt, Disturbance);
+            AngularRateLoop.calculateNonlinearObserver(dt, Disturbance);
 
-            positionLoop.calculatePrescribedParameter();
-            ship.calculateCompensation(dt, positionLoop, step_count);
-            positionLoop.calculateState(dt, null);
-            positionLoop.calculateOutput(dt, current_time, step_count);
-            positionLoop.calculateLimiter(dt);
+            PositionLoop.calculatePrescribedParameter();
+            Ship.calculateCompensation(dt, PositionLoop, step_count);
+            PositionLoop.calculateState(dt, null);
+            PositionLoop.calculateOutput(dt, current_time, step_count);
+            PositionLoop.calculateLimiter(dt);
 
-            flightPathLoop.calculateState(dt, positionLoop.current_u1);
-            flightPathLoop.calculateOutput();
-            flightPathLoop.calculateLimiter(dt);
-            flightPathLoop.calculateFilter(dt);
+            FlightPathLoop.calculateState(dt, PositionLoop.U1);
+            FlightPathLoop.calculateOutput();
+            FlightPathLoop.calculateLimiter(dt);
+            FlightPathLoop.calculateFilter(dt);
 
-            attitudeLoop.calculateState(dt, flightPathLoop.current_u2);
-            attitudeLoop.calculateOutput();
-            attitudeLoop.calculateLimiter(dt);
+            AttitudeLoop.calculateState(dt, FlightPathLoop.current_u2);
+            AttitudeLoop.calculateOutput();
+            AttitudeLoop.calculateLimiter(dt);
 
-            angularRateLoop.calculateState(dt, attitudeLoop.current_u3);
-            angularRateLoop.calculateOutput();
-            angularRateLoop.calculateLimiter(dt, step_count);
-            angularRateLoop.calculateFilter(dt);
+            AngularRateLoop.calculateState(dt, AttitudeLoop.current_u3);
+            AngularRateLoop.calculateOutput();
+            AngularRateLoop.calculateLimiter(dt, step_count);
+            AngularRateLoop.calculateFilter(dt);
 
-            plane.updateState(dt, disturbance);
-            ship.updateState(dt);
-            disturbance.updateWind(plane, ship, step_count);
+            Plane.UpdateState(dt, Disturbance);
+            Ship.updateState(dt);
+            Disturbance.updateWind(Plane, Ship, step_count);
 
-            plane.record();
-            ship.record();
-            positionLoop.record(dt);
-            flightPathLoop.record(dt);
-            attitudeLoop.record(dt);
-            angularRateLoop.record(dt);
+            Plane.Record();
+            Ship.record();
+            PositionLoop.record(dt);
+            FlightPathLoop.record(dt);
+            AttitudeLoop.record(dt);
+            AngularRateLoop.record(dt);
             //record.time_record.Add(current_time);
         }
 
-        void reset()
+        void Reset()
         {
             step_count = 0;
             current_time = 0;
-            ship.reset();
-            plane.reset(ship);
-            positionLoop.reset();
-            flightPathLoop.reset();
-            attitudeLoop.reset();
-            angularRateLoop.reset();
-            disturbance.reset();
+            Ship.reset();
+            Plane.Reset(Ship);
+            PositionLoop.reset();
+            FlightPathLoop.reset();
+            AttitudeLoop.reset();
+            AngularRateLoop.reset();
+            Disturbance.reset();
         }
 
-        void plotData()
+        void PlotData()
         {
             //notify(obj, "PlotEvent")
         }
 
-        void initializeInitialParameters()
+        void InitializeInitialParameters()
         {
             dt = 1 / frequency; // 1 / f
         }
 
-        void modifyFrequency()
+        void ModifyFrequency()
         {
             //dt = e.AffectedObject.simulationStep;
             //frequency = 1 / dt;

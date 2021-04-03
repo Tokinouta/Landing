@@ -108,19 +108,19 @@ namespace CsharpVersion
             ship = ac;
             current_T_index = vb.Dense(sample_num_T, 0);
             current_X2 = vb.Dense(new[]
-                { plane.current_kai, plane.current_gamma });
-            current_u2 = vb.Dense(new[] { plane.desired_alpha, 0, 0 });
+                { plane.Chi, plane.Gamma });
+            current_u2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
             filter_u1 = current_u1;
             previous_u2 = current_u2;
-            previous_T = plane.current_T;
-            current_delta_tef_desired = plane.current_delta_tef;
+            previous_T = plane.T;
+            current_delta_tef_desired = plane.DeltaTEF;
             current_delta_tef_filtered = current_delta_tef_desired;
             //addlistener(plane, 'X2ChangedEvent', @updateState);
         }
 
         public void calculateFilter(double dt)
         {
-            current_T_index[current_T_index_count] = plane.current_T;
+            current_T_index[current_T_index_count] = plane.T;
             current_T_index_count++;
 
             if (current_T_index_count >= sample_num_T)
@@ -128,7 +128,7 @@ namespace CsharpVersion
                 current_T_index_count = 0;
             }
 
-            plane.current_T = current_T_index.Sum() / sample_num_T;
+            plane.T = current_T_index.Sum() / sample_num_T;
 
             // // dynamic performance. new added in mk4 .1
             // thrust_tau_e = 0.650;
@@ -149,94 +149,94 @@ namespace CsharpVersion
             //thrust_rate_range = plane.thrust_rate_range;
 
             // Description    : 后缘襟翼变化幅度限制
-            if (current_delta_tef_desired < plane.delta_tef_range[0])
+            if (current_delta_tef_desired < plane.DeltaTEFRange[0])
             {
-                current_delta_tef_desired = plane.delta_tef_range[0];
+                current_delta_tef_desired = plane.DeltaTEFRange[0];
             }
-            else if (current_delta_tef_desired > plane.delta_tef_range[1])
+            else if (current_delta_tef_desired > plane.DeltaTEFRange[1])
             {
-                current_delta_tef_desired = plane.delta_tef_range[1];
+                current_delta_tef_desired = plane.DeltaTEFRange[1];
             }
             // Description    : 后缘襟翼变化速率限制
             double derive_delta_tef = (current_delta_tef_desired - previous_delta_tef_desired) / dt;
-            if (derive_delta_tef < plane.delta_tef_rate_range[0])
+            if (derive_delta_tef < plane.DeltaTEFRateRange[0])
             {
-                current_delta_tef_desired = previous_delta_tef_desired + plane.delta_tef_rate_range[0] * dt;
+                current_delta_tef_desired = previous_delta_tef_desired + plane.DeltaTEFRateRange[0] * dt;
             }
-            else if (derive_delta_tef > plane.delta_tef_rate_range[1])
+            else if (derive_delta_tef > plane.DeltaTEFRateRange[1])
             {
-                current_delta_tef_desired = previous_delta_tef_desired + plane.delta_tef_rate_range[1] * dt;
+                current_delta_tef_desired = previous_delta_tef_desired + plane.DeltaTEFRateRange[1] * dt;
             }
             double previous_delta_tef_filtered = current_delta_tef_filtered;
             current_delta_tef_filtered = 1 / 30.0 / (1 / 30.0 + dt * 1) * previous_delta_tef_filtered
                 + dt * 1 / (1 / 30.0 + dt * 1) * current_delta_tef_desired;
-            plane.current_delta_tef = current_delta_tef_filtered;
+            plane.DeltaTEF = current_delta_tef_filtered;
 
             // Description    : 角度变化幅度限制
             // 角度变化幅度限制
-            if (current_u2[0] < plane.theta_range[0])
+            if (current_u2[0] < plane.ThetaRange[0])
             {
-                current_u2[0] = plane.theta_range[0];
+                current_u2[0] = plane.ThetaRange[0];
             }
-            if (current_u2[0] > plane.theta_range[1])
+            if (current_u2[0] > plane.ThetaRange[1])
             {
-                current_u2[0] = plane.theta_range[1];
+                current_u2[0] = plane.ThetaRange[1];
             }
 
-            if (current_u2[2] < plane.miu_range[0])
+            if (current_u2[2] < plane.MiuRange[0])
             {
-                current_u2[2] = plane.miu_range[0];
+                current_u2[2] = plane.MiuRange[0];
             }
-            if (current_u2[2] > plane.miu_range[1])
+            if (current_u2[2] > plane.MiuRange[1])
             {
-                current_u2[2] = plane.miu_range[1];
+                current_u2[2] = plane.MiuRange[1];
             }
 
             // Description    : 角度变化速率限制
             // 角度变化速率限制
             var derive_u2 = (current_u2 - previous_u2) / dt;
 
-            if (derive_u2[0] < plane.theta_rate_range[0])
+            if (derive_u2[0] < plane.ThetaRateRange[0])
             {
-                current_u2[0] = previous_u2[0] + plane.theta_rate_range[0] * dt;
+                current_u2[0] = previous_u2[0] + plane.ThetaRateRange[0] * dt;
             }
-            if (derive_u2[0] > plane.theta_rate_range[1])
+            if (derive_u2[0] > plane.ThetaRateRange[1])
             {
-                current_u2[0] = previous_u2[0] + plane.theta_rate_range[1] * dt;
+                current_u2[0] = previous_u2[0] + plane.ThetaRateRange[1] * dt;
             }
 
-            if (derive_u2[1] < plane.miu_rate_range[0])
+            if (derive_u2[1] < plane.MiuRateRange[0])
             {
-                current_u2[1] = previous_u2[0] + plane.miu_rate_range[0] * dt;
+                current_u2[1] = previous_u2[0] + plane.MiuRateRange[0] * dt;
             }
-            if (derive_u2[1] > plane.miu_rate_range[1])
+            if (derive_u2[1] > plane.MiuRateRange[1])
             {
-                current_u2[1] = previous_u2[0] + plane.miu_rate_range[1] * dt;
+                current_u2[1] = previous_u2[0] + plane.MiuRateRange[1] * dt;
             }
 
 
             // Description    : 油门变化幅度限制
             // 油门变化幅度限制
-            if (plane.current_T < plane.thrust_range[0])
+            if (plane.T < plane.ThrustRange[0])
             {
-                plane.current_T = plane.thrust_range[0];
+                plane.T = plane.ThrustRange[0];
             }
-            if (plane.current_T > plane.thrust_range[1])
+            if (plane.T > plane.ThrustRange[1])
             {
-                plane.current_T = plane.thrust_range[1];
+                plane.T = plane.ThrustRange[1];
             }
 
             // Description    : 油门变化速度限制
             // 油门变化速度限制
-            double derive_T = (plane.current_T - previous_T) / dt;
+            double derive_T = (plane.T - previous_T) / dt;
 
-            if (derive_T < plane.thrust_rate_range[0])
+            if (derive_T < plane.ThrustRateRange[0])
             {
-                plane.current_T = previous_T + plane.thrust_rate_range[0] * dt;
+                plane.T = previous_T + plane.ThrustRateRange[0] * dt;
             }
-            if (derive_T > plane.thrust_rate_range[1])
+            if (derive_T > plane.ThrustRateRange[1])
             {
-                plane.current_T = previous_T + plane.thrust_rate_range[1] * dt;
+                plane.T = previous_T + plane.ThrustRateRange[1] * dt;
             }
         }
 
@@ -259,7 +259,7 @@ namespace CsharpVersion
             double previous_NDO_p_kai_b2f = current_NDO_p_kai_b2f;
             double derive_NDO_p_kai_b2f = -NDO_l_kai_b2f
                 * (NDO_l_kai_b2f * plane.kai_b2f + current_NDO_p_kai_b2f
-                + F_kai_b2f + B_kai_b2f * plane.current_miu);
+                + F_kai_b2f + B_kai_b2f * plane.Miu);
             current_NDO_p_kai_b2f = previous_NDO_p_kai_b2f + derive_NDO_p_kai_b2f * dt;
             double NDO_d_kai_b2f = current_NDO_p_kai_b2f + NDO_l_kai_b2f * plane.kai_b2f;
             NDO_d_kai_b2f_output = disturbance.wind_disturbance_start ? NDO_d_kai_b2f : 0;
@@ -272,7 +272,7 @@ namespace CsharpVersion
             double previous_NDO_p_gamma_b2f = current_NDO_p_gamma_b2f;
             double derive_NDO_p_gamma_b2f = -NDO_l_gamma_b2f
                 * (NDO_l_gamma_b2f * plane.gamma_b2f + current_NDO_p_gamma_b2f
-                + F_gamma_b2f + B_gamma_b2f * plane.current_delta_tef);
+                + F_gamma_b2f + B_gamma_b2f * plane.DeltaTEF);
             current_NDO_p_gamma_b2f = previous_NDO_p_gamma_b2f + derive_NDO_p_gamma_b2f * dt;
             double NDO_d_gamma_b2f = current_NDO_p_gamma_b2f + NDO_l_gamma_b2f * plane.gamma_b2f;
             NDO_d_gamma_b2f_output = disturbance.wind_disturbance_start ? NDO_d_gamma_b2f : 0;
@@ -284,10 +284,10 @@ namespace CsharpVersion
 
             double previous_NDO_p_Vk = current_NDO_p_Vk;
             double derive_NDO_p_Vk = -NDO_l_Vk
-                * (NDO_l_Vk * plane.current_Vk + current_NDO_p_Vk
-                + F_Vk + B_Vk * plane.current_T);
+                * (NDO_l_Vk * plane.Vk + current_NDO_p_Vk
+                + F_Vk + B_Vk * plane.T);
             current_NDO_p_Vk = previous_NDO_p_Vk + derive_NDO_p_Vk * dt;
-            double NDO_d_Vk = current_NDO_p_Vk + NDO_l_Vk * plane.current_Vk;
+            double NDO_d_Vk = current_NDO_p_Vk + NDO_l_Vk * plane.Vk;
             NDO_d_Vk_output = disturbance.wind_disturbance_start ? NDO_d_Vk : 0;
             //if (disturbance.wind_disturbance_start > 0)
             //    NDO_d_Vk_output = NDO_d_Vk;
@@ -295,24 +295,24 @@ namespace CsharpVersion
             //    NDO_d_Vk_output = 0;
             //end
 
-            double a_temp = (plane.current_D + plane.current_Q * Plane.wing_S * plane.CY_alpha)
-                * Sin(plane.current_miu)
-                / (Cos(plane.current_gamma) * Plane.m * plane.current_Vk);
-            double b_temp = (plane.current_Q * Plane.wing_S * plane.CC_beta * Cos(plane.current_miu)
-                - plane.current_D * Cos(plane.current_miu)) / (Cos(plane.current_gamma)
-                * Plane.m * plane.current_Vk);
-            double c_temp = (plane.current_D + plane.current_Q * Plane.wing_S * plane.CY_alpha)
-                * Cos(plane.current_miu)
-                / (Plane.m * plane.current_Vk);
-            double d_temp = (-plane.current_Q * Plane.wing_S * plane.CC_beta * Sin(plane.current_miu)
-                + plane.current_D * Sin(plane.current_miu))
-                / (Plane.m * plane.current_Vk);
+            double a_temp = (plane.D + plane.Flow * Plane.WingS * plane.CY_alpha)
+                * Sin(plane.Miu)
+                / (Cos(plane.Gamma) * Plane.Mass * plane.Vk);
+            double b_temp = (plane.Flow * Plane.WingS * plane.CC_beta * Cos(plane.Miu)
+                - plane.D * Cos(plane.Miu)) / (Cos(plane.Gamma)
+                * Plane.Mass * plane.Vk);
+            double c_temp = (plane.D + plane.Flow * Plane.WingS * plane.CY_alpha)
+                * Cos(plane.Miu)
+                / (Plane.Mass * plane.Vk);
+            double d_temp = (-plane.Flow * Plane.WingS * plane.CC_beta * Sin(plane.Miu)
+                + plane.D * Sin(plane.Miu))
+                / (Plane.Mass * plane.Vk);
 
-            double wind_estimation_NDO = plane.current_Vk
-                * ((Cos(plane.gamma_b2f) / Cos(plane.current_gamma) * NDO_d_kai_b2f) * d_temp
+            double wind_estimation_NDO = plane.Vk
+                * ((Cos(plane.gamma_b2f) / Cos(plane.Gamma) * NDO_d_kai_b2f) * d_temp
                 - NDO_d_gamma_b2f * b_temp) / (a_temp * d_temp - b_temp * c_temp); // 通过干扰观测器观测disturbance_gamma反推出的风速
-            double wind_estimation_NDO_lat = -plane.current_Vk * (NDO_d_gamma_b2f * a_temp
-                - (Cos(plane.gamma_b2f) / Cos(plane.current_gamma) * NDO_d_kai_b2f) * c_temp)
+            double wind_estimation_NDO_lat = -plane.Vk * (NDO_d_gamma_b2f * a_temp
+                - (Cos(plane.gamma_b2f) / Cos(plane.Gamma) * NDO_d_kai_b2f) * c_temp)
                 / (a_temp * d_temp - b_temp * c_temp);
 
             //ev = XChangedEventArgs(NDO_d_kai_b2f, NDO_d_gamma_b2f, NDO_d_Vk, wind_estimation_NDO, wind_estimation_NDO_lat);
@@ -347,57 +347,57 @@ namespace CsharpVersion
 
             // 航迹控制环
             // 保持迎角
-            double F2_1 = (plane.current_T * (
-                -Cos(plane.current_alpha + plane.engine_delta) * Sin(plane.current_beta)
-                * Cos(plane.current_miu)) + plane.current_C * Cos(plane.current_miu))
-                / (Plane.m * plane.current_Vk * Cos(plane.current_gamma));
-            double F2_2 = (plane.current_T * (-Sin(plane.current_alpha + plane.engine_delta) * Cos(plane.current_miu)
-                - Cos(plane.current_alpha + plane.engine_delta) * Sin(plane.current_beta)
-                * Sin(plane.current_miu)) + plane.current_C * Sin(plane.current_miu)
-                - (plane.current_Y - plane.current_Q * Plane.wing_S * (plane.CY_alpha * plane.current_alpha)) * Cos(plane.current_miu)
-                + Plane.m * Plane.g * Cos(plane.current_gamma))
-                / (-Plane.m * plane.current_Vk);
+            double F2_1 = (plane.T * (
+                -Cos(plane.Alpha + plane.EngineDelta) * Sin(plane.Beta)
+                * Cos(plane.Miu)) + plane.C * Cos(plane.Miu))
+                / (Plane.Mass * plane.Vk * Cos(plane.Gamma));
+            double F2_2 = (plane.T * (-Sin(plane.Alpha + plane.EngineDelta) * Cos(plane.Miu)
+                - Cos(plane.Alpha + plane.EngineDelta) * Sin(plane.Beta)
+                * Sin(plane.Miu)) + plane.C * Sin(plane.Miu)
+                - (plane.Y - plane.Flow * Plane.WingS * (plane.CY_alpha * plane.Alpha)) * Cos(plane.Miu)
+                + Plane.Mass * Plane.G * Cos(plane.Gamma))
+                / (-Plane.Mass * plane.Vk);
             F2 = vb.Dense(new[] { F2_1, F2_2 });
-            B2 = 1 / (Plane.m * plane.current_Vk) * mb.DenseOfArray(new[,] {
-                { (plane.current_T * Sin(plane.current_alpha + plane.engine_delta) + plane.current_Y)
-                    / Cos(plane.current_gamma), 0},
-                { 0, plane.current_Q* Plane.wing_S *plane.CY_alpha }});
+            B2 = 1 / (Plane.Mass * plane.Vk) * mb.DenseOfArray(new[,] {
+                { (plane.T * Sin(plane.Alpha + plane.EngineDelta) + plane.Y)
+                    / Cos(plane.Gamma), 0},
+                { 0, plane.Flow* Plane.WingS *plane.CY_alpha }});
 
             // 迎角控制环
-            F_alpha = plane.current_q - plane.current_Y / (Plane.m * plane.current_Vk)
-                + Plane.g * Cos(plane.current_gamma) / (plane.current_Vk);
+            F_alpha = plane.Q - plane.Y / (Plane.Mass * plane.Vk)
+                + Plane.G * Cos(plane.Gamma) / (plane.Vk);
             // B_alpha = -Sin(current_alpha + engine_delta) / (m * current_Vk) * T_max;
-            B_alpha = -Sin(plane.current_alpha + plane.engine_delta) / (Plane.m * plane.current_Vk);
+            B_alpha = -Sin(plane.Alpha + plane.EngineDelta) / (Plane.Mass * plane.Vk);
 
             // 速度控制环
-            F_Vk = -(1 / Plane.m) * (plane.current_D + Plane.m * Plane.g * Sin(plane.current_gamma));
+            F_Vk = -(1 / Plane.Mass) * (plane.D + Plane.Mass * Plane.G * Sin(plane.Gamma));
             // B_Vk = (1 / m) * (Cos(current_alpha + engine_delta) * Cos(current_beta) * T_max);
-            B_Vk = (1 / Plane.m) * (Cos(plane.current_alpha + plane.engine_delta) * Cos(plane.current_beta));
+            B_Vk = (1 / Plane.Mass) * (Cos(plane.Alpha + plane.EngineDelta) * Cos(plane.Beta));
 
             // 直接升力控制
-            F_kai = (1 / (Plane.m * plane.current_Vk * Cos(plane.current_gamma)))
-                * ((plane.current_T * Sin(plane.current_alpha) + plane.current_Y)
-                * (Sin(plane.current_miu) - plane.current_miu)
-                + (-plane.current_T * Cos(plane.current_alpha) * Sin(plane.current_beta) + plane.current_C)
-                * Cos(plane.current_miu));
-            B_kai = (plane.current_T * Sin(plane.current_alpha) + plane.current_Y)
-                / (Plane.m * plane.current_Vk * Cos(plane.current_gamma));
+            F_kai = (1 / (Plane.Mass * plane.Vk * Cos(plane.Gamma)))
+                * ((plane.T * Sin(plane.Alpha) + plane.Y)
+                * (Sin(plane.Miu) - plane.Miu)
+                + (-plane.T * Cos(plane.Alpha) * Sin(plane.Beta) + plane.C)
+                * Cos(plane.Miu));
+            B_kai = (plane.T * Sin(plane.Alpha) + plane.Y)
+                / (Plane.Mass * plane.Vk * Cos(plane.Gamma));
 
-            F_gamma = -(1 / (Plane.m * plane.current_Vk))
-                * (plane.current_T * (-Sin(plane.current_alpha) * Cos(plane.current_miu)
-                - Cos(plane.current_alpha) * Sin(plane.current_beta) * Sin(plane.current_miu))
-                + plane.current_C * Sin(plane.current_miu)
-                + Plane.m * Plane.g * Cos(plane.current_gamma)
-                - (plane.current_Y - plane.current_Q * Plane.wing_S * plane.CY_delta_tef * plane.current_delta_tef)
-                * Cos(plane.current_miu));
-            B_gamma = (plane.current_Q * Plane.wing_S * Cos(plane.current_miu) * plane.CY_delta_tef)
-                / (Plane.m * plane.current_Vk);
+            F_gamma = -(1 / (Plane.Mass * plane.Vk))
+                * (plane.T * (-Sin(plane.Alpha) * Cos(plane.Miu)
+                - Cos(plane.Alpha) * Sin(plane.Beta) * Sin(plane.Miu))
+                + plane.C * Sin(plane.Miu)
+                + Plane.Mass * Plane.G * Cos(plane.Gamma)
+                - (plane.Y - plane.Flow * Plane.WingS * plane.CY_delta_tef * plane.DeltaTEF)
+                * Cos(plane.Miu));
+            B_gamma = (plane.Flow * Plane.WingS * Cos(plane.Miu) * plane.CY_delta_tef)
+                / (Plane.Mass * plane.Vk);
 
             // 3D移动路径跟踪
-            F_kai_b2f = (Cos(plane.current_gamma) / Cos(plane.gamma_b2f)) * F_kai
+            F_kai_b2f = (Cos(plane.Gamma) / Cos(plane.gamma_b2f)) * F_kai
                 - Tan(plane.gamma_b2f) * Cos(plane.kai_b2f) * plane.omega_fy_2f
                 - plane.omega_fz_2f;
-            B_kai_b2f = (Cos(plane.current_gamma) / Cos(plane.gamma_b2f)) * B_kai;
+            B_kai_b2f = (Cos(plane.Gamma) / Cos(plane.gamma_b2f)) * B_kai;
 
             F_gamma_b2f = F_gamma - Cos(plane.kai_b2f) * plane.omega_fy_2f;
             B_gamma_b2f = B_gamma;
@@ -422,9 +422,9 @@ namespace CsharpVersion
                     if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)// 判断使用何种干扰观测器
                     {
                         current_desired_miu = 1 / B_kai_b2f * (-F_kai_b2f + k_kai_mpf * e_kai + derive_kai_desired
-                            - NDO_d_kai_b2f_output - epsilon_kai * plane.current_Vk * plane.y_b_2f) ; // 使用NDO
+                            - NDO_d_kai_b2f_output - epsilon_kai * plane.Vk * plane.y_b_2f) ; // 使用NDO
                         current_delta_tef_desired = 1 / B_gamma_b2f * (-F_gamma_b2f + k_gamma_mpf * e_gamma + derive_gamma_desired
-                            - NDO_d_gamma_b2f_output + epsilon_gamma * plane.current_Vk * plane.z_b_2f) ;
+                            - NDO_d_gamma_b2f_output + epsilon_gamma * plane.Vk * plane.z_b_2f) ;
                     }
                     else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
                     {
@@ -465,19 +465,19 @@ namespace CsharpVersion
             }
 
             previous_u2 = current_u2;
-            current_u2 = vb.Dense(new double[] { plane.desired_alpha, 0, current_desired_miu });
+            current_u2 = vb.Dense(new double[] { plane.AlphaDesired, 0, current_desired_miu });
 
             if (Configuration.AttitudeController == AttitudeConfig.IDLC)
             {
                 // 综合直接升力控制，油门控制速度
                 if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)// 判断使用何种干扰观测器
                 {
-                    plane.current_T =
+                    plane.T =
                         (-F_Vk + k_Vk_backstepping * current_err_Vk - NDO_d_Vk_output) / B_Vk; // 保持速度
                 }
                 else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
                 {
-                    plane.current_T =
+                    plane.T =
                         (-F_Vk + k_Vk_backstepping * current_err_Vk) / B_Vk; // backstepping control without disturbance observer 保持速度
                 }
                 else
@@ -527,24 +527,24 @@ namespace CsharpVersion
             }
             // Description    : 自动油门控制器
             // 自动油门
-            var previous_T = plane.current_T;
+            var previous_T = plane.T;
 
             // Description    : 保持迎角自动油门参量
             var previous_err_alpha = current_err_alpha;
-            current_err_alpha = plane.current_alpha - plane.desired_alpha; // 保持迎角自动油门P项
+            current_err_alpha = plane.Alpha - plane.AlphaDesired; // 保持迎角自动油门P项
                                                                            // err_alpha = plane.desired_alpha - plane.current_alpha;
             alphaI_sum = alphaI_sum + current_err_alpha * dt; // 保持迎角自动油门I项
             var derive_err_alpha = (current_err_alpha - previous_err_alpha) / dt; // 保持迎角 自动油门D项
 
             // Description    : 保持速度自动油门参量
             var previous_err_Vk = current_err_Vk;
-            current_err_Vk = plane.desired_Vk - plane.current_Vk;
+            current_err_Vk = plane.VkDesired - plane.Vk;
             VkI_sum = VkI_sum + current_err_Vk * dt; // 保持速度自动油门I项
             var derive_err_Vk = (current_err_Vk - previous_err_Vk) / dt; // 保持速度自动油门D项
 
-            var accel_z = (plane.current_Y - Plane.m * Plane.g * Cos(plane.current_theta)) / Plane.m;
+            var accel_z = (plane.Y - Plane.Mass * Plane.G * Cos(plane.Theta)) / Plane.Mass;
             filter_accel_z = accel_z_T * filter_accel_z / (accel_z_T + dt) + dt * accel_z / (accel_z_T + dt);
-            filter_current_delta_e = current_delta_e_T * filter_current_delta_e / (current_delta_e_T + dt) + dt * plane.current_delta_e / (current_delta_e_T + dt);
+            filter_current_delta_e = current_delta_e_T * filter_current_delta_e / (current_delta_e_T + dt) + dt * plane.DeltaE / (current_delta_e_T + dt);
             // current_delta_p = 95 * current_err_alpha + 40 * alphaI_sum + 0 * derive_err_alpha + 0 * filter_accel_z + 0 * filter_Uact(2) + 0 * current_q;   // 使用PID控制油门 迎角稳定 "linearized model of carrier-based aircraft dynamics in final-approach air condition"
             // current_delta_p = 6.532 * current_err_Vk + 4.7286 * VkI_sum + 1.42 * derive_err_Vk + 0 * filter_accel_z + 0 * filter_current_delta_e;   // 使用PID控制油门 速度稳定
             // current_delta_p = B_alpha \ (-F_alpha + k_alpha_backstepping * err_alpha - NDO_d_alpha); // 使用非线性方法控制油门，保持迎角
@@ -563,12 +563,12 @@ namespace CsharpVersion
 
             current_T_index = vb.Dense(sample_num_T, 0);
             current_X2 = vb.Dense(new[]
-                { plane.current_kai, plane.current_gamma });
-            current_u2 = vb.Dense(new[] { plane.desired_alpha, 0, 0 });
+                { plane.Chi, plane.Gamma });
+            current_u2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
             filter_u1 = current_u1;
             previous_u2 = current_u2;
-            previous_T = plane.current_T;
-            current_delta_tef_desired = plane.current_delta_tef;
+            previous_T = plane.T;
+            current_delta_tef_desired = plane.DeltaTEF;
             current_delta_tef_filtered = current_delta_tef_desired;
 
             // 有DMC有omega

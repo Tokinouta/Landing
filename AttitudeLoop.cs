@@ -53,10 +53,10 @@ namespace CsharpVersion
             this.plane = plane;
             this.ship = ship;
 
-            current_u2 = vb.Dense(new[] { plane.desired_alpha, 0, 0 });
+            current_u2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
             current_u3_index = mb.Dense(sample_num_u3, 3, 0); // p q r
             current_X3 = vb.Dense(new[]
-                { plane.current_alpha, plane.current_beta, plane.current_miu });
+                { plane.Alpha, plane.Beta, plane.Miu });
             previous_u3 = current_u3;
             filter_u2 = current_u2;
             //addlistener(plane, 'X3ChangedEvent', @updateState);
@@ -87,58 +87,58 @@ namespace CsharpVersion
             //q_rate_range = plane.q_rate_range;
             //r_rate_range = plane.r_rate_range;
 
-            if (current_u3[0] < plane.p_range[0])
+            if (current_u3[0] < plane.PRange[0])
             {
-                current_u3[0] = plane.p_range[0];
+                current_u3[0] = plane.PRange[0];
             }
-            if (current_u3[0] > plane.p_range[1])
+            if (current_u3[0] > plane.PRange[1])
             {
-                current_u3[0] = plane.p_range[1];
+                current_u3[0] = plane.PRange[1];
             }
-            if (current_u3[1] < plane.q_range[0])
+            if (current_u3[1] < plane.QRange[0])
             {
-                current_u3[1] = plane.q_range[0];
+                current_u3[1] = plane.QRange[0];
             }
-            if (current_u3[1] > plane.q_range[1])
+            if (current_u3[1] > plane.QRange[1])
             {
-                current_u3[1] = plane.q_range[1];
+                current_u3[1] = plane.QRange[1];
             }
-            if (current_u3[2] < plane.r_range[0])
+            if (current_u3[2] < plane.RRange[0])
             {
-                current_u3[2] = plane.r_range[0];
+                current_u3[2] = plane.RRange[0];
             }
-            if (current_u3[2] > plane.r_range[1])
+            if (current_u3[2] > plane.RRange[1])
             {
-                current_u3[2] = plane.r_range[1];
+                current_u3[2] = plane.RRange[1];
             }
 
             // Description    : p q r变化速率限制
             // p q r变化速率限制
             var derive_u3 = (current_u3 - previous_u3) / dt;
 
-            if (derive_u3[0] < plane.p_rate_range[0])
+            if (derive_u3[0] < plane.PRateRange[0])
             {
-                current_u3[0] = previous_u3[0] + plane.p_rate_range[0] * dt;
+                current_u3[0] = previous_u3[0] + plane.PRateRange[0] * dt;
             }
-            if (derive_u3[0] > plane.p_rate_range[1])
+            if (derive_u3[0] > plane.PRateRange[1])
             {
-                current_u3[0] = previous_u3[0] + plane.p_rate_range[1] * dt;
+                current_u3[0] = previous_u3[0] + plane.PRateRange[1] * dt;
             }
-            if (derive_u3[1] < plane.q_rate_range[0])
+            if (derive_u3[1] < plane.QRateRange[0])
             {
-                current_u3[1] = previous_u3[1] + plane.q_rate_range[0] * dt;
+                current_u3[1] = previous_u3[1] + plane.QRateRange[0] * dt;
             }
-            if (derive_u3[1] > plane.q_rate_range[1])
+            if (derive_u3[1] > plane.QRateRange[1])
             {
-                current_u3[1] = previous_u3[1] + plane.q_rate_range[1] * dt;
+                current_u3[1] = previous_u3[1] + plane.QRateRange[1] * dt;
             }
-            if (derive_u3[2] < plane.r_rate_range[0])
+            if (derive_u3[2] < plane.RRateRange[0])
             {
-                current_u3[2] = previous_u3[2] + plane.r_rate_range[0] * dt;
+                current_u3[2] = previous_u3[2] + plane.RRateRange[0] * dt;
             }
-            if (derive_u3[2] > plane.r_rate_range[1])
+            if (derive_u3[2] > plane.RRateRange[1])
             {
-                current_u3[2] = previous_u3[2] + plane.r_rate_range[1] * dt;
+                current_u3[2] = previous_u3[2] + plane.RRateRange[1] * dt;
             }
         }
 
@@ -149,12 +149,12 @@ namespace CsharpVersion
 
         public void calculateObservation()
         {
-            double current_alpha = plane.current_alpha;
-            double current_beta = plane.current_beta;
-            double current_gamma = plane.current_gamma;
-            double current_miu = plane.current_miu;
-            double derive_kai = plane.derive_kai;
-            double derive_gamma = plane.derive_gamma;
+            double current_alpha = plane.Alpha;
+            double current_beta = plane.Beta;
+            double current_gamma = plane.Gamma;
+            double current_miu = plane.Miu;
+            double derive_kai = plane.KaiDerive;
+            double derive_gamma = plane.GammaDerive;
 
             F3 = vb.Dense(new[] {
                 derive_gamma + (-derive_gamma * Cos(current_miu) - derive_kai * Sin(current_miu) * Cos(current_gamma)) / (Cos(current_beta)),
@@ -227,10 +227,10 @@ namespace CsharpVersion
         public void reset()
         {
             current_u3_index_count = 1;
-            current_u2 = vb.Dense(new[] { plane.desired_alpha, 0, 0 });
+            current_u2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
             current_u3_index = mb.Dense(sample_num_u3, 3, 0); // p q r
             current_X3 = vb.Dense(new[]
-                { plane.current_alpha, plane.current_beta, plane.current_miu });
+                { plane.Alpha, plane.Beta, plane.Miu });
             previous_u3 = current_u3;
             filter_u2 = current_u2;
 

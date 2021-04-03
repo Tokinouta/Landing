@@ -44,9 +44,9 @@ namespace CsharpVersion
             Simulation sim = new Simulation();
             //Control.UseManaged();
             w.Restart();
-            sim.simulate();
+            sim.Simulate();
             Console.WriteLine(w.Elapsed);
-            Console.WriteLine(sim.plane.current_position.ToString("G40"));
+            Console.WriteLine(sim.Plane.Position.ToString("G40"));
         }
     }
 }
