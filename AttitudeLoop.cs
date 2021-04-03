@@ -19,7 +19,7 @@ namespace CsharpVersion
         Vector<double> current_u2;
 
         // State Variable
-        Vector<double> current_X3;
+        public Vector<double> current_X3;
 
         // Output Variable
         public Vector<double> current_u3 = vb.Dense(3, 0);

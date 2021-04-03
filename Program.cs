@@ -42,6 +42,7 @@ namespace CsharpVersion
             Console.WriteLine("rarara");
 
             Simulation sim = new Simulation();
+            //Control.UseManaged();
             w.Restart();
             sim.simulate();
             Console.WriteLine(w.Elapsed);

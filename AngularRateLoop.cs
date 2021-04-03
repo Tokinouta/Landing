@@ -19,10 +19,10 @@ namespace CsharpVersion
         Vector<double> current_u3 = vb.Dense(3, 0);
 
         // State Variable
-        Vector<double> current_X4;
+        public Vector<double> current_X4;
 
         // Output Variable
-        Vector<double> current_Uact;
+        public Vector<double> current_Uact;
 
         // Interior Variable
         Matrix<double> epsilon_X4 = mb.DiagonalIdentity(3) * 0.7; // 增大阻尼同时减小频率
@@ -35,7 +35,7 @@ namespace CsharpVersion
         int sample_num_rudder = 1; // 3
         int current_Uact_index_count = 0;
         Matrix<double> current_Uact_index; // delta_a delta_e delta_r
-        Vector<double> filter_Uact;
+        public Vector<double> filter_Uact;
         Vector<double> filter_Uact_previous;
 
         // 观测器输出变量
@@ -288,7 +288,7 @@ namespace CsharpVersion
             B4 = plane.current_Q * Plane.wing_S * mb.DenseOfArray(new[,] {
                 { Plane.wing_L * (Plane.Izz * plane.CL_delta_a + Plane.Ixz * plane.CN_delta_a) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)), 0,
                     Plane.wing_L * (Plane.Izz * plane.CL_delta_r + Plane.Ixz * plane.CN_delta_r) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))},
-                {    0, Plane.wing_C* plane.CM_delta_e / Plane.Iyy, 0 },
+                { 0, Plane.wing_C* plane.CM_delta_e / Plane.Iyy, 0 },
                 { Plane.wing_L * (Plane.Ixz * plane.CL_delta_a + Plane.Ixx * plane.CN_delta_a) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)), 0,
                     Plane.wing_L * (Plane.Ixz * plane.CL_delta_r + Plane.Ixx * plane.CN_delta_r) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)) } });
         }

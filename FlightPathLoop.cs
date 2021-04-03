@@ -21,7 +21,7 @@ namespace CsharpVersion
         Vector<double> current_u1 = vb.Dense(2, 0);
 
         // State Variable
-        Vector<double> current_X2;
+        public Vector<double> current_X2;
 
         // Output Variable
         public Vector<double> current_u2;
@@ -168,8 +168,8 @@ namespace CsharpVersion
                 current_delta_tef_desired = previous_delta_tef_desired + plane.delta_tef_rate_range[1] * dt;
             }
             double previous_delta_tef_filtered = current_delta_tef_filtered;
-            current_delta_tef_filtered = 1 / 30 / (1 / 30 + dt * 1) * previous_delta_tef_filtered
-                + dt * 1 / (1 / 30 + dt * 1) * current_delta_tef_desired;
+            current_delta_tef_filtered = 1 / 30.0 / (1 / 30.0 + dt * 1) * previous_delta_tef_filtered
+                + dt * 1 / (1 / 30.0 + dt * 1) * current_delta_tef_desired;
             plane.current_delta_tef = current_delta_tef_filtered;
 
             // Description    : 角度变化幅度限制
@@ -421,10 +421,10 @@ namespace CsharpVersion
                     // Description    : 3D移动路径跟踪
                     if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)// 判断使用何种干扰观测器
                     {
-                        current_desired_miu = (-F_kai_b2f + k_kai_mpf * e_kai + derive_kai_desired
-                            - NDO_d_kai_b2f_output - epsilon_kai * plane.current_Vk * plane.y_b_2f) / B_kai_b2f; // 使用NDO
-                        current_delta_tef_desired = (-F_gamma_b2f + k_gamma_mpf * e_gamma + derive_gamma_desired
-                            - NDO_d_gamma_b2f_output + epsilon_gamma * plane.current_Vk * plane.z_b_2f) / B_gamma_b2f;
+                        current_desired_miu = 1 / B_kai_b2f * (-F_kai_b2f + k_kai_mpf * e_kai + derive_kai_desired
+                            - NDO_d_kai_b2f_output - epsilon_kai * plane.current_Vk * plane.y_b_2f) ; // 使用NDO
+                        current_delta_tef_desired = 1 / B_gamma_b2f * (-F_gamma_b2f + k_gamma_mpf * e_gamma + derive_gamma_desired
+                            - NDO_d_gamma_b2f_output + epsilon_gamma * plane.current_Vk * plane.z_b_2f) ;
                     }
                     else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
                     {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MathNet.Numerics.Data.Matlab;
+using MathNet.Numerics.LinearAlgebra;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,11 +53,76 @@ namespace CsharpVersion
             //fid = fopen('out.txt', 'a');
             // load('position.mat');
             // while (step_count < 2000)
+            Matrix<double> X1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X1_record");
+
+            Matrix<double> X2_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X2_record");
+
+            Matrix<double> X3_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X3_record");
+
+            Matrix<double> X4_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X4_record");
+
+            Matrix<double> derive_X1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "derive_X1_record");
+
+            Matrix<double> position_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "position_record");
+
+            Matrix<double> position_ship_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "position_ship_record");
+
+            Matrix<double> u1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "u1_record");
+
+            Matrix<double> u2_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "u2_record");
+
+            Matrix<double> u3_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "u3_record");
+
+            Matrix<double> uact_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "uact_record");
             while ((plane.current_position[0] - ship.current_position_ship[0]) < 0)
             {
                 // t1 = position_record(step_count,:);
                 // con = sum(t1.* t1) ~= sum(plane.current_position.* plane.current_position);
-            singleStep();//fclose(fid);
+                singleStep();//fclose(fid);
+                //if (!position_record.Row(step_count - 1).Equals(plane.current_position))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!position_ship_record.Row(step_count - 1).Equals(ship.current_position_ship))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!derive_X1_record.Row(step_count - 1).Equals(positionLoop.derive_X1))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!X1_record.Row(step_count - 1).Equals(positionLoop.current_X1))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!u1_record.Row(step_count - 1).Equals(positionLoop.current_u1))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!X2_record.Row(step_count - 1).Equals(flightPathLoop.current_X2))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!u2_record.Row(step_count - 1).Equals(flightPathLoop.current_u2))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!X3_record.Row(step_count - 1).Equals(attitudeLoop.current_X3))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!u3_record.Row(step_count - 1).Equals(attitudeLoop.current_u3))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!X4_record.Row(step_count - 1).Equals(angularRateLoop.current_X4))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
+                //if (!uact_record.Row(step_count - 1).Equals(angularRateLoop.filter_Uact))
+                //{
+                //    Console.WriteLine(step_count);
+                //}
 
             }
             Console.WriteLine(step_count);

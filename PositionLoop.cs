@@ -20,7 +20,7 @@ namespace CsharpVersion
         public Vector<double> current_desired_X1;
 
         // State Variable
-        Vector<double> current_X1;
+        public Vector<double> current_X1;
 
         // Output Variable
         public Vector<double> current_u1 = vb.Dense(2, 0);
@@ -46,7 +46,7 @@ namespace CsharpVersion
         Vector<double> epp;
         Vector<double> epc;
         // filter_u3;
-        Vector<double> derive_X1 = vb.Dense(2, 0); //[y,z]'
+        public Vector<double> derive_X1 = vb.Dense(2, 0); //[y,z]'
         Vector<double> previous_u1;
         Vector<double> previous_desired_X1;
         Vector<double> filter_desired_X1;
@@ -212,11 +212,6 @@ namespace CsharpVersion
             {
                 Console.WriteLine("请指定滤波器种类 id 11");
             }
-        }
-
-        public void calculateState(double dt, Vector<double> input, Plane plane)
-        {
-            throw new NotImplementedException();
         }
 
         public void record(double dt)
