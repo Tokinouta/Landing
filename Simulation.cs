@@ -43,7 +43,7 @@ namespace CsharpVersion
             Plane.X2ChangedEvent += FlightPathLoop.OnUpdateState;
             Plane.X3ChangedEvent += AttitudeLoop.OnUpdateState;
             Plane.X4ChangedEvent += AngularRateLoop.OnUpdateState;
-
+            Plane.RecordPlaneStateEvent += Record.OnRecordPlaneState;
             //disturbance.AddListener(flightPathLoop);
             // addlistener(app, "simulationStep", "PostSet", @modifyFrequency);
         }

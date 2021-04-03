@@ -141,7 +141,7 @@ namespace CsharpVersion
         public event EventHandler<XChangedEventArgs> X2ChangedEvent;
         public event EventHandler<XChangedEventArgs> X3ChangedEvent;
         public event EventHandler<XChangedEventArgs> X4ChangedEvent;
-
+        public event EventHandler RecordPlaneStateEvent;
         //event X1ChangedEvent;
         //event X2ChangedEvent;
         //event X3ChangedEvent;
@@ -225,7 +225,8 @@ namespace CsharpVersion
 
         public void Record()
         {
-            //notify(obj, "RecordPlaneStateEvent");
+            //notify(obj, "RecordPlaneStateEvent
+            RecordPlaneStateEvent?.Invoke(this, null);
         }
 
 
