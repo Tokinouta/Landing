@@ -42,6 +42,8 @@ namespace CsharpVersion
             Console.WriteLine("rarara");
 
             Simulation sim = new Simulation();
+            Console.WriteLine("Press Enter to Start ...");
+            Console.ReadLine();
             //Control.UseManaged();
             w.Restart();
             sim.Simulate();

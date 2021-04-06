@@ -1,5 +1,6 @@
 ﻿using MathNet.Numerics.Data.Matlab;
 using MathNet.Numerics.LinearAlgebra;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace CsharpVersion
 {
     class Simulation
     {
+        HubConnection connection;
         double frequency = 400; // 计算频率 Hz
         double dt; // 1 / f
         int step_count = 0;
@@ -53,6 +55,10 @@ namespace CsharpVersion
             //fid = fopen('out.txt', 'a');
             // load('position.mat');
             // while (step_count < 2000)
+            connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:5001/chatHub")
+                .Build();
+            connection.StartAsync();
             Matrix<double> X1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X1_record");
 
             Matrix<double> X2_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X2_record");
@@ -79,6 +85,14 @@ namespace CsharpVersion
                 // t1 = position_record(step_count,:);
                 // con = sum(t1.* t1) ~= sum(plane.current_position.* plane.current_position);
                 SingleStep();//fclose(fid);
+                if (step_count % 50 == 0)
+                {
+                    Task.Run(() =>
+                    {
+                        Task.Delay(250);
+                        connection.InvokeAsync("SendData", "user", Plane.Alpha);
+                    });
+                }
                 //if (!position_record.Row(step_count - 1).Equals(plane.current_position))
                 //{
                 //    Console.WriteLine(step_count);
@@ -171,6 +185,7 @@ namespace CsharpVersion
             FlightPathLoop.Record(dt);
             AttitudeLoop.Record(dt);
             AngularRateLoop.Record(dt);
+            //Task.Run(() => Console.WriteLine(step_count));
             //record.time_record.Add(current_time);
         }
 
