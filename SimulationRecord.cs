@@ -1,4 +1,5 @@
-﻿using MathNet.Numerics.LinearAlgebra;
+﻿using MathNet.Numerics.Data.Matlab;
+using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,76 +10,77 @@ namespace CsharpVersion
 {
     public class SimulationRecord
     {
+        static readonly VectorBuilder<double> vb = Vector<double>.Build;
+        static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+
         public List<double> time_record;
 
         // Data record
 
-        List<Vector<double>> position_ship_record;
-        List<double> psi_s_record; // 航母偏航角记录
-                                   // Data record
+        readonly List<Vector<double>> position_ship_record;
+        readonly List<double> psi_s_record; // 航母偏航角记录
+                                            // Data record
 
-        List<double> delta_tef_record;
-        List<Vector<double>> position_record;
-        List<double> alpha_record;
-        List<double> delta_p_record;
-        List<double> Vk_record;
-        List<double> current_Q_record;
-        List<double> current_T_record;
+
+        readonly List<double> delta_tef_record;
+        readonly List<Vector<double>> position_record;
+        readonly List<double> alpha_record;
+        readonly List<double> delta_p_record;
+        readonly List<double> Vk_record;
+        readonly List<double> current_Q_record;
+        readonly List<double> current_T_record;
+
         // 欧拉角记录
-        List<double> phi_record;
-        List<double> psi_record;
-        List<double> theta_record;
-
-        List<double> x_b_2f_record;
-        List<double> y_b_2f_record;
-        List<double> z_b_2f_record;
-
-        List<Vector<double>> epc_record;
-        List<Vector<double>> u1_record;
-        List<Vector<double>> X1_record;
-        List<Vector<double>> derive_X1_record;
-        List<Vector<double>> x1_dot_record;
-        List<Vector<double>> x2_dot_record;
+        readonly List<double> phi_record;
+        readonly List<double> psi_record;
+        readonly List<double> theta_record;
+        readonly List<double> x_b_2f_record;
+        readonly List<double> y_b_2f_record;
+        readonly List<double> z_b_2f_record;
+        readonly List<Vector<double>> epc_record;
+        readonly List<Vector<double>> u1_record;
+        readonly List<Vector<double>> X1_record;
+        readonly List<Vector<double>> derive_X1_record;
+        readonly List<Vector<double>> x1_dot_record;
+        readonly List<Vector<double>> x2_dot_record;
 
         //List<Vector<double>> vector_trac_err_record;
         //List<Vector<double>> pp_xi_lon_record;
         //List<Vector<double>> pp_xi_lat_record;
 
-        List<double> l_path_record;
-        List<double> l_path_dot_record;
-        List<double> psi_dmc_p2i_y_record;
-        List<double> psi_dmc_p2i_z_record;
-        List<double> kai_b2f_record;
-        List<double> gamma_b2f_record;
-        // Data record
-        List<Vector<double>> e2_record;
-        List<Vector<double>> u2_record;
-        List<Vector<double>> X2_record;
-        List<double> current_err_alpha_record;
-        List<Vector<double>> derive_X2_record;
-        List<Vector<double>> x3_dot_record;
-
-        List<double> NDO_d_kai_b2f_record;
-        List<double> NDO_d_gamma_b2f_record;
-        List<double> NDO_d_Vk_record;
-
-        List<double> wind_estimation_NDO;
-        List<double> wind_estimation_NDO_lat;
+        readonly List<double> l_path_record;
+        readonly List<double> l_path_dot_record;
+        readonly List<double> psi_dmc_p2i_y_record;
+        readonly List<double> psi_dmc_p2i_z_record;
+        readonly List<double> kai_b2f_record;
+        readonly List<double> gamma_b2f_record;
 
         // Data record
-        List<Vector<double>> e3_record;
-        List<Vector<double>> u3_record;
-        List<Vector<double>> X3_record;
-        List<Vector<double>> derive_X3_record;
-        List<Vector<double>> x4_dot_record;
+        readonly List<Vector<double>> e2_record;
+        readonly List<Vector<double>> u2_record;
+        readonly List<Vector<double>> X2_record;
+        readonly List<double> current_err_alpha_record;
+        readonly List<Vector<double>> derive_X2_record;
+        readonly List<Vector<double>> x3_dot_record;
+        readonly List<double> NDO_d_kai_b2f_record;
+        readonly List<double> NDO_d_gamma_b2f_record;
+        readonly List<double> NDO_d_Vk_record;
+        readonly List<double> wind_estimation_NDO;
+        readonly List<double> wind_estimation_NDO_lat;
 
         // Data record
-        List<Vector<double>> e4_record;
-        List<Vector<double>> uact_record;
-        List<Vector<double>> X4_record;
-        List<Vector<double>> derive_X4_record;
+        readonly List<Vector<double>> e3_record;
+        readonly List<Vector<double>> u3_record;
+        readonly List<Vector<double>> X3_record;
+        readonly List<Vector<double>> derive_X3_record;
+        readonly List<Vector<double>> x4_dot_record;
 
-        List<double> NDO_d_omega_record;
+        // Data record
+        readonly List<Vector<double>> e4_record;
+        readonly List<Vector<double>> uact_record;
+        readonly List<Vector<double>> X4_record;
+        readonly List<Vector<double>> derive_X4_record;
+        readonly List<double> NDO_d_omega_record;
 
         public SimulationRecord()
         {
@@ -88,7 +90,7 @@ namespace CsharpVersion
 
             position_ship_record = new List<Vector<double>>();
             psi_s_record = new List<double>(); // 航母偏航角记录
-                                       // Data record
+                                               // Data record
 
             delta_tef_record = new List<double>();
             position_record = new List<Vector<double>>();
@@ -117,7 +119,7 @@ namespace CsharpVersion
             //addlistener(sim, "PlotEvent", @plotDotEventHandler);
         }
 
-        void saveToFile()
+        public void SaveToFile(string fileName)
         {
             // add simulation date and time
             // add simulation configuration
@@ -140,6 +142,16 @@ namespace CsharpVersion
             //sobj.theta_record = theta_record;
 
             //save("ra.mat", 'sobj');
+            var matrices = new List<MatlabMatrix>
+            {
+                MatlabWriter.Pack(mb.DenseOfRowVectors(position_record), "position_record"),
+                MatlabWriter.Pack(mb.DenseOfRowMajor(Vk_record.Count, 1, Vk_record), "Vk_record"),
+                MatlabWriter.Pack(mb.DenseOfRowMajor(phi_record.Count, 1, phi_record), "phi_record"),
+                MatlabWriter.Pack(mb.DenseOfRowMajor(psi_record.Count, 1, psi_record), "psi_record"),
+                MatlabWriter.Pack(mb.DenseOfRowMajor(theta_record.Count, 1, theta_record), "theta_record"),
+                MatlabWriter.Pack(mb.DenseOfRowMajor(current_T_record.Count, 1, current_T_record), "current_T_record"),
+            };
+            MatlabWriter.Store(fileName, matrices);
         }
 
         public void OnRecordPlaneState(object sender, EventArgs e)

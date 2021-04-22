@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HistoryDemo\HistoryDemo\HistoryDemo.csproj" />
+  </ItemGroup>
+
 </Project>

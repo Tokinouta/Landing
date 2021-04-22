@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HistoryDemo;
+using HistoryDemo.Entities;
 
 namespace CsharpVersion
 {
@@ -80,6 +82,22 @@ namespace CsharpVersion
             Matrix<double> u3_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "u3_record");
 
             Matrix<double> uact_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "uact_record");
+
+            var ini = new Initialization()
+            {
+                InitialPositionX = Plane.Position[0],
+                InitialPositionY = Plane.Position[1],
+                InitialPositionZ = Plane.Position[2],
+                InitialAttitudePhi = Plane.Phi,
+                InitialAttitudePsi = Plane.Psi,
+                InitialAttitudeTheta = Plane.Theta
+            };
+            var conf = new HistoryDemo.Entities.Configuration()
+            {
+                GuidanceConfig = (HistoryDemo.Entities.GuidanceConfig)Configuration.GuidanceController
+            };
+
+
             while ((Plane.Position[0] - Ship.Position[0]) < 0)
             {
                 // t1 = position_record(step_count,:);
@@ -140,6 +158,26 @@ namespace CsharpVersion
 
             }
             Console.WriteLine(step_count);
+            string fileName = $"datalog\\{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.mat";
+            Record.SaveToFile(fileName);
+            using var db = new AppDbContext();
+            var t = db.Configurations.First();
+            var b = t == conf;
+            var bi = new BasicInformation()
+            {
+                //Id = 1, 
+                DateTime = DateTime.Now,
+                SimConfiguration = conf,
+                SimInitialization = ini,
+                PathToData = fileName
+            };
+            //var t = db.Configurations.Find(new HistoryDemo.Entities.Configuration(){
+            //    GuidanceConfig = (HistoryDemo.Entities.GuidanceConfig)Configuration.GuidanceController
+            //});
+            db.Add(bi);
+            db.Add(ini);
+            db.Add(conf);
+            db.SaveChanges();
         }
 
         void SingleStep()
