@@ -1,4 +1,6 @@
-﻿using MathNet.Numerics.Data.Matlab;
+﻿using HistoryDemo;
+using HistoryDemo.Entities;
+using MathNet.Numerics.Data.Matlab;
 using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Collections.Generic;
@@ -119,29 +121,38 @@ namespace CsharpVersion
             //addlistener(sim, "PlotEvent", @plotDotEventHandler);
         }
 
+        async public void SaveToDatabase(Initialization ini, HistoryDemo.Entities.Configuration conf)
+        {
+            await Task.Run(() =>
+            {
+                string fileName = $"datalog\\{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.mat";
+                SaveToFile(fileName);
+                using var db = new AppDbContext();
+                var t = db.Configurations.First();
+                var b = t == conf;
+                var bi = new BasicInformation()
+                {
+                    //Id = 1, 
+                    DateTime = DateTime.Now,
+                    SimConfiguration = conf,
+                    SimInitialization = ini,
+                    PathToData = fileName
+                };
+                //var t = db.Configurations.Find(new HistoryDemo.Entities.Configuration(){
+                //    GuidanceConfig = (HistoryDemo.Entities.GuidanceConfig)Configuration.GuidanceController
+                //});
+                db.Add(bi);
+                db.Add(ini);
+                db.Add(conf);
+                db.SaveChanges();
+            });
+        }
+
         public void SaveToFile(string fileName)
         {
             // add simulation date and time
             // add simulation configuration
             // add add initial state of plane
-
-            //sobj.time_record = time_record;
-            //sobj.position_ship_record = position_ship_record;
-            //sobj.psi_s_record = psi_s_record;
-
-            //sobj.delta_tef_record = delta_tef_record;
-            //sobj.position_record = position_record;
-            //sobj.alpha_record = alpha_record;
-            //sobj.delta_p_record = delta_p_record;
-            //sobj.Vk_record = Vk_record;
-            //sobj.current_Q_record = current_Q_record;
-            //sobj.current_T_record = current_T_record;
-
-            //sobj.phi_record = phi_record;
-            //sobj.psi_record = psi_record;
-            //sobj.theta_record = theta_record;
-
-            //save("ra.mat", 'sobj');
             var matrices = new List<MatlabMatrix>
             {
                 MatlabWriter.Pack(mb.DenseOfRowVectors(position_record), "position_record"),
@@ -150,7 +161,8 @@ namespace CsharpVersion
                 MatlabWriter.Pack(mb.DenseOfRowMajor(psi_record.Count, 1, psi_record), "psi_record"),
                 MatlabWriter.Pack(mb.DenseOfRowMajor(theta_record.Count, 1, theta_record), "theta_record"),
                 MatlabWriter.Pack(mb.DenseOfRowMajor(current_T_record.Count, 1, current_T_record), "current_T_record"),
-            };
+                MatlabWriter.Pack(mb.DenseOfRowMajor(time_record.Count, 1, time_record), "time_record"),
+            }; 
             MatlabWriter.Store(fileName, matrices);
         }
 

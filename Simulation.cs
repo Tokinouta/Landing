@@ -2,16 +2,18 @@
 using MathNet.Numerics.LinearAlgebra;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Timers;
 using System.Threading.Tasks;
-using HistoryDemo;
 using HistoryDemo.Entities;
+using HistoryDemo;
 
 namespace CsharpVersion
 {
-    class Simulation
+    public class Simulation
     {
         HubConnection connection;
         double frequency = 400; // 计算频率 Hz
@@ -27,7 +29,8 @@ namespace CsharpVersion
         public PositionLoop PositionLoop { get; set; }
         public AngularRateLoop AngularRateLoop { get; set; }
         public SimulationRecord Record { get; set; }
-
+        public ConcurrentQueue<double> queue { get; set; }
+        public Timer timer { get; set; }
         public Simulation()
         {
             InitializeInitialParameters();
@@ -39,7 +42,6 @@ namespace CsharpVersion
             FlightPathLoop = new FlightPathLoop(Plane, Ship);
             AttitudeLoop = new AttitudeLoop(Plane, Ship);
             AngularRateLoop = new AngularRateLoop(Plane, Ship);
-            Console.WriteLine("text");
             // plane.addListeners(positionLoop, flightPathLoop, attitudeLoop, angularRateLoop);
             Record = new SimulationRecord();
 
@@ -50,39 +52,49 @@ namespace CsharpVersion
             Plane.RecordPlaneStateEvent += Record.OnRecordPlaneState;
             //disturbance.AddListener(flightPathLoop);
             // addlistener(app, "simulationStep", "PostSet", @modifyFrequency);
+            timer = new Timer(100);
+            timer.Elapsed += (sender, e) =>
+            {
+                if (queue.TryDequeue(out double data))
+                {
+                    connection.InvokeAsync("SendData", "user", data);
+                }
+                if (queue.IsEmpty)
+                {
+                    timer.Stop();
+                    Console.WriteLine("Timer Stoped");
+                }
+            };
+            queue = new ConcurrentQueue<double>();
+            Console.WriteLine("text");
+        }
+
+        async public void StartHubConnection()
+        {
+            connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:5001/simulationHub")
+                .Build();
+            await connection.StartAsync();
+            Console.WriteLine(connection.State);
+            if (connection.State == HubConnectionState.Connected)
+            {
+                Console.WriteLine("connection started");
+            }
+        }
+
+        public Task SendData()
+        {
+            return new Task(() =>
+            {
+                if (queue.TryDequeue(out double data))
+                {
+                    connection.InvokeAsync("SendData", "user", data);
+                }
+            });
         }
 
         public void Simulate()
         {
-            //fid = fopen('out.txt', 'a');
-            // load('position.mat');
-            // while (step_count < 2000)
-            connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:5001/chatHub")
-                .Build();
-            connection.StartAsync();
-            Matrix<double> X1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X1_record");
-
-            Matrix<double> X2_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X2_record");
-
-            Matrix<double> X3_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X3_record");
-
-            Matrix<double> X4_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "X4_record");
-
-            Matrix<double> derive_X1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "derive_X1_record");
-
-            Matrix<double> position_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "position_record");
-
-            Matrix<double> position_ship_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "position_ship_record");
-
-            Matrix<double> u1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "u1_record");
-
-            Matrix<double> u2_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "u2_record");
-
-            Matrix<double> u3_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "u3_record");
-
-            Matrix<double> uact_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab.mat", "uact_record");
-
             var ini = new Initialization()
             {
                 InitialPositionX = Plane.Position[0],
@@ -97,87 +109,24 @@ namespace CsharpVersion
                 GuidanceConfig = (HistoryDemo.Entities.GuidanceConfig)Configuration.GuidanceController
             };
 
-
+            timer.Start();
             while ((Plane.Position[0] - Ship.Position[0]) < 0)
             {
-                // t1 = position_record(step_count,:);
-                // con = sum(t1.* t1) ~= sum(plane.current_position.* plane.current_position);
-                SingleStep();//fclose(fid);
+                SingleStep();
                 if (step_count % 50 == 0)
                 {
-                    Task.Run(() =>
-                    {
-                        Task.Delay(250);
-                        connection.InvokeAsync("SendData", "user", Plane.Alpha);
-                    });
+                    queue.Enqueue(Plane.Alpha);
                 }
-                //if (!position_record.Row(step_count - 1).Equals(plane.current_position))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!position_ship_record.Row(step_count - 1).Equals(ship.current_position_ship))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!derive_X1_record.Row(step_count - 1).Equals(positionLoop.derive_X1))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!X1_record.Row(step_count - 1).Equals(positionLoop.current_X1))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!u1_record.Row(step_count - 1).Equals(positionLoop.current_u1))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!X2_record.Row(step_count - 1).Equals(flightPathLoop.current_X2))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!u2_record.Row(step_count - 1).Equals(flightPathLoop.current_u2))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!X3_record.Row(step_count - 1).Equals(attitudeLoop.current_X3))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!u3_record.Row(step_count - 1).Equals(attitudeLoop.current_u3))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!X4_record.Row(step_count - 1).Equals(angularRateLoop.current_X4))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-                //if (!uact_record.Row(step_count - 1).Equals(angularRateLoop.filter_Uact))
-                //{
-                //    Console.WriteLine(step_count);
-                //}
-
             }
+
             Console.WriteLine(step_count);
-            string fileName = $"datalog\\{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.mat";
-            Record.SaveToFile(fileName);
-            using var db = new AppDbContext();
-            var t = db.Configurations.First();
-            var b = t == conf;
-            var bi = new BasicInformation()
-            {
-                //Id = 1, 
-                DateTime = DateTime.Now,
-                SimConfiguration = conf,
-                SimInitialization = ini,
-                PathToData = fileName
-            };
-            //var t = db.Configurations.Find(new HistoryDemo.Entities.Configuration(){
-            //    GuidanceConfig = (HistoryDemo.Entities.GuidanceConfig)Configuration.GuidanceController
-            //});
-            db.Add(bi);
-            db.Add(ini);
-            db.Add(conf);
-            db.SaveChanges();
+            Record.SaveToDatabase(ini, conf);
+        }
+
+        ~Simulation()
+        {
+            timer.Dispose();
+            Console.WriteLine("Timer Disposed");
         }
 
         void SingleStep()
@@ -210,7 +159,7 @@ namespace CsharpVersion
 
             AngularRateLoop.CalculateState(dt, AttitudeLoop.U3);
             AngularRateLoop.CalculateOutput();
-            AngularRateLoop.calculateLimiter(dt, step_count);
+            AngularRateLoop.CalculateLimiter(dt);
             AngularRateLoop.CalculateFilter(dt);
 
             Plane.UpdateState(dt, Disturbance);

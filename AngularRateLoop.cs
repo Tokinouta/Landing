@@ -114,32 +114,32 @@ namespace CsharpVersion
             // 舵面偏转角度限幅
             if (Uact[0] < plane.DeltaARange[0])
             {
-                Console.WriteLine($"Aileron over range bottom, {step_count}");
+                //Console.WriteLine($"Aileron over range bottom, {step_count}");
                 Uact[0] = plane.DeltaARange[0];
             }
             if (Uact[0] > plane.DeltaARange[1])
             {
-                Console.WriteLine($"Aileron over range top, {step_count}");
+                //Console.WriteLine($"Aileron over range top, {step_count}");
                 Uact[0] = plane.DeltaARange[1];
             }
             if (Uact[1] < plane.DeltaERange[0])
             {
-                Console.WriteLine($"Elevator over range bottom, {step_count}");
+                //Console.WriteLine($"Elevator over range bottom, {step_count}");
                 Uact[1] = plane.DeltaERange[0];
             }
             if (Uact[1] > plane.DeltaERange[1])
             {
-                Console.WriteLine($"Elevator over range top, {step_count}");
+                //Console.WriteLine($"Elevator over range top, {step_count}");
                 Uact[1] = plane.DeltaERange[1];
             }
             if (Uact[2] < plane.DeltaRRange[0])
             {
-                Console.WriteLine($"Rudder over range bottom, {step_count}");
+                //Console.WriteLine($"Rudder over range bottom, {step_count}");
                 Uact[2] = plane.DeltaRRange[0];
             }
             if (Uact[2] > plane.DeltaRRange[1])
             {
-                Console.WriteLine($"Rudder over range top, {step_count}");
+                //Console.WriteLine($"Rudder over range top, {step_count}");
                 Uact[2] = plane.DeltaRRange[1];
             }
 
