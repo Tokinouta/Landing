@@ -2,6 +2,8 @@
 using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 // CUDA support is not available in Math.NET
 
@@ -42,12 +44,13 @@ namespace CsharpVersion
             Console.WriteLine("rarara");
 
             Simulation sim = new Simulation();
-            Console.WriteLine("Press Enter to Start ...");
-            Console.ReadLine();
+            Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
             //Control.UseManaged();
             w.Restart();
             sim.Simulate();
             Console.WriteLine(w.Elapsed);
+            //Task.WaitAll();
+            Thread.Sleep(5000);
             Console.WriteLine(sim.Plane.Position.ToString("G40"));
         }
     }

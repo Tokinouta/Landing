@@ -29,8 +29,8 @@ namespace CsharpVersion
         public PositionLoop PositionLoop { get; set; }
         public AngularRateLoop AngularRateLoop { get; set; }
         public SimulationRecord Record { get; set; }
-        public ConcurrentQueue<double> queue { get; set; }
-        public Timer timer { get; set; }
+        public ConcurrentQueue<double> DataQueue { get; set; }
+        public Timer DataSendTimer { get; set; }
         public Simulation()
         {
             InitializeInitialParameters();
@@ -52,20 +52,20 @@ namespace CsharpVersion
             Plane.RecordPlaneStateEvent += Record.OnRecordPlaneState;
             //disturbance.AddListener(flightPathLoop);
             // addlistener(app, "simulationStep", "PostSet", @modifyFrequency);
-            timer = new Timer(100);
-            timer.Elapsed += (sender, e) =>
+            DataSendTimer = new Timer(100);
+            DataSendTimer.Elapsed += (sender, e) =>
             {
-                if (queue.TryDequeue(out double data))
+                if (DataQueue.TryDequeue(out double data))
                 {
                     connection.InvokeAsync("SendData", "user", data);
                 }
-                if (queue.IsEmpty)
+                if (DataQueue.IsEmpty)
                 {
-                    timer.Stop();
+                    DataSendTimer.Stop();
                     Console.WriteLine("Timer Stoped");
                 }
             };
-            queue = new ConcurrentQueue<double>();
+            DataQueue = new ConcurrentQueue<double>();
             Console.WriteLine("text");
         }
 
@@ -86,7 +86,7 @@ namespace CsharpVersion
         {
             return new Task(() =>
             {
-                if (queue.TryDequeue(out double data))
+                if (DataQueue.TryDequeue(out double data))
                 {
                     connection.InvokeAsync("SendData", "user", data);
                 }
@@ -109,13 +109,13 @@ namespace CsharpVersion
                 GuidanceConfig = (HistoryDemo.Entities.GuidanceConfig)Configuration.GuidanceController
             };
 
-            timer.Start();
+            DataSendTimer.Start();
             while ((Plane.Position[0] - Ship.Position[0]) < 0)
             {
                 SingleStep();
                 if (step_count % 50 == 0)
                 {
-                    queue.Enqueue(Plane.Alpha);
+                    DataQueue.Enqueue(Plane.Alpha);
                 }
             }
 
@@ -125,7 +125,7 @@ namespace CsharpVersion
 
         ~Simulation()
         {
-            timer.Dispose();
+            DataSendTimer.Dispose();
             Console.WriteLine("Timer Disposed");
         }
 

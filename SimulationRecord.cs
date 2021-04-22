@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CsharpVersion
@@ -123,28 +124,11 @@ namespace CsharpVersion
 
         async public void SaveToDatabase(Initialization ini, HistoryDemo.Entities.Configuration conf)
         {
-            await Task.Run(() =>
-            {
-                string fileName = $"datalog\\{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.mat";
+            string fileName = $"datalog\\{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.mat";
+            await Task.Run(()=> {
+                Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
                 SaveToFile(fileName);
-                using var db = new AppDbContext();
-                var t = db.Configurations.First();
-                var b = t == conf;
-                var bi = new BasicInformation()
-                {
-                    //Id = 1, 
-                    DateTime = DateTime.Now,
-                    SimConfiguration = conf,
-                    SimInitialization = ini,
-                    PathToData = fileName
-                };
-                //var t = db.Configurations.Find(new HistoryDemo.Entities.Configuration(){
-                //    GuidanceConfig = (HistoryDemo.Entities.GuidanceConfig)Configuration.GuidanceController
-                //});
-                db.Add(bi);
-                db.Add(ini);
-                db.Add(conf);
-                db.SaveChanges();
+                DataManipulation.Create(ini, conf, fileName);
             });
         }
 
@@ -162,7 +146,7 @@ namespace CsharpVersion
                 MatlabWriter.Pack(mb.DenseOfRowMajor(theta_record.Count, 1, theta_record), "theta_record"),
                 MatlabWriter.Pack(mb.DenseOfRowMajor(current_T_record.Count, 1, current_T_record), "current_T_record"),
                 MatlabWriter.Pack(mb.DenseOfRowMajor(time_record.Count, 1, time_record), "time_record"),
-            }; 
+            };
             MatlabWriter.Store(fileName, matrices);
         }
 
