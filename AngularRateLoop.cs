@@ -257,31 +257,39 @@ namespace CsharpVersion
 
         public void CalculateObservation()
         {
-            double F4_1 = 1 / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))
-                * ((Plane.Iyy * Plane.Izz - Math.Pow(Plane.Izz, 2) - Math.Pow(Plane.Ixz, 2)) * plane.R * plane.Q
-                + (Plane.Ixx * Plane.Ixz + Plane.Izz * Plane.Ixz - Plane.Iyy * Plane.Ixz) * plane.P * plane.Q
-                + Plane.Izz * (plane.L - plane.Flow * Plane.WingS * Plane.WingL
+            double Ixx = plane.PlaneInertia.Ixx;
+            double Iyy = plane.PlaneInertia.Iyy;
+            double Izz = plane.PlaneInertia.Izz;
+            double Ixz = plane.PlaneInertia.Ixz;
+            double WingC = plane.PlaneInertia.WingC;
+            double WingS = plane.PlaneInertia.WingS;
+            double WingL = plane.PlaneInertia.WingL;
+
+            double F4_1 = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
+                * ((Iyy * Izz - Math.Pow(Izz, 2) - Math.Pow(Ixz, 2)) * plane.R * plane.Q
+                + (Ixx * Ixz + Izz * Ixz - Iyy * Ixz) * plane.P * plane.Q
+                + Izz * (plane.L - plane.Flow * WingS * WingL
                 * (plane.CL_delta_a * plane.DeltaA + plane.CL_delta_r * plane.DeltaR))
-                + Plane.Ixz * (plane.N - plane.Flow * Plane.WingS * Plane.WingL
+                + Ixz * (plane.N - plane.Flow * WingS * WingL
                 * (plane.CN_delta_r * plane.DeltaR + plane.CN_delta_a * plane.DeltaA)));
-            double F4_2 = 1 / Plane.Iyy * ((Plane.Izz - Plane.Ixx) * plane.P * plane.R
-                - Plane.Ixz * Math.Pow(plane.P, 2) + Plane.Ixz * Math.Pow(plane.R, 2)
-                + (plane.M - plane.Flow * Plane.WingS * Plane.WingC
+            double F4_2 = 1 / Iyy * ((Izz - Ixx) * plane.P * plane.R
+                - Ixz * Math.Pow(plane.P, 2) + Ixz * Math.Pow(plane.R, 2)
+                + (plane.M - plane.Flow * WingS * WingC
                 * (plane.CM_delta_e * plane.DeltaE)));
-            double F4_3 = 1 / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))
-                * ((Math.Pow(Plane.Ixx, 2) + Math.Pow(Plane.Ixz, 2) - Plane.Ixx * Plane.Iyy) * plane.P * plane.Q
-                + (Plane.Iyy * Plane.Ixz - Plane.Ixx * Plane.Ixz - Plane.Izz * Plane.Ixz) * plane.Q * plane.R
-                + Plane.Ixz * (plane.L - plane.Flow * Plane.WingS * Plane.WingL
+            double F4_3 = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
+                * ((Math.Pow(Ixx, 2) + Math.Pow(Ixz, 2) - Ixx * Iyy) * plane.P * plane.Q
+                + (Iyy * Ixz - Ixx * Ixz - Izz * Ixz) * plane.Q * plane.R
+                + Ixz * (plane.L - plane.Flow * WingS * WingL
                 * (plane.CL_delta_a * plane.DeltaA + plane.CL_delta_r * plane.DeltaR))
-                + Plane.Ixx * (plane.N - plane.Flow * Plane.WingS * Plane.WingL
+                + Ixx * (plane.N - plane.Flow * WingS * WingL
                 * (plane.CN_delta_r * plane.DeltaR + plane.CN_delta_a * plane.DeltaA)));
             F4 = vb.Dense(new[] { F4_1, F4_2, F4_3 });
-            B4 = plane.Flow * Plane.WingS * mb.DenseOfArray(new[,] {
-                { Plane.WingL * (Plane.Izz * plane.CL_delta_a + Plane.Ixz * plane.CN_delta_a) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)), 0,
-                    Plane.WingL * (Plane.Izz * plane.CL_delta_r + Plane.Ixz * plane.CN_delta_r) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2))},
-                { 0, Plane.WingC* plane.CM_delta_e / Plane.Iyy, 0 },
-                { Plane.WingL * (Plane.Ixz * plane.CL_delta_a + Plane.Ixx * plane.CN_delta_a) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)), 0,
-                    Plane.WingL * (Plane.Ixz * plane.CL_delta_r + Plane.Ixx * plane.CN_delta_r) / (Plane.Ixx * Plane.Izz - Math.Pow(Plane.Ixz, 2)) } });
+            B4 = plane.Flow * WingS * mb.DenseOfArray(new[,] {
+                { WingL * (Izz * plane.CL_delta_a + Ixz * plane.CN_delta_a) / (Ixx * Izz - Math.Pow(Ixz, 2)), 0,
+                    WingL * (Izz * plane.CL_delta_r + Ixz * plane.CN_delta_r) / (Ixx * Izz - Math.Pow(Ixz, 2))},
+                { 0, WingC* plane.CM_delta_e / Iyy, 0 },
+                { WingL * (Ixz * plane.CL_delta_a + Ixx * plane.CN_delta_a) / (Ixx * Izz - Math.Pow(Ixz, 2)), 0,
+                    WingL * (Ixz * plane.CL_delta_r + Ixx * plane.CN_delta_r) / (Ixx * Izz - Math.Pow(Ixz, 2)) } });
         }
 
         public void CalculateOutput()

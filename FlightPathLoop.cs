@@ -242,19 +242,8 @@ namespace CsharpVersion
 
         public void CalculateNonlinearObserver(double dt, Disturbance disturbance)
         {
-            //kai_b2f = plane.kai_b2f;
-            //gamma_b2f = plane.gamma_b2f;
-            //current_gamma = plane.current_gamma;
-            //current_miu = plane.current_miu;
-            //current_Vk = plane.current_Vk;
-            //current_Q = plane.current_Q;
-            //current_D = plane.current_D;
-            //current_delta_tef = plane.current_delta_tef;
-            //current_T = plane.current_T;
-            //m = plane.m;
-            //wing_S = plane.wing_S;
-            //CY_alpha = plane.CY_alpha;
-            //CC_beta = plane.CC_beta;
+            double WingS = plane.PlaneInertia.WingS;
+            double Mass = plane.PlaneInertia.Mass;
 
             double previous_NDO_p_kai_b2f = current_NDO_p_chi_b2f;
             double derive_NDO_p_kai_b2f = -NDO_l_chi_b2f
@@ -295,18 +284,18 @@ namespace CsharpVersion
             //    NDO_d_Vk_output = 0;
             //end
 
-            double a_temp = (plane.D + plane.Flow * Plane.WingS * plane.CY_alpha)
+            double a_temp = (plane.D + plane.Flow * WingS * plane.CY_alpha)
                 * Sin(plane.Miu)
-                / (Cos(plane.Gamma) * Plane.Mass * plane.Vk);
-            double b_temp = (plane.Flow * Plane.WingS * plane.CC_beta * Cos(plane.Miu)
+                / (Cos(plane.Gamma) * Mass * plane.Vk);
+            double b_temp = (plane.Flow * WingS * plane.CC_beta * Cos(plane.Miu)
                 - plane.D * Cos(plane.Miu)) / (Cos(plane.Gamma)
-                * Plane.Mass * plane.Vk);
-            double c_temp = (plane.D + plane.Flow * Plane.WingS * plane.CY_alpha)
+                * Mass * plane.Vk);
+            double c_temp = (plane.D + plane.Flow * WingS * plane.CY_alpha)
                 * Cos(plane.Miu)
-                / (Plane.Mass * plane.Vk);
-            double d_temp = (-plane.Flow * Plane.WingS * plane.CC_beta * Sin(plane.Miu)
+                / (Mass * plane.Vk);
+            double d_temp = (-plane.Flow * WingS * plane.CC_beta * Sin(plane.Miu)
                 + plane.D * Sin(plane.Miu))
-                / (Plane.Mass * plane.Vk);
+                / (Mass * plane.Vk);
 
             double wind_estimation_NDO = plane.Vk
                 * ((Cos(plane.gamma_b2f) / Cos(plane.Gamma) * NDO_d_kai_b2f) * d_temp
@@ -321,6 +310,17 @@ namespace CsharpVersion
 
         public void CalculateObservation()
         {
+            _ = plane.PlaneInertia.Ixx;
+            _ = plane.PlaneInertia.Iyy;
+            _ = plane.PlaneInertia.Izz;
+            _ = plane.PlaneInertia.Ixz;
+            _ = plane.PlaneInertia.WingC;
+            double WingS = plane.PlaneInertia.WingS;
+            _ = plane.PlaneInertia.WingL;
+            double Mass = plane.PlaneInertia.Mass;
+            _ = plane.PlaneInertia.TMax;
+            _ = plane.PlaneInertia.Rou;
+            double G = plane.PlaneInertia.G;
             //kai_b2f = plane.kai_b2f;
             //gamma_b2f = plane.gamma_b2f;
 
@@ -350,48 +350,48 @@ namespace CsharpVersion
             double F2_1 = (plane.T * (
                 -Cos(plane.Alpha + plane.EngineDelta) * Sin(plane.Beta)
                 * Cos(plane.Miu)) + plane.C * Cos(plane.Miu))
-                / (Plane.Mass * plane.Vk * Cos(plane.Gamma));
+                / (Mass * plane.Vk * Cos(plane.Gamma));
             double F2_2 = (plane.T * (-Sin(plane.Alpha + plane.EngineDelta) * Cos(plane.Miu)
                 - Cos(plane.Alpha + plane.EngineDelta) * Sin(plane.Beta)
                 * Sin(plane.Miu)) + plane.C * Sin(plane.Miu)
-                - (plane.Y - plane.Flow * Plane.WingS * (plane.CY_alpha * plane.Alpha)) * Cos(plane.Miu)
-                + Plane.Mass * Plane.G * Cos(plane.Gamma))
-                / (-Plane.Mass * plane.Vk);
+                - (plane.Y - plane.Flow * WingS * (plane.CY_alpha * plane.Alpha)) * Cos(plane.Miu)
+                + Mass * G * Cos(plane.Gamma))
+                / (-Mass * plane.Vk);
             F2 = vb.Dense(new[] { F2_1, F2_2 });
-            B2 = 1 / (Plane.Mass * plane.Vk) * mb.DenseOfArray(new[,] {
+            B2 = 1 / (Mass * plane.Vk) * mb.DenseOfArray(new[,] {
                 { (plane.T * Sin(plane.Alpha + plane.EngineDelta) + plane.Y)
                     / Cos(plane.Gamma), 0},
-                { 0, plane.Flow* Plane.WingS *plane.CY_alpha }});
+                { 0, plane.Flow* WingS *plane.CY_alpha }});
 
             // 迎角控制环
-            F_alpha = plane.Q - plane.Y / (Plane.Mass * plane.Vk)
-                + Plane.G * Cos(plane.Gamma) / (plane.Vk);
+            F_alpha = plane.Q - plane.Y / (Mass * plane.Vk)
+                + G * Cos(plane.Gamma) / (plane.Vk);
             // B_alpha = -Sin(current_alpha + engine_delta) / (m * current_Vk) * T_max;
-            B_alpha = -Sin(plane.Alpha + plane.EngineDelta) / (Plane.Mass * plane.Vk);
+            B_alpha = -Sin(plane.Alpha + plane.EngineDelta) / (Mass * plane.Vk);
 
             // 速度控制环
-            F_Vk = -(1 / Plane.Mass) * (plane.D + Plane.Mass * Plane.G * Sin(plane.Gamma));
+            F_Vk = -(1 / Mass) * (plane.D + Mass * G * Sin(plane.Gamma));
             // B_Vk = (1 / m) * (Cos(current_alpha + engine_delta) * Cos(current_beta) * T_max);
-            B_Vk = (1 / Plane.Mass) * (Cos(plane.Alpha + plane.EngineDelta) * Cos(plane.Beta));
+            B_Vk = (1 / Mass) * (Cos(plane.Alpha + plane.EngineDelta) * Cos(plane.Beta));
 
             // 直接升力控制
-            F_chi = (1 / (Plane.Mass * plane.Vk * Cos(plane.Gamma)))
+            F_chi = (1 / (Mass * plane.Vk * Cos(plane.Gamma)))
                 * ((plane.T * Sin(plane.Alpha) + plane.Y)
                 * (Sin(plane.Miu) - plane.Miu)
                 + (-plane.T * Cos(plane.Alpha) * Sin(plane.Beta) + plane.C)
                 * Cos(plane.Miu));
             B_chi = (plane.T * Sin(plane.Alpha) + plane.Y)
-                / (Plane.Mass * plane.Vk * Cos(plane.Gamma));
+                / (Mass * plane.Vk * Cos(plane.Gamma));
 
-            F_gamma = -(1 / (Plane.Mass * plane.Vk))
+            F_gamma = -(1 / (Mass * plane.Vk))
                 * (plane.T * (-Sin(plane.Alpha) * Cos(plane.Miu)
                 - Cos(plane.Alpha) * Sin(plane.Beta) * Sin(plane.Miu))
                 + plane.C * Sin(plane.Miu)
-                + Plane.Mass * Plane.G * Cos(plane.Gamma)
-                - (plane.Y - plane.Flow * Plane.WingS * plane.CY_delta_tef * plane.DeltaTEF)
+                + Mass * G * Cos(plane.Gamma)
+                - (plane.Y - plane.Flow * WingS * plane.CY_delta_tef * plane.DeltaTEF)
                 * Cos(plane.Miu));
-            B_gamma = (plane.Flow * Plane.WingS * Cos(plane.Miu) * plane.CY_delta_tef)
-                / (Plane.Mass * plane.Vk);
+            B_gamma = (plane.Flow * WingS * Cos(plane.Miu) * plane.CY_delta_tef)
+                / (Mass * plane.Vk);
 
             // 3D移动路径跟踪
             F_chi_b2f = (Cos(plane.Gamma) / Cos(plane.gamma_b2f)) * F_chi
@@ -405,8 +405,6 @@ namespace CsharpVersion
 
         public void CalculateOutput()
         {
-            //current_Vk = plane.current_Vk;
-
             // 直接升力控制
             double deriveChiDesired = deriveX2[0]; // derive_kai 在 observer.m 文件中出现，不要重复使用
             double deriveGammaDesired = deriveX2[1]; // derive_gamma 在 observer.m 文件中出现，不要重复使用
@@ -422,9 +420,9 @@ namespace CsharpVersion
                     if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)// 判断使用何种干扰观测器
                     {
                         current_desired_miu = 1 / B_chi_b2f * (-F_chi_b2f + k_kai_mpf * eChi + deriveChiDesired
-                            - NDO_d_chi_b2f_output - epsilonChi * plane.Vk * plane.y_b_2f) ; // 使用NDO
+                            - NDO_d_chi_b2f_output - epsilonChi * plane.Vk * plane.y_b_2f); // 使用NDO
                         desiredDeltaTEF = 1 / B_gamma_b2f * (-F_gamma_b2f + k_gamma_mpf * eGamma + deriveGammaDesired
-                            - NDO_d_gamma_b2f_output + epsilonGamma * plane.Vk * plane.z_b_2f) ;
+                            - NDO_d_gamma_b2f_output + epsilonGamma * plane.Vk * plane.z_b_2f);
                     }
                     else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
                     {
@@ -495,6 +493,9 @@ namespace CsharpVersion
 
         public void CalculateState(double dt, Vector<double> input)
         {
+            double Mass = plane.PlaneInertia.Mass;
+            double G = plane.PlaneInertia.G;
+
             U1 = input;
 
             if (Configuration.attitude_command_filter_flag)// 判断使用何种滤波器
@@ -532,7 +533,7 @@ namespace CsharpVersion
             // Description    : 保持迎角自动油门参量
             var previous_err_alpha = current_err_alpha;
             current_err_alpha = plane.Alpha - plane.AlphaDesired; // 保持迎角自动油门P项
-                                                                           // err_alpha = plane.desired_alpha - plane.current_alpha;
+                                                                  // err_alpha = plane.desired_alpha - plane.current_alpha;
             alphaI_sum = alphaI_sum + current_err_alpha * dt; // 保持迎角自动油门I项
             var derive_err_alpha = (current_err_alpha - previous_err_alpha) / dt; // 保持迎角 自动油门D项
 
@@ -542,7 +543,7 @@ namespace CsharpVersion
             VkI_sum = VkI_sum + current_err_Vk * dt; // 保持速度自动油门I项
             var derive_err_Vk = (current_err_Vk - previous_err_Vk) / dt; // 保持速度自动油门D项
 
-            var accel_z = (plane.Y - Plane.Mass * Plane.G * Cos(plane.Theta)) / Plane.Mass;
+            var accel_z = (plane.Y - Mass * G * Cos(plane.Theta)) / Mass;
             filter_accel_z = accel_z_T * filter_accel_z / (accel_z_T + dt) + dt * accel_z / (accel_z_T + dt);
             filter_current_delta_e = current_delta_e_T * filter_current_delta_e / (current_delta_e_T + dt) + dt * plane.DeltaE / (current_delta_e_T + dt);
             // current_delta_p = 95 * current_err_alpha + 40 * alphaI_sum + 0 * derive_err_alpha + 0 * filter_accel_z + 0 * filter_Uact(2) + 0 * current_q;   // 使用PID控制油门 迎角稳定 "linearized model of carrier-based aircraft dynamics in final-approach air condition"

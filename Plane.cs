@@ -9,19 +9,24 @@ using System.Threading.Tasks;
 
 namespace CsharpVersion
 {
+    public struct InertiaParameter
+    {
+        public double Ixx; // 转动惯量 kg/m2
+        public double Iyy;
+        public double Izz;
+        public double Ixz;
+        public double WingS; // 翼面积
+        public double WingC;  // 平均气动弦长
+        public double WingL;  // 翼展
+        public double Mass; // 空重 kg
+        public double TMax;  // 军用推力（两台）
+        public double Rou;  // 空气密度
+        public double G;
+    }
+
     public class Plane
     {
-        public const double Ixx = 31183.40; // 转动惯量 kg/m2
-        public const double Iyy = 205123.05;
-        public const double Izz = 230411.43;
-        public const double Ixz = 4028.08;
-        public const double WingS = 37.16; // 翼面积
-        public const double WingC = 3.51; // 平均气动弦长
-        public const double WingL = 11.41; // 翼展
-        public const double Mass = 15097.39; // 空重 kg
-        public const double TMax = 130.6 * 1000; // 军用推力（两台）
-        public const double Rou = 1.225; // 空气密度
-        public const double G = 9.8;
+        public InertiaParameter PlaneInertia;
 
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
@@ -132,9 +137,8 @@ namespace CsharpVersion
         public double AlphaDesired = 9.1 * Pi / 180; // 期望迎角 9.1
         public double ChiDesired = 0 * Pi / 180; // 期望航向角
         public double GammaDesired = -3.5 * Pi / 180; // 期望爬升角
-        public double VkDesired = 75; // 期望速度 71
+        public double VkDesired { get; private set; } = 75; // 期望速度 71
         public double EngineDelta = 0 * Pi / 180; // 发动机安装角
-
 
         //event RecordPlaneStateEvent;
         public event EventHandler<XChangedEventArgs> X1ChangedEvent;
@@ -149,14 +153,25 @@ namespace CsharpVersion
 
         public Plane(Ship ship)
         {
-            //var current_position_ship = ;
-            //double ship.Theta = ;
-            //double ship.Psi = ship.Psi;
+            PlaneInertia = new()
+            {
+                Ixx = 31183.40,// 转动惯量 kg/m2
+                Iyy = 205123.05,
+                Izz = 230411.43,
+                Ixz = 4028.08,
+                WingS = 37.16, // 翼面积
+                WingC = 3.51, // 平均气动弦长
+                WingL = 11.41, // 翼展
+                Mass = 15097.39, // 空重 kg
+                TMax = 130.6 * 1000, // 军用推力（两台）
+                Rou = 1.225, // 空气密度
+                G = 9.8
+            };
 
-            Flow = 0.5 * Rou * Math.Pow(Vk, 2);
-            T = TMax * DeltaP;
-            ThrustRange = TMax * DeltaPRange;
-            ThrustRateRange = TMax * DeltaPRateRange;
+            Flow = 0.5 * PlaneInertia.Rou * Math.Pow(Vk, 2);
+            T = PlaneInertia.TMax * DeltaP;
+            ThrustRange = PlaneInertia.TMax * DeltaPRange;
+            ThrustRateRange = PlaneInertia.TMax * DeltaPRateRange;
             CalculatePneumaticParameters();
             CalculateForceAndMoment();
             Initialize(ship);
@@ -232,6 +247,10 @@ namespace CsharpVersion
 
         void CalculatePneumaticParameters()
         {
+            double WingC = PlaneInertia.WingC;
+            double WingS = PlaneInertia.WingS;
+            double WingL = PlaneInertia.WingL;
+
             // flap coefficient
             double CM_delta_tef = 0.001 * 180 / Pi;
             double CM_delta_lef = 0;
@@ -399,12 +418,12 @@ namespace CsharpVersion
 
         void CalculateForceAndMoment()
         {
-            Y = Flow * WingS * CY;
-            D = Flow * WingS * CD;
-            C = Flow * WingS * CC;
-            L = Flow * WingS * WingL * CL;
-            M = Flow * WingS * WingC * CM;
-            N = Flow * WingS * WingL * CN;
+            Y = Flow * PlaneInertia.WingS * CY;
+            D = Flow * PlaneInertia.WingS * CD;
+            C = Flow * PlaneInertia.WingS * CC;
+            L = Flow * PlaneInertia.WingS * PlaneInertia.WingL * CL;
+            M = Flow * PlaneInertia.WingS * PlaneInertia.WingC * CM;
+            N = Flow * PlaneInertia.WingS * PlaneInertia.WingL * CN;
         }
 
         public void UpdateState(double dt, Disturbance disturbance)
@@ -414,11 +433,20 @@ namespace CsharpVersion
 
             disturbance.updateState(this);
 
+            double Ixx = PlaneInertia.Ixx;
+            double Iyy = PlaneInertia.Iyy;
+            double Izz = PlaneInertia.Izz;
+            double Ixz = PlaneInertia.Ixz;
+            double Mass = PlaneInertia.Mass;
+            double TMax = PlaneInertia.TMax;
+            double Rou = PlaneInertia.Rou;
+            double G = PlaneInertia.G;
+
             double current_p_dot = 1 / (Ixx * Izz - Math.Pow(Ixz, 2)) * ((Iyy * Izz - Math.Pow(Izz, 2) - Math.Pow(Ixz, 2)) * Q * R
-                + (Ixx * Ixz + Izz * Ixz - Iyy * Ixz) * P * Q
-                + Izz * L
-                + Ixz * N)
-                + disturbance.disturbance_p;
+                    + (Ixx * Ixz + Izz * Ixz - Iyy * Ixz) * P * Q
+                    + Izz * L
+                    + Ixz * N)
+                    + disturbance.disturbance_p;
 
             double current_q_dot = 1 / Iyy * ((Izz - Ixx) * P * R - Ixz * Math.Pow(P, 2)
                 + Ixz * Math.Pow(R, 2) + M)
@@ -542,8 +570,8 @@ namespace CsharpVersion
 
             GammaDerive = 0;
             KaiDerive = 0;
-            Flow = 0.5 * Rou * Math.Pow(Vk, 2);
-            T = TMax * DeltaP;
+            Flow = 0.5 * PlaneInertia.Rou * Math.Pow(Vk, 2);
+            T = PlaneInertia.TMax * DeltaP;
 
             CalculatePneumaticParameters();
             CalculateForceAndMoment();

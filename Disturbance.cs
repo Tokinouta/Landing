@@ -127,13 +127,15 @@ namespace CsharpVersion
             double current_Vk = plane.Vk;
             double current_Y = plane.Y;
             double CY_alpha = plane.CY_alpha;
-            double Ixx = Plane.Ixx;
-            double Ixz = Plane.Ixz;
-            double Iyy = Plane.Iyy;
-            double Izz = Plane.Izz;
-            double m = Plane.Mass;
-            double wing_L = Plane.WingL;
-            double wing_S = Plane.WingS;
+
+            double Ixx = plane.PlaneInertia.Ixx;
+            double Iyy = plane.PlaneInertia.Iyy;
+            double Izz = plane.PlaneInertia.Izz;
+            double Ixz = plane.PlaneInertia.Ixz;
+            double WingS = plane.PlaneInertia.WingS;
+            double WingL = plane.PlaneInertia.WingL;
+            double Mass = plane.PlaneInertia.Mass;
+
 
             if (wind_enable)
             {
@@ -141,14 +143,14 @@ namespace CsharpVersion
                 {
                     // 典型舰尾流模型
                     // previous_disturbance_gamma = disturbance_gamma;
-                    disturbance_kai = 1 / (m * current_Vk * Cos(current_gamma)) * (current_D * current_alpha_wind * Sin(current_miu)
-                        + current_Q * wing_S * (CY_alpha * current_alpha_wind) * Sin(current_miu)
-                        - current_D * current_beta_wind * Cos(current_miu) + current_Q * wing_S * CC_beta * current_beta_wind * Cos(current_miu));
-                    disturbance_gamma = 1 / (m * current_Vk) * (current_D * current_alpha_wind * Cos(current_miu)
-                        + current_Q * wing_S * (CY_alpha * current_alpha_wind) * Cos(current_miu)
-                        + current_D * current_beta_wind * Sin(current_miu) - current_Q * wing_S * CC_beta * current_beta_wind * Sin(current_miu));
-                    disturbance_Vk = 1 / m
-                        * (current_Y * current_alpha_wind - current_Q * wing_S * (CD_alpha * current_alpha_wind));
+                    disturbance_kai = 1 / (Mass * current_Vk * Cos(current_gamma)) * (current_D * current_alpha_wind * Sin(current_miu)
+                        + current_Q * WingS * (CY_alpha * current_alpha_wind) * Sin(current_miu)
+                        - current_D * current_beta_wind * Cos(current_miu) + current_Q * WingS * CC_beta * current_beta_wind * Cos(current_miu));
+                    disturbance_gamma = 1 / (Mass * current_Vk) * (current_D * current_alpha_wind * Cos(current_miu)
+                        + current_Q * WingS * (CY_alpha * current_alpha_wind) * Cos(current_miu)
+                        + current_D * current_beta_wind * Sin(current_miu) - current_Q * WingS * CC_beta * current_beta_wind * Sin(current_miu));
+                    disturbance_Vk = 1 / Mass
+                        * (current_Y * current_alpha_wind - current_Q * WingS * (CD_alpha * current_alpha_wind));
                     disturbance_alpha = -disturbance_gamma;
                 }
                 else
@@ -170,9 +172,9 @@ namespace CsharpVersion
                 if (Configuration.DisturbanceTypeI)
                 {
                     // 典型舰尾流模型
-                    double current_L_wind = current_Q * wing_S * wing_L * CL_beta * current_beta_wind;
-                    double current_N_wind = current_Q * wing_S * wing_L * CN_beta * current_beta_wind;
-                    double current_M_wind = current_Q * wing_S * (CM_alpha2 * current_alpha + CM_alpha1) * current_alpha_wind;
+                    double current_L_wind = current_Q * WingS * WingL * CL_beta * current_beta_wind;
+                    double current_N_wind = current_Q * WingS * WingL * CN_beta * current_beta_wind;
+                    double current_M_wind = current_Q * WingS * (CM_alpha2 * current_alpha + CM_alpha1) * current_alpha_wind;
                     disturbance_p = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
                         * (Izz * current_L_wind
                         + Ixz * current_N_wind);
