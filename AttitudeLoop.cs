@@ -53,7 +53,7 @@ namespace CsharpVersion
             this.plane = plane;
             this.ship = ship;
 
-            U2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
+            U2 = vb.Dense(new[] { plane.DesiredParameter.AlphaDesired, 0, 0 });
             U3FilterBuffer = mb.Dense(sampleNumber, 3, 0); // p q r
             X3 = vb.Dense(new[]
                 { plane.Alpha, plane.Beta, plane.Miu });
@@ -227,7 +227,7 @@ namespace CsharpVersion
         public void Reset()
         {
             U3FilterBufferIndex = 1;
-            U2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
+            U2 = vb.Dense(new[] { plane.DesiredParameter.AlphaDesired, 0, 0 });
             U3FilterBuffer = mb.Dense(sampleNumber, 3, 0); // p q r
             X3 = vb.Dense(new[]
                 { plane.Alpha, plane.Beta, plane.Miu });

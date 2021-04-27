@@ -109,7 +109,7 @@ namespace CsharpVersion
             TFilterBuffer = vb.Dense(sampleNumber, 0);
             X2 = vb.Dense(new[]
                 { plane.Chi, plane.Gamma });
-            U2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
+            U2 = vb.Dense(new[] { plane.DesiredParameter.AlphaDesired, 0, 0 });
             filterdU1 = U1;
             previousU2 = U2;
             previousT = plane.T;
@@ -310,17 +310,12 @@ namespace CsharpVersion
 
         public void CalculateObservation()
         {
-            _ = plane.PlaneInertia.Ixx;
-            _ = plane.PlaneInertia.Iyy;
-            _ = plane.PlaneInertia.Izz;
-            _ = plane.PlaneInertia.Ixz;
-            _ = plane.PlaneInertia.WingC;
             double WingS = plane.PlaneInertia.WingS;
-            _ = plane.PlaneInertia.WingL;
             double Mass = plane.PlaneInertia.Mass;
-            _ = plane.PlaneInertia.TMax;
-            _ = plane.PlaneInertia.Rou;
             double G = plane.PlaneInertia.G;
+
+            double EngineDelta = plane.DesiredParameter.EngineDelta; // 发动机安装角
+
             //kai_b2f = plane.kai_b2f;
             //gamma_b2f = plane.gamma_b2f;
 
@@ -348,18 +343,18 @@ namespace CsharpVersion
             // 航迹控制环
             // 保持迎角
             double F2_1 = (plane.T * (
-                -Cos(plane.Alpha + plane.EngineDelta) * Sin(plane.Beta)
+                -Cos(plane.Alpha +EngineDelta) * Sin(plane.Beta)
                 * Cos(plane.Miu)) + plane.C * Cos(plane.Miu))
                 / (Mass * plane.Vk * Cos(plane.Gamma));
-            double F2_2 = (plane.T * (-Sin(plane.Alpha + plane.EngineDelta) * Cos(plane.Miu)
-                - Cos(plane.Alpha + plane.EngineDelta) * Sin(plane.Beta)
+            double F2_2 = (plane.T * (-Sin(plane.Alpha + EngineDelta) * Cos(plane.Miu)
+                - Cos(plane.Alpha + EngineDelta) * Sin(plane.Beta)
                 * Sin(plane.Miu)) + plane.C * Sin(plane.Miu)
                 - (plane.Y - plane.Flow * WingS * (plane.CY_alpha * plane.Alpha)) * Cos(plane.Miu)
                 + Mass * G * Cos(plane.Gamma))
                 / (-Mass * plane.Vk);
             F2 = vb.Dense(new[] { F2_1, F2_2 });
             B2 = 1 / (Mass * plane.Vk) * mb.DenseOfArray(new[,] {
-                { (plane.T * Sin(plane.Alpha + plane.EngineDelta) + plane.Y)
+                { (plane.T * Sin(plane.Alpha + EngineDelta) + plane.Y)
                     / Cos(plane.Gamma), 0},
                 { 0, plane.Flow* WingS *plane.CY_alpha }});
 
@@ -367,12 +362,12 @@ namespace CsharpVersion
             F_alpha = plane.Q - plane.Y / (Mass * plane.Vk)
                 + G * Cos(plane.Gamma) / (plane.Vk);
             // B_alpha = -Sin(current_alpha + engine_delta) / (m * current_Vk) * T_max;
-            B_alpha = -Sin(plane.Alpha + plane.EngineDelta) / (Mass * plane.Vk);
+            B_alpha = -Sin(plane.Alpha + EngineDelta) / (Mass * plane.Vk);
 
             // 速度控制环
             F_Vk = -(1 / Mass) * (plane.D + Mass * G * Sin(plane.Gamma));
             // B_Vk = (1 / m) * (Cos(current_alpha + engine_delta) * Cos(current_beta) * T_max);
-            B_Vk = (1 / Mass) * (Cos(plane.Alpha + plane.EngineDelta) * Cos(plane.Beta));
+            B_Vk = (1 / Mass) * (Cos(plane.Alpha + EngineDelta) * Cos(plane.Beta));
 
             // 直接升力控制
             F_chi = (1 / (Mass * plane.Vk * Cos(plane.Gamma)))
@@ -463,7 +458,7 @@ namespace CsharpVersion
             }
 
             previousU2 = U2;
-            U2 = vb.Dense(new double[] { plane.AlphaDesired, 0, current_desired_miu });
+            U2 = vb.Dense(new double[] { plane.DesiredParameter.AlphaDesired, 0, current_desired_miu });
 
             if (Configuration.AttitudeController == AttitudeConfig.IDLC)
             {
@@ -532,14 +527,14 @@ namespace CsharpVersion
 
             // Description    : 保持迎角自动油门参量
             var previous_err_alpha = current_err_alpha;
-            current_err_alpha = plane.Alpha - plane.AlphaDesired; // 保持迎角自动油门P项
+            current_err_alpha = plane.Alpha - plane.DesiredParameter.AlphaDesired; // 保持迎角自动油门P项
                                                                   // err_alpha = plane.desired_alpha - plane.current_alpha;
             alphaI_sum = alphaI_sum + current_err_alpha * dt; // 保持迎角自动油门I项
             var derive_err_alpha = (current_err_alpha - previous_err_alpha) / dt; // 保持迎角 自动油门D项
 
             // Description    : 保持速度自动油门参量
             var previous_err_Vk = current_err_Vk;
-            current_err_Vk = plane.VkDesired - plane.Vk;
+            current_err_Vk = plane.DesiredParameter.VkDesired - plane.Vk;
             VkI_sum = VkI_sum + current_err_Vk * dt; // 保持速度自动油门I项
             var derive_err_Vk = (current_err_Vk - previous_err_Vk) / dt; // 保持速度自动油门D项
 
@@ -565,7 +560,7 @@ namespace CsharpVersion
             TFilterBuffer = vb.Dense(sampleNumber, 0);
             X2 = vb.Dense(new[]
                 { plane.Chi, plane.Gamma });
-            U2 = vb.Dense(new[] { plane.AlphaDesired, 0, 0 });
+            U2 = vb.Dense(new[] { plane.DesiredParameter.AlphaDesired, 0, 0 });
             filterdU1 = U1;
             previousU2 = U2;
             previousT = plane.T;

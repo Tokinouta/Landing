@@ -24,9 +24,19 @@ namespace CsharpVersion
         public double G;
     }
 
+    public struct DesiredParameter
+    {
+        public double AlphaDesired; // 期望迎角 9.1
+        public double ChiDesired; // 期望航向角
+        public double GammaDesired; // 期望爬升角
+        public double VkDesired; // 期望速度 71
+        public double EngineDelta; // 发动机安装角
+    }
+
     public class Plane
     {
         public InertiaParameter PlaneInertia;
+        public DesiredParameter DesiredParameter;
 
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
@@ -134,12 +144,6 @@ namespace CsharpVersion
 
         // 着舰过程中期望参量
 
-        public double AlphaDesired = 9.1 * Pi / 180; // 期望迎角 9.1
-        public double ChiDesired = 0 * Pi / 180; // 期望航向角
-        public double GammaDesired = -3.5 * Pi / 180; // 期望爬升角
-        public double VkDesired { get; private set; } = 75; // 期望速度 71
-        public double EngineDelta = 0 * Pi / 180; // 发动机安装角
-
         //event RecordPlaneStateEvent;
         public event EventHandler<XChangedEventArgs> X1ChangedEvent;
         public event EventHandler<XChangedEventArgs> X2ChangedEvent;
@@ -166,6 +170,14 @@ namespace CsharpVersion
                 TMax = 130.6 * 1000, // 军用推力（两台）
                 Rou = 1.225, // 空气密度
                 G = 9.8
+            };
+            DesiredParameter = new()
+            {
+                AlphaDesired = 9.1 * Pi / 180, // 期望迎角 9.1
+                ChiDesired = 0 * Pi / 180, // 期望航向角
+                GammaDesired = -3.5 * Pi / 180, // 期望爬升角
+                VkDesired = 75, // 期望速度 71
+                EngineDelta = 0 * Pi / 180// 发动机安装角
             };
 
             Flow = 0.5 * PlaneInertia.Rou * Math.Pow(Vk, 2);
@@ -442,11 +454,18 @@ namespace CsharpVersion
             double Rou = PlaneInertia.Rou;
             double G = PlaneInertia.G;
 
+            double AlphaDesired = DesiredParameter.AlphaDesired; // 期望迎角 9.1
+            double ChiDesired = DesiredParameter.ChiDesired; // 期望航向角
+            double GammaDesired = DesiredParameter.GammaDesired; // 期望爬升角
+            double VkDesired = DesiredParameter.VkDesired; // 期望速度 71
+            double EngineDelta = DesiredParameter.EngineDelta; // 发动机安装角
+
+
             double current_p_dot = 1 / (Ixx * Izz - Math.Pow(Ixz, 2)) * ((Iyy * Izz - Math.Pow(Izz, 2) - Math.Pow(Ixz, 2)) * Q * R
-                    + (Ixx * Ixz + Izz * Ixz - Iyy * Ixz) * P * Q
-                    + Izz * L
-                    + Ixz * N)
-                    + disturbance.disturbance_p;
+                        + (Ixx * Ixz + Izz * Ixz - Iyy * Ixz) * P * Q
+                        + Izz * L
+                        + Ixz * N)
+                        + disturbance.disturbance_p;
 
             double current_q_dot = 1 / Iyy * ((Izz - Ixx) * P * R - Ixz * Math.Pow(P, 2)
                 + Ixz * Math.Pow(R, 2) + M)
