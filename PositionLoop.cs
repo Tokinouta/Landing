@@ -26,8 +26,8 @@ namespace CsharpVersion
         public Vector<double> U1 = vb.Dense(2, 0);
 
         // Interior Variable
-        readonly Matrix<double> epsilonX1 = mb.DenseDiagonal(2, 2);
-        readonly Matrix<double> omegaX1 = mb.DenseDiagonal(2, 40);
+        readonly Matrix<double> epsilonX1 = mb.DenseDiagonal(2, 0.707);
+        readonly Matrix<double> omegaX1 = mb.DenseDiagonal(2, 50);
 
         // 反步法参数
         Matrix<double> k1_backstepping = mb.DenseOfDiagonalArray(new[] { 0.9, 0.2 });

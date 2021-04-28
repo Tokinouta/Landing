@@ -25,7 +25,7 @@ namespace CsharpVersion
         public Vector<double> U3 = vb.Dense(3, 0);
 
         // Interior Variable
-        Matrix<double> epsilonX3 = mb.DenseDiagonal(3, 0.7);
+        Matrix<double> epsilonX3 = mb.DenseDiagonal(3, 0.707);
         Matrix<double> omegaX3 = mb.DenseDiagonal(3, 40);
 
         // 反步法参数

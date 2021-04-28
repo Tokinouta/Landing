@@ -359,20 +359,6 @@ namespace CsharpVersion
             CN = CN_beta * Beta
                 + CN_delta_r * DeltaR
                 + WingL / 2 / Vk * CN_r * R; // yawing moment coefficient
-            //CY_alpha = CY_alpha;
-            //CY_delta_tef = CY_delta_tef;
-            //CL_delta_a = CL_delta_a;
-            //CL_delta_r = CL_delta_r;
-            //CM_delta_e = CM_delta_e;
-            //CN_delta_a = CN_delta_a;
-            //CN_delta_r = CN_delta_r;
-            //CC_beta = CC_beta;
-            //CD_alpha = CD_alpha;
-            //CL_beta = CL_beta;
-            //CM_alpha1 = CM_alpha1;
-            //CM_alpha2 = CM_alpha2;
-            //CN_beta = CN_beta;
-
         }
 
         void CalculateForceAndMoment()

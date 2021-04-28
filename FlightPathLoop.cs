@@ -27,8 +27,8 @@ namespace CsharpVersion
         public Vector<double> U2;
 
         // Interior Variable
-        Matrix<double> epsilonX2 = mb.DenseDiagonal(2, 0.7);
-        Matrix<double> omegaX2 = mb.DenseDiagonal(2, 40);
+        Matrix<double> epsilonX2 = mb.DenseDiagonal(2, 0.707);
+        Matrix<double> omegaX2 = mb.DenseDiagonal(2, 50);
 
         // 反步法参数
         Matrix<double> k2_backstepping = mb.DenseDiagonal(2, 0.5); // 0.5

@@ -25,8 +25,8 @@ namespace CsharpVersion
         public Vector<double> Uact;
 
         // Interior Variable
-        Matrix<double> epsilonX4 = mb.DiagonalIdentity(3) * 0.7; // 增大阻尼同时减小频率
-        Matrix<double> omegaX4 = mb.DiagonalIdentity(3) * 40;
+        Matrix<double> epsilonX4 = mb.DenseDiagonal(3, 0.707); // 增大阻尼同时减小频率
+        Matrix<double> omegaX4 = mb.DenseDiagonal(3, 40);
 
         // 反步法参数
         Matrix<double> k4_backstepping = mb.DiagonalIdentity(3) * 2; // 1.0
