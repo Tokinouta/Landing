@@ -1,4 +1,4 @@
-﻿using CsharpVersion.PositionController;
+﻿using CsharpVersion.Controllers;
 using MathNet.Numerics.LinearAlgebra;
 using static MathNet.Numerics.Trig;
 using System;
@@ -50,7 +50,7 @@ namespace CsharpVersion
         Vector<double> previousU1;
         Vector<double> previousX1Desired;
         Vector<double> filterdX1Desired;
-        readonly IPositionController controller;
+        readonly IController controller;
 
         public event EventHandler<EventArgs> RecordPositionLoopEvent;
         public event EventHandler<EventArgs> RecordPositionLoopVarEvent;

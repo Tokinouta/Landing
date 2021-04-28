@@ -41,10 +41,17 @@ namespace CsharpVersion
         TypeII = 1 // 1 使用y，z系数为1的轨迹
     }
 
+    public enum AngularRateConfig
+    {
+        BS,
+        NDI
+    }
+
     public static class Configuration
     {
         public static GuidanceConfig GuidanceController { get; set; } = GuidanceConfig.G3dMPF;
         public static AttitudeConfig AttitudeController { get; set; } = AttitudeConfig.IDLC;
+        public static AngularRateConfig AngularRateController { get; set; } = AngularRateConfig.NDI;
         public static DisturbanceObserverConfig DisturbanceObserver { get; set; } = DisturbanceObserverConfig.NDO;
 
         // 导数滤波器配置参数
@@ -61,6 +68,8 @@ namespace CsharpVersion
 
         public static bool wind_enable = false; // 是否使能风场扰动 0:不使能 1:使能
         public static bool deck_enable = false; // 是否使能甲板运动补偿 0:不使能 1:使能
+
+        public static bool L1_adaptive_flag = true;
         // epsilon_gamma = 0.000001;
         // epsilon_kai = 0.000001;
     }

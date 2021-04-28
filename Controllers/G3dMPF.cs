@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CsharpVersion.PositionController
+namespace CsharpVersion.Controllers
 {
-    class G3dMPF : IPositionController
+    class G3dMPF : IController
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;

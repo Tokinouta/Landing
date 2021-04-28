@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CsharpVersion.PositionController
+namespace CsharpVersion.Controllers
 {
-    interface IPositionController
+    interface IController
     {
         public Plane Plane { get; set; }
         public Ship Ship { get; set; }

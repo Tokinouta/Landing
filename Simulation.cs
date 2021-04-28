@@ -21,6 +21,10 @@ namespace CsharpVersion
         int step_count = 0;
         double current_time = 0;
 
+        bool landing_gear = false; // 1放起落架
+        bool tail_hook = false; // 1放尾钩
+        bool wing_damage = false; //1机翼损伤
+
         public Ship Ship { get; set; }
         public Plane Plane { get; set; }
         public Disturbance Disturbance { get; set; }
@@ -113,7 +117,7 @@ namespace CsharpVersion
             while ((Plane.Position[0] - Ship.Position[0]) < 0)
             {
                 SingleStep();
-                if (step_count % 50 == 0)
+                if (step_count // 50 == 0)
                 {
                     DataQueue.Enqueue(Plane.Alpha);
                 }
