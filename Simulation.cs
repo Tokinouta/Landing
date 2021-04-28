@@ -120,7 +120,7 @@ namespace CsharpVersion
             }
 
             Console.WriteLine(step_count);
-            Record.SaveToDatabase(ini, conf);
+            //Record.SaveToDatabase(ini, conf);
         }
 
         ~Simulation()

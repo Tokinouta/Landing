@@ -86,7 +86,7 @@ namespace CsharpVersion
         public Vector<double> Position;
         public double Chi;
         public double Gamma;
-        public double Alpha = 6.0 * Pi / 180; // 5.0
+        public double Alpha = 8.0 * Pi / 180; // 5.0
         public double Miu = 0 * Pi / 180;
         public double Beta = 0 * Pi / 180;
         public double Theta;
@@ -95,13 +95,13 @@ namespace CsharpVersion
         public double P = 0 * Pi / 180;
         public double Q = 0 * Pi / 180;
         public double R = 0 * Pi / 180;
-        public double Vk = 72; // 70
+        public double Vk = 65; // 70
         public double DeltaA = 0 * Pi / 180;
         public double DeltaE = 0 * Pi / 180;
         public double DeltaR = 0 * Pi / 180;
         public double DeltaP = 0.100; // 0.10
         public double DeltaLEF = 33 * Pi / 180 * 1; // leading-edge flap
-        public double DeltaTEF = 45 * Pi / 180 * 1; // tailing-edge flap
+        public double DeltaTEF = 25 * Pi / 180 * 1; // tailing-edge flap
         public double DeltaTEFDesired;
         public double Flow;
         public double T;
@@ -189,7 +189,7 @@ namespace CsharpVersion
             Initialize(ship);
             Theta = Gamma + Alpha;
             DeltaTEFDesired = DeltaTEF;
-            DesiredPosition = vb.Dense(3, Position[0]);
+            DesiredPosition = Position;
             DesiredPosition.SetSubVector(
                 1, 2, HelperFunction.ideal_path(Position, ship.Position, ship.Theta, ship.Psi));
         }
@@ -208,20 +208,32 @@ namespace CsharpVersion
             //double ship.Psi = ship.Psi;
             //double ship.Gamma = ship.Gamma;
 
-            double l_path_0 = 1620; // 期望路径参数，初始路径长度
+            double l_path_0 = 3500; // 期望路径参数，初始路径长度
             double l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
-            double x_d_2p = -(l_path_0 - l_path) * Cos(ship.Theta) * Cos(ship.Gamma); // 期望点坐标 P系下表示
-            double y_d_2p = (l_path_0 - l_path) * Sin(ship.Theta) * Cos(ship.Gamma);
-            double z_d_2p = (l_path_0 - l_path) * Sin(ship.Gamma);
-            Vector<double> p_d_2p = vb.Dense(new double[] { x_d_2p, y_d_2p, z_d_2p }); // 期望点坐标 P系下表示
+            Vector<double> p_d_2p;
+            if (l_path_0 > 1620)
+            {
+                double x_d_2p = -1620 * Cos(ship.Theta) * Cos(ship.Gamma) - (l_path_0 - 1620); // 期望点坐标 P系下表示
+                double y_d_2p = 1620 * Sin(ship.Theta) * Cos(ship.Gamma);
+                double z_d_2p = 1620 * Sin(ship.Gamma);
 
+                p_d_2p = vb.Dense(new double[] { x_d_2p, y_d_2p, z_d_2p }); // 期望点坐标 P系下表示
+            }
+            else
+            {
+                double x_d_2p = -(l_path_0 - l_path) * Cos(ship.Theta) * Cos(ship.Gamma); // 期望点坐标 P系下表示
+                double y_d_2p = (l_path_0 - l_path) * Sin(ship.Theta) * Cos(ship.Gamma);
+                double z_d_2p = (l_path_0 - l_path) * Sin(ship.Gamma);
+
+                p_d_2p = vb.Dense(new double[] { x_d_2p, y_d_2p, z_d_2p }); // 期望点坐标 P系下表示
+            }
             Matrix<double> R_i2p = mb.DenseOfArray(new double[,] {
                 { Cos(ship.Psi), Sin(ship.Psi), 0 }, { -Sin(ship.Psi), Cos(ship.Psi), 0 }, { 0, 0, 1 } });
             Matrix<double> R_p2i = R_i2p.Transpose();
             Vector<double> p_d_2i = R_p2i * p_d_2p + ship.Position; // 期望点坐标 I系下表示
 
-            double kai_f = -ship.Theta + ship.Psi;
-            double gamma_f = ship.Gamma;
+            double kai_f = 0;
+            double gamma_f = 0;
 
             Matrix<double> R_i2f = mb.DenseOfArray(new double[,] {
                 { Cos(gamma_f) * Cos(kai_f), Cos(gamma_f) * Sin(kai_f), -Sin(gamma_f) },

@@ -27,11 +27,21 @@ namespace CsharpVersion
             Vector<double> delta = position_s - position_a;
             //double delta_x = position_s[0] - position_a[0];
             //double delta_y = position_s[1] - position_a[1];
-            double l1 = delta[0] / (Cos(psi_total));
+            double l1 = delta[0] / Cos(psi_total);
             double l2 = (delta[1] - delta[0] * Tan(psi_total)) * Sin(psi_total);
             double l = l1 + l2;
-            double zd = l * Tan(-3.5 * Pi / 180);
-            double yd = position_s[1] - l * Sin(psi_total);
+            double yd;
+            double zd;
+            if (l > 1620)
+            {
+                zd = 1620 * Tan(-3.5 * Pi / 180);
+                yd = position_s[1] - 1620 * Sin(psi_total);
+            }
+            else
+            {
+                zd = 1620 * Tan(-3.5 * Pi / 180);
+                yd = position_s[1] - 1620 * Sin(psi_total);
+            }
             //y_z[0] = yd;
             //y_z[1] = zd;
             return Vector<double>.Build.Dense(new[] { yd, zd });
