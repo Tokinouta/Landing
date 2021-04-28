@@ -275,7 +275,6 @@ namespace CsharpVersion
             double WingS = PlaneInertia.WingS;
             double WingL = PlaneInertia.WingL;
 
-            // flap coefficient
             double CM_delta_tef = 0.001 * 180 / Pi;
             double CM_delta_lef = 0;
             double Cnormal_delta_tef = 0.009 * 180 / Pi;
@@ -284,146 +283,82 @@ namespace CsharpVersion
             double Caxis_delta_lef = 0;
 
             // 升力系数相关参数 弧度制
-            double CY_alpha3 = 1.1645;
-            double CY_alpha2 = -5.4246;
-            double CY_alpha1 = 5.6770;
-            double CY_alpha0 = -0.0204;
-            double CY_delta_e3 = 2.1852;
-            double CY_delta_e2 = -2.6975;
-            double CY_delta_e1 = 0.4055;
-            double CY_delta_e0 = 0.5725;
-            double CY_0 = CY_alpha0 * Cos(2 * Beta / 3);
-            CY_alpha = Cos(2 * Beta / 3) *
-                (CY_alpha3 * Math.Pow(Alpha, 2) + CY_alpha2 * Alpha + CY_alpha1);
-            double CY_delta_e = CY_delta_e3 * Math.Pow(Alpha, 3) + CY_delta_e2 * Math.Pow(Alpha, 2) + CY_delta_e1 * Alpha + CY_delta_e0;
-            double CY_delta_lef = Cnormal_delta_lef * Cos(Alpha) - Caxis_delta_lef * Sin(Alpha);
-            CY_delta_tef = Cnormal_delta_tef * Cos(Alpha) - Caxis_delta_tef * Sin(Alpha);
+            double CY_alpha3 = -20.779;
+            double CY_alpha2 = 1.1682;
+            double CY_alpha1 = 3.8091;
+            double CY_0 = 0.12;
+            CY_alpha = CY_alpha3 * Math.Pow(Alpha, 2) + CY_alpha2 * Alpha + CY_alpha1;
+            double CY_delta_e = 0.6;
+            double CY_delta_lef = 0;
+            double CY_delta_tef = 0.02 * 57.3;
             CY = CY_0
                 + CY_alpha * Alpha
                 + CY_delta_e * DeltaE
                 + CY_delta_lef * DeltaLEF // leading - egde flap && tailing - edge flap
-                + CY_delta_tef * DeltaTEF; // lift coefficient
-
-            // 阻力系数相关参数 弧度制
-            double CD_alpha4 = 1.4610;
-            double CD_alpha3 = -5.7341;
-            double CD_alpha2 = 6.3971;
-            double CD_alpha1 = -0.1995;
+                + CY_delta_tef * DeltaTEF;    // lift coefficient
+                                    // 阻力系数相关参数 弧度制
+            double CD_alpha2 = 0.3009;
+            double CD_alpha1 = -0.0622;
             double CD_alpha0 = -1.4994;
-            double CD_delta_e3 = -3.8578;
-            double CD_delta_e2 = 4.2360;
-            double CD_delta_e1 = -0.2739;
-            double CD_delta_e0 = 0.0366;
-            double CD_0 = 1.5036 + CD_alpha0 * Cos(Beta);
-            CD_alpha = Cos(Beta) * (CD_alpha4 * Math.Pow(Alpha, 3) + CD_alpha3 * Math.Pow(Alpha, 2) + CD_alpha2 * Alpha + CD_alpha1);
-            double CD_delta_e = CD_delta_e3 * Math.Pow(Alpha, 3) + CD_delta_e2 * Math.Pow(Alpha, 2) + CD_delta_e1 * Alpha + CD_delta_e0;
-            double CD_delta_lef = (Caxis_delta_lef * Cos(Alpha) + Cnormal_delta_lef * Sin(Alpha));
-            double CD_delta_tef = (Caxis_delta_tef * Cos(Alpha) + Cnormal_delta_tef * Sin(Alpha));
+            double CD_0 = -0.0019 + 0.0109;
+            CD_alpha = CD_alpha2 * Alpha + CD_alpha1;
+            double CD_delta_e = 0.04;
+            double CD_delta_lef = 0;
+            double CD_delta_tef = 0.002 * 57.3;
+            double CD_Ma;
+            if (Vk / 340 <= 0.81)
+            {
+                CD_Ma = 0;
+            }
+            else
+            {
+                CD_Ma = 0.1007 * Math.Pow(Vk / 340, 3) - 0.4653 * Math.Pow(Vk / 340, 2) + 0.6903 * (Vk / 340) - 0.3074;
+            }
+            double CD_beta1 = 0.4946;
+            double CD_beta = CD_beta1 * Beta;
             CD = CD_0
-                + CD_alpha * Alpha
-                + CD_delta_e * DeltaE
-                + CD_delta_lef * DeltaLEF // leading - egde flap && tailing - edge flap
-                + CD_delta_tef * DeltaTEF; // drag coefficient
-
+                + CD_beta * Beta// 侧滑阻力
+                + CD_alpha * Alpha// 迎角引起的阻力
+                + CD_delta_e * Math.Abs(DeltaE)// 升降舵偏转引起的阻力。
+                + CD_delta_lef * DeltaLEF  // leading - egde flap引起的阻力认为是0 && tailing - edge flap
+                + CD_delta_tef * DeltaTEF// 襟翼引起的阻力
+                + 0.1 * Math.Pow(CY, 2)// 升致阻力
+                + CD_Ma;// 马赫导致的阻力 // drag coefficient
+                   
             // 侧力系数 弧度制
-            double CC_beta = -0.012 * 180 / Pi;
+            CC_beta = -1;
             CC = CC_beta * Beta;
-            // CC_beta2 = -0.1926;
-            // CC_beta1 = 0.2654;
-            // CC_beta0 = -0.7344;
-            // CC_delta_a3 = -0.8500;
-            // CC_delta_a2 = 1.5317;
-            // CC_delta_a1 = -0.2403;
-            // CC_delta_a0 = -0.1656;
-            // CC_delta_r3 = 0.9351;
-            // CC_delta_r2 = -1.6921;
-            // CC_delta_r1 = 0.4082;
-            // CC_delta_r0 = 0.2054;
-            // CC_beta = CC_beta2 * Math.Pow(current_alpha, 2) + CC_beta1 * current_alpha + CC_beta0;
-            // CC_delta_a = CC_delta_a3 * Math.Pow(current_alpha, 3) + CC_delta_a2 * Math.Pow(current_alpha, 2) + CC_delta_a1 * current_alpha + CC_delta_a0;
-            // CC_delta_r = CC_delta_r3 * Math.Pow(current_alpha, 3) + CC_delta_r2 * Math.Pow(current_alpha, 2) + CC_delta_r1 * current_alpha + CC_delta_r0;
-            // CC = CC_beta * current_beta...
-            // +CC_delta_a * DeltaA...
-            // +CC_delta_r * current_delta_r; // sidefroce coefficient
 
             // 滚转力矩相关参数 弧度制
-            double CL_beta4 = -1.6196;
-            double CL_beta3 = 2.3843;
-            double CL_beta2 = -0.3620;
-            double CL_beta1 = -0.4153;
-            double CL_beta0 = -0.0556;
-            double CL_delta_a3 = 0.1989;
-            double CL_delta_a2 = -0.2646;
-            double CL_delta_a1 = -0.0516;
-            double CL_delta_a0 = 0.1424;
-            double CL_delta_r3 = -0.0274;
-            double CL_delta_r2 = 0.0083;
-            double CL_delta_r1 = 0.0014;
-            double CL_delta_r0 = 0.0129;
-            double CL_p1 = 0.2377;
-            double CL_p0 = -0.3540;
-            double CL_r2 = -1.0871;
-            double CL_r1 = 0.7804;
-            double CL_r0 = 0.1983;
-            CL_beta = CL_beta4 * Math.Pow(Alpha, 4) + CL_beta3 * Math.Pow(Alpha, 3) + CL_beta2 * Math.Pow(Alpha, 2) + CL_beta1 * Alpha + CL_beta0;
-            CL_delta_a = CL_delta_a3 * Math.Pow(Alpha, 3) + CL_delta_a2 * Math.Pow(Alpha, 2) + CL_delta_a1 * Alpha + CL_delta_a0;
-            CL_delta_r = CL_delta_r3 * Math.Pow(Alpha, 3) + CL_delta_r2 * Math.Pow(Alpha, 2) + CL_delta_r1 * Alpha + CL_delta_r0;
-            double CL_p = CL_p1 * Alpha + CL_p0;
-            double CL_r = CL_r2 * Math.Pow(Alpha, 2) + CL_r1 * Alpha + CL_r0;
-            CL = CL_beta * Beta
+            CL_beta = -0.1;
+            CL_delta_a = 0.12;
+            CL_delta_r = 0.01;
+            double CL_p = -0.4;
+            double CL_r = 0.15;
+            CL = CL_beta * Beta          // beta引起的滚转力矩
                 + CL_delta_a * DeltaA
                 + CL_delta_r * DeltaR
                 + WingL / 2 / Vk * CL_p * P
                 + WingL / 2 / Vk * CL_r * R; // rolling moment coefficient
 
             // 俯仰力矩相关参数 弧度制
-            CM_alpha2 = -1.2897;
-            CM_alpha1 = 0.5110;
-            double CM_alpha0 = -0.0866;
-            double CM_delta_e2 = 0.9338;
-            double CM_delta_e1 = -0.3245;
-            double CM_delta_e0 = -0.9051;
-            double CM_q3 = 64.7190;
-            double CM_q2 = -68.5641;
-            double CM_q1 = 10.9921;
-            double CM_q0 = -4.1186;
-            double CM_0 = CM_alpha2 * Math.Pow(Alpha, 2) + CM_alpha1 * Alpha + CM_alpha0;
-            CM_delta_e = CM_delta_e2 * Math.Pow(Alpha, 2) + CM_delta_e1 * Alpha + CM_delta_e0;
-            double CM_q = CM_q3 * Math.Pow(Alpha, 3) + CM_q2 * Math.Pow(Alpha, 2) + CM_q1 * Alpha + CM_q0;
-            CM_0 = CM_0 * Pi / 180;
-            CM = CM_0
-                + CM_delta_e * DeltaE
-                + WingC / 2 / Vk * CM_q * Q
-                + CM_delta_lef * DeltaLEF + CM_delta_tef * DeltaTEF; // pitching moment coefficient
+            CM_delta_e = 0.35 * (Vk / 340) - 1.1;
+            double CM_q = -23;
+            double CM_alpha = -0.1;
+            double CM_alpha_dot = -9;
+            CM = CM_alpha * Alpha                     // 由alpha引起的俯仰力矩
+                + CM_delta_e * DeltaE                 // 升降舵产生的俯仰力矩
+                + WingC / 2 / Vk * CM_q * Q;       // 俯仰角速度产生的俯仰力矩
+
 
             // 偏航力矩相关参数 弧度制
-            double CN_beta2 = -0.3816;
-            double CN_beta1 = 0.0329;
-            double CN_beta0 = 0.0885;
-            double CN_delta_a3 = 0.2694;
-            double CN_delta_a2 = -0.3413;
-            double CN_delta_a1 = 0.0584;
-            double CN_delta_a0 = 0.0104;
-            double CN_delta_r4 = 0.3899;
-            double CN_delta_r3 = -0.8980;
-            double CN_delta_r2 = 0.5564;
-            double CN_delta_r1 = -0.0176;
-            double CN_delta_r0 = -0.0780;
-            double CN_p1 = -0.0881;
-            double CN_p0 = 0.0792;
-            double CN_r1 = -0.1307;
-            double CN_r0 = -0.4326;
-            CN_beta = CN_beta2 * Math.Pow(Alpha, 2) + CN_beta1 * Alpha + CN_beta0;
-            CN_delta_r = CN_delta_r4 * Math.Pow(Alpha, 4) + CN_delta_r3 * Math.Pow(Alpha, 3) + CN_delta_r2 * Math.Pow(Alpha, 2) + CN_delta_r1 * Alpha + CN_delta_r0;
-            CN_delta_a = CN_delta_a3 * Math.Pow(Alpha, 3) + CN_delta_a2 * Math.Pow(Alpha, 2) + CN_delta_a1 * Alpha + CN_delta_a0;
-            double CN_p = CN_p1 * Alpha + CN_p0;
-            double CN_r = CN_r1 * Alpha + CN_r0;
+            CN_beta = 0.12;
+            CN_delta_r = -0.15;
+            double CN_r = -0.15;
+            CN_delta_a = 0;
             CN = CN_beta * Beta
                 + CN_delta_r * DeltaR
-                + CN_delta_a * DeltaA
-                + WingL / 2 / Vk * CN_p * P
                 + WingL / 2 / Vk * CN_r * R; // yawing moment coefficient
-
             //CY_alpha = CY_alpha;
             //CY_delta_tef = CY_delta_tef;
             //CL_delta_a = CL_delta_a;
