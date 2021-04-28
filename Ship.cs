@@ -1,7 +1,7 @@
 ﻿using static MathNet.Numerics.Constants;
 using static MathNet.Numerics.Trig;
 using MathNet.Numerics.LinearAlgebra;
-
+using MathNet.Numerics.Data.Matlab;
 
 namespace CsharpVersion
 {
@@ -30,7 +30,7 @@ namespace CsharpVersion
         public int DeckCompensationLateralStartCount = 0; // 1开启DMC 0关闭DMC，等待补偿指令足够小 用于横侧向补偿 new added in mk4.1
 
         public int CalCount;
-        public Vector<double> ForwardFilterState;
+        public Matrix<double> ForwardFilterState;
         public Vector<double> CurrentDeckPredict;
         public Vector<double> CurrentDeckControl;
         public Vector<double> CurrentDeckLateralControl;
@@ -49,9 +49,7 @@ namespace CsharpVersion
             DeckPosition = Position;
             if (DeckEnable)
             {
-                // Code For Import Forward filter model
-                //open_system('forward_filter');
-                //[cal_count, forward_filter_state, current_deck_predict, current_deck_control, current_deck_control_lat] = sim('forward_filter');
+                ForwardFilterState = MatlabReader.Read<double>("./ForwardFilter.mat", "forward_filter_state");
             }
         }
 

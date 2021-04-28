@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.Data.Matlab;
 
 namespace CsharpVersion
 {
@@ -21,7 +22,7 @@ namespace CsharpVersion
         public bool wind_disturbance_start = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
 
         Vector<double> cal_count;
-        Vector<double> wind_model_state;
+        Matrix<double> wind_model_state;
         Vector<double> wind;
         Vector<double> wind_lat;
 
@@ -56,6 +57,10 @@ namespace CsharpVersion
             {
                 // load_system('wind_model');
                 //[cal_count, wind_model_state, wind, wind_lat] = sim('wind_model');
+                cal_count = MatlabReader.Read<double>("./WindModel.mat", nameof(cal_count)).Column(0);
+                wind_model_state = MatlabReader.Read<double>("./WindModel.mat", nameof(wind_model_state);
+                wind = MatlabReader.Read<double>("./WindModel.mat", nameof(wind)).Column(0);
+                wind_lat = MatlabReader.Read<double>("./WindModel.mat", nameof(wind_lat)).Column(0);
             }
         }
 
