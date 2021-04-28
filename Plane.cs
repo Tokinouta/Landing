@@ -108,6 +108,8 @@ namespace CsharpVersion
         public Vector<double> DesiredPosition;
         public double GammaDerive = 0;
         public double KaiDerive = 0;
+        public double l_path_0 = 3500; // 期望路径参数，初始路径长度
+        public double l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
 
         public double omega_fx_2f;
         public double omega_fy_2f;
@@ -208,8 +210,6 @@ namespace CsharpVersion
             //double ship.Psi = ship.Psi;
             //double ship.Gamma = ship.Gamma;
 
-            double l_path_0 = 3500; // 期望路径参数，初始路径长度
-            double l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
             Vector<double> p_d_2p;
             if (l_path_0 > 1620)
             {
@@ -296,7 +296,7 @@ namespace CsharpVersion
                 + CY_delta_e * DeltaE
                 + CY_delta_lef * DeltaLEF // leading - egde flap && tailing - edge flap
                 + CY_delta_tef * DeltaTEF;    // lift coefficient
-                                    // 阻力系数相关参数 弧度制
+                                              // 阻力系数相关参数 弧度制
             double CD_alpha2 = 0.3009;
             double CD_alpha1 = -0.0622;
             double CD_alpha0 = -1.4994;
@@ -324,7 +324,7 @@ namespace CsharpVersion
                 + CD_delta_tef * DeltaTEF// 襟翼引起的阻力
                 + 0.1 * Math.Pow(CY, 2)// 升致阻力
                 + CD_Ma;// 马赫导致的阻力 // drag coefficient
-                   
+
             // 侧力系数 弧度制
             CC_beta = -1;
             CC = CC_beta * Beta;

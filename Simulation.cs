@@ -117,7 +117,7 @@ namespace CsharpVersion
             while ((Plane.Position[0] - Ship.Position[0]) < 0)
             {
                 SingleStep();
-                if (step_count // 50 == 0)
+                if (step_count % 50 == 0)
                 {
                     DataQueue.Enqueue(Plane.Alpha);
                 }
@@ -147,7 +147,7 @@ namespace CsharpVersion
             AngularRateLoop.CalculateNonlinearObserver(dt, Disturbance);
 
             PositionLoop.calculatePrescribedParameter();
-            Ship.calculateCompensation(dt, PositionLoop, step_count);
+            Ship.calculateCompensation(dt,Plane, PositionLoop, step_count);
             PositionLoop.CalculateState(dt, null);
             PositionLoop.calculateOutput(dt, current_time, step_count);
             PositionLoop.CalculateLimiter(dt);
@@ -178,6 +178,11 @@ namespace CsharpVersion
             AngularRateLoop.Record(dt);
             //Task.Run(() => Console.WriteLine(step_count));
             //record.time_record.Add(current_time);
+            if (Plane.l_path>1000)
+            {
+                landing_gear = true;
+                tail_hook = true;
+            }
         }
 
         void Reset()
