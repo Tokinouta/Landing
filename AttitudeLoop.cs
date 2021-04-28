@@ -29,7 +29,8 @@ namespace CsharpVersion
         Matrix<double> omegaX3 = mb.DenseDiagonal(3, 40);
 
         // 反步法参数
-        Matrix<double> k3_backstepping = mb.DenseIdentity(3); // 1.0
+        Matrix<double> k3_backstepping =
+            mb.DenseOfDiagonalArray(new[] { 0.9, 1, 0.7 }); // 1.0
 
         // 滤波器参数
         int sampleNumber = 1;

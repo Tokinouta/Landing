@@ -32,7 +32,7 @@ namespace CsharpVersion
 
         // 反步法参数
         Matrix<double> k2_backstepping = mb.DenseDiagonal(2, 0.5); // 0.5
-        double k_alpha_backstepping = 5; // 自动油门系数 5
+        double k_alpha_backstepping = 2.8; // 自动油门系数 5
         double k_Vk_backstepping = 3.0;
 
         // 有DMC有omega

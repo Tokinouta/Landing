@@ -17,10 +17,10 @@ namespace CsharpVersion.PositionController
         Ship ship;
 
         // 3D路径跟踪
-        double l_path_initial = 1620; // 期望路径参数，初始路径长度
-        double k_x = 1.0;
-        double k_y = 1.5;
-        double k_z = 1.0;
+        double l_path_initial = 3500; // 期望路径参数，初始路径长度
+        double k_x = 0.6;
+        double k_y = 0.5;
+        double k_z = 0.8;
         double l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
         double l_path_dot;
         double psi_dmc_p2i_y;
