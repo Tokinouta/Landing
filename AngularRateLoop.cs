@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CsharpVersion.Controllers;
 
 namespace CsharpVersion
 {
@@ -41,6 +42,10 @@ namespace CsharpVersion
         // 观测器输出变量
         Vector<double> F4;
         Matrix<double> B4;
+        double _Fq;
+        double _Gq;
+        Vector<double> _Fpr;
+        Matrix<double> _Gpr;
 
         // Nonlinear Observer
         Vector<double> current_NDO_p_omega = vb.Dense(3, 0);
@@ -51,6 +56,15 @@ namespace CsharpVersion
         Vector<double> filteredU3;
         Vector<double> deriveX4 = vb.Dense(3, 0); //[p,q,r]'
         Vector<double> previousUact;
+
+        IController controller;
+
+        public Vector<double> FilteredU3 { get => filteredU3; }
+        public Vector<double> DeriveX4 { get => deriveX4; }
+        public double Fq { get => _Fq; }
+        public double Gq { get => _Gq; }
+        public Matrix<double> Gpr { get => _Gpr; }
+        public Vector<double> Fpr { get => _Fpr; }
 
         //event RecordAngularRateLoopEvent;
         //event RecordAngularRateLoopVarEvent
@@ -70,6 +84,16 @@ namespace CsharpVersion
             filteredUactPrevious = filteredUact;
             filteredU3 = U3;
             previousUact = Uact;
+            switch (Configuration.AngularRateController)
+            {
+                case AngularRateConfig.BS:
+                    break;
+                case AngularRateConfig.NDI:
+                    controller = new L1Adaptive(this.ship, this.plane, this);
+                    break;
+                default:
+                    break;
+            }
             //addlistener(plane, 'X4ChangedEvent', @updateState);
         }
 
@@ -290,24 +314,59 @@ namespace CsharpVersion
                 { 0, WingC* plane.CM_delta_e / Iyy, 0 },
                 { WingL * (Ixz * plane.CL_delta_a + Ixx * plane.CN_delta_a) / (Ixx * Izz - Math.Pow(Ixz, 2)), 0,
                     WingL * (Ixz * plane.CL_delta_r + Ixx * plane.CN_delta_r) / (Ixx * Izz - Math.Pow(Ixz, 2)) } });
+
+            _Fq = 1 / Iyy * ((Izz - Ixx) * plane.P * plane.R - Ixz * Math.Pow(plane.P, 2) + Ixz * Math.Pow(plane.R, 2) + (plane.M - plane.Flow * WingS * WingC * (plane.CM_delta_e * plane.DeltaE)));
+            _Gq = plane.Flow * WingS * WingC * plane.CM_delta_e / Iyy;
+
+            double Fpr_0 = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
+                * ((Iyy * Izz - Math.Pow(Izz, 2) - Math.Pow(Ixz, 2)) * plane.R * plane.Q
+                + (Ixx * Ixz + Izz * Ixz - Iyy * Ixz) * plane.P * plane.Q
+                + Izz * (plane.L - plane.Flow * WingS * WingL * (plane.CL_delta_a * plane.DeltaA + plane.CL_delta_r * plane.DeltaR))
+                + Ixz * (plane.N - plane.Flow * WingS * WingL * (plane.CN_delta_r * plane.DeltaR + plane.CN_delta_a * plane.DeltaA)));
+            double Fpr_1 = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
+                * ((Math.Pow(Ixx, 2) + Math.Pow(Ixz, 2) - Ixx * Iyy) * plane.P * plane.Q
+                + (Iyy * Ixz - Ixx * Ixz - Izz * Ixz) * plane.Q * plane.R
+                + Ixz * (plane.L - plane.Flow * WingS * WingL * (plane.CL_delta_a * plane.DeltaA + plane.CL_delta_r * plane.DeltaR))
+                + Ixx * (plane.N - plane.Flow * WingS * WingL * (plane.CN_delta_r * plane.DeltaR + plane.CN_delta_a * plane.DeltaA)));
+
+            _Fpr = vb.Dense(new[] { Fpr_0, Fpr_1 });
+            Gpr = plane.Flow * WingS * WingL / (Ixx * Izz - Math.Pow(Ixz, 2)) * mb.DenseOfArray(new[,] {
+                {Izz * plane.CL_delta_a + Ixz * plane.CN_delta_a, Izz * plane.CL_delta_r + Ixz * plane.CN_delta_r },
+                {Ixz * plane.CL_delta_a + Ixx * plane.CN_delta_a, Ixz * plane.CL_delta_r + Ixx * plane.CN_delta_r }
+            });
         }
 
         public void CalculateOutput()
         {
+            throw new NotImplementedException();
+        }
+        public void CalculateOutput(double dt, double current_time, int step_count)
+        {
             if (Configuration.AttitudeController == AttitudeConfig.IDLC)
             {
-                // 直接升力控制
-                if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)// 判断使用何种干扰观测器
+                switch (Configuration.AngularRateController)
                 {
-                    Uact = B4.Inverse() * (-F4 + k4_backstepping * e4 + deriveX4 - NDO_d_omega_output); // 使用NDO
-                }
-                else if(Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
-                {
-                    Uact = B4.Inverse() * (-F4 + k4_backstepping * e4 + deriveX4); // 不使用DO
-                }
-                else
-                {
-                    Console.WriteLine("请指定干扰观测器种类 id 44");
+                    case AngularRateConfig.BS:
+                        // 直接升力控制
+                        if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)// 判断使用何种干扰观测器
+                        {
+                            Uact = B4.Inverse() * (-F4 + k4_backstepping * e4 + deriveX4 - NDO_d_omega_output); // 使用NDO
+                        }
+                        else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
+                        {
+                            Uact = B4.Inverse() * (-F4 + k4_backstepping * e4 + deriveX4); // 不使用DO
+                        }
+                        else
+                        {
+                            Console.WriteLine("请指定干扰观测器种类 id 44");
+                        }
+                        break;
+                    case AngularRateConfig.NDI:
+                        Uact = controller.CalculateOutput(dt, current_time, step_count);
+                        controller.InvokeRecordEvent();
+                        break;
+                    default:
+                        break;
                 }
             }
             else

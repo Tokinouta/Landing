@@ -27,15 +27,17 @@ namespace CsharpVersion.Controllers
         double psi_dmc_p2i_z;
         Vector<double> current_deck_position_ship;
 
-        public G3dMPF(Plane plane, Ship ship)
+        public G3dMPF(Plane plane, Ship ship, IControlModule module)
         {
             this.plane = plane;
             this.ship = ship;
+            ControlModule = module;
             current_deck_position_ship = ship.Position;
         }
 
         public Plane Plane { get => plane; set => plane = value; }
         public Ship Ship { get => ship; set => ship = value; }
+        public IControlModule ControlModule { get; set; }
 
         public Vector<double> CalculateOutput(double dt, double current_time, int step_count)
         {

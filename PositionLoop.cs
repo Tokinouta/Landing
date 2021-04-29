@@ -90,7 +90,7 @@ namespace CsharpVersion
                     break;
                 case GuidanceConfig.G3dMPF:
                     // Description    : 3D移动路径跟踪制导律
-                    controller = new G3dMPF(plane, ship);
+                    controller = new G3dMPF(plane, ship, this);
                     break;
                 default:
                     Console.WriteLine("请指定控制器种类 id 12");

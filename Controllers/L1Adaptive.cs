@@ -9,8 +9,9 @@ namespace CsharpVersion.Controllers
 {
     class L1Adaptive : IController
     {
-        public Plane Plane { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Ship Ship { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Plane Plane { get; set; }
+        public Ship Ship { get; set; }
+        public IControlModule ControlModule { get; set; }
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
 
@@ -98,10 +99,14 @@ namespace CsharpVersion.Controllers
         Vector<double> pr_ad_dot2 => vb.Dense(new[] { p_ad_dot2, r_ad_dot2 });
         Vector<double> pr_mear => vb.Dense(new[] { p_mear, r_mear });
 
+
         double adap_constraint = 0.5;
 
-        public L1Adaptive()
+        public L1Adaptive(Ship ship, Plane plane, IControlModule module)
         {
+            Ship = ship;
+            Plane = plane;
+            ControlModule = module;
             k_pr = mb.DenseOfDiagonalArray(new[] { k_p, k_r });
             Amq = -1 / T_pitch;
             w_cq = 1 / T_cq;
@@ -114,7 +119,96 @@ namespace CsharpVersion.Controllers
 
         public Vector<double> CalculateOutput(double dt, double current_time, int step_count)
         {
-            throw new NotImplementedException();
+            // 角速度指令使用二阶滤波器
+            var controlModule = (AngularRateLoop)ControlModule;
+            double p_ref = controlModule.FilteredU3[0];
+            double q_ref = controlModule.FilteredU3[1];
+            double r_ref = controlModule.FilteredU3[2];
+            Vector<double> pr_ref = vb.Dense(new[] { p_ref, r_ref });
+            double p_ref_dot = controlModule.DeriveX4[0];
+            double q_ref_dot = controlModule.DeriveX4[1];
+            double r_ref_dot = controlModule.DeriveX4[2];
+            Vector<double> pr_ref_dot = vb.Dense(new[] { p_ref_dot, r_ref_dot });
+
+
+            double p_mear = controlModule.X4[0];
+            double q_mear = controlModule.X4[1];
+            double r_mear = controlModule.X4[2];
+            Vector<double> pr_mear = vb.Dense(new[] { p_mear, r_mear });
+
+
+            q_ndi_dot = k_q * (q_ref - q_mear) + q_ref_dot;
+            pr_ndi_dot = k_pr * (pr_ref - pr_mear) + pr_ref_dot;
+
+            if (Configuration.L1_adaptive_flag)
+            {
+                double r_q = k_ad_q * q_ref / T_pitch;
+                q_est_dot = Amq * q_est + Bmq * (r_q + q_ref_dot + q_ad_dot + sigma_q_est);
+                q_est = q_est + q_est_dot * dt;
+                q_est_err = q_est - q_mear;
+                double phi_q = (1 / Amq) * (Math.Exp(Amq * dt) - 1);
+                double mu_q = Math.Exp(Amq * dt) * q_est_err;
+                sigma_q_est = -(1 / Bmq) * (1 / phi_q) * mu_q;
+                q_ad_dot2 = -w_cq * q_ad_dot - w_cq * sigma_q_est;
+                q_ad_dot = q_ad_dot + q_ad_dot2 * dt;
+
+                if (q_ad_dot > adap_constraint)
+                    q_ad_dot = adap_constraint;
+                else if (q_ad_dot < -adap_constraint)
+                    q_ad_dot = -adap_constraint;
+
+
+                // 单通道设计 roll
+                double r_p = p_ref / T_roll;
+                p_est_dot = Amp * p_est + Bmp * (r_p + p_ad_dot + p_ref_dot + sigma_p_est);
+                p_est = p_est + p_est_dot * dt;
+                p_est_err = p_est - p_mear;
+                double phi_p = (1 / Amp) * (Math.Exp(Amp * dt) - 1);
+                double mu_p = Math.Exp(Amp * dt) * p_est_err;
+                sigma_p_est = -(1 / Bmp) * (1 / phi_p) * mu_p;
+                p_ad_dot2 = -w_cp * p_ad_dot - w_cp * sigma_p_est;
+                p_ad_dot = p_ad_dot + p_ad_dot2 * dt;
+
+                if (p_ad_dot > adap_constraint)
+                {
+                    p_ad_dot = adap_constraint;
+                }
+                else if (p_ad_dot < -adap_constraint)
+                {
+                    p_ad_dot = -adap_constraint;
+                }
+                // 单通道设计 yaw
+                double r_r = r_ref / T_yaw;
+                r_est_dot = Amr * r_est + Bmr * (r_r + r_ad_dot + r_ref_dot + sigma_r_est);
+                r_est = r_est + r_est_dot * dt;
+                r_est_err = r_est - r_mear;
+                double phi_r = (1 / Amr) * (Math.Exp(Amr * dt) - 1);
+                double mu_r = Math.Exp(Amr * dt) * r_est_err;
+                sigma_r_est = -(1 / Bmr) * (1 / phi_r) * mu_r;
+                r_ad_dot2 = -w_cr * r_ad_dot - w_cr * sigma_r_est;
+                r_ad_dot = r_ad_dot + r_ad_dot2 * dt;
+
+                if (r_ad_dot > adap_constraint)
+                {
+                    r_ad_dot = adap_constraint;
+                }
+                else if (r_ad_dot < -adap_constraint)
+                {
+                    r_ad_dot = -adap_constraint;
+                }
+                pr_ad_dot = vb.Dense(new[] { p_ad_dot, r_ad_dot });
+            }
+            else
+            {
+                q_ad_dot = 0;
+                pr_ad_dot = vb.Dense(2, 0);
+            }
+            double q_d_dot = q_ndi_dot + q_ad_dot;
+
+            var q_uact = (-controlModule.Fq + q_d_dot) / controlModule.Gq;
+            var pr_d_dot = pr_ndi_dot + pr_ad_dot;
+            var pr_uact = controlModule.Gpr.Inverse() * (-controlModule.Fpr + pr_d_dot);
+            return vb.Dense(new[] { pr_uact[0], q_uact, pr_uact[1] });
         }
 
         public void InvokeRecordEvent()

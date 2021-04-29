@@ -11,6 +11,7 @@ namespace CsharpVersion.Controllers
     {
         public Plane Plane { get; set; }
         public Ship Ship { get; set; }
+        public IControlModule ControlModule { get; set; }
         Vector<double> CalculateOutput(double dt, double current_time, int step_count);
         void InvokeRecordEvent();
         void Reset();
