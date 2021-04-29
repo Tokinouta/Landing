@@ -77,7 +77,7 @@ namespace CsharpVersion.Controllers
             double x_d_2p;// 期望点坐标 P系下表示
             double y_d_2p;
             double z_d_2p;
-             
+
             if (l_path < l_path_0 - 1620)
             {
                 x_d_2p = -1620 * Cos(ship.Theta) * Cos(ship.Gamma) - (l_path_0 - l_path - 1620);
@@ -169,7 +169,7 @@ namespace CsharpVersion.Controllers
 
         public void Reset()
         {
-            l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
+            //l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
         }
     }
 }

@@ -26,10 +26,10 @@ namespace CsharpVersion
 
     public struct DesiredParameter
     {
-        public double AlphaDesired; // 期望迎角 9.1
-        public double ChiDesired; // 期望航向角
-        public double GammaDesired; // 期望爬升角
-        public double VkDesired; // 期望速度 71
+        public double Alpha; // 期望迎角 9.1
+        public double Chi; // 期望航向角
+        public double Gamma; // 期望爬升角
+        public double Vk; // 期望速度 71
         public double EngineDelta; // 发动机安装角
     }
 
@@ -175,10 +175,10 @@ namespace CsharpVersion
             };
             DesiredParameter = new()
             {
-                AlphaDesired = 9.1 * Pi / 180, // 期望迎角 9.1
-                ChiDesired = 0 * Pi / 180, // 期望航向角
-                GammaDesired = -3.5 * Pi / 180, // 期望爬升角
-                VkDesired = 75, // 期望速度 71
+                Alpha = 9.1 * Pi / 180, // 期望迎角 9.1
+                Chi = 0 * Pi / 180, // 期望航向角
+                Gamma = -3.5 * Pi / 180, // 期望爬升角
+                Vk = 75, // 期望速度 71
                 EngineDelta = 0 * Pi / 180// 发动机安装角
             };
 
@@ -387,10 +387,10 @@ namespace CsharpVersion
             double Rou = PlaneInertia.Rou;
             double G = PlaneInertia.G;
 
-            double AlphaDesired = DesiredParameter.AlphaDesired; // 期望迎角 9.1
-            double ChiDesired = DesiredParameter.ChiDesired; // 期望航向角
-            double GammaDesired = DesiredParameter.GammaDesired; // 期望爬升角
-            double VkDesired = DesiredParameter.VkDesired; // 期望速度 71
+            double AlphaDesired = DesiredParameter.Alpha; // 期望迎角 9.1
+            double ChiDesired = DesiredParameter.Chi; // 期望航向角
+            double GammaDesired = DesiredParameter.Gamma; // 期望爬升角
+            double VkDesired = DesiredParameter.Vk; // 期望速度 71
             double EngineDelta = DesiredParameter.EngineDelta; // 发动机安装角
 
 
@@ -533,6 +533,9 @@ namespace CsharpVersion
             DesiredPosition.SetSubVector(
                 1, 2, HelperFunction.ideal_path(Position, ship.Position, ship.Theta, ship.Psi));
             DeltaTEFDesired = DeltaTEF;
+
+            l_path = 0;
+            l_path_0 = 3500;
         }
     }
 }
