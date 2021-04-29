@@ -52,7 +52,7 @@ namespace CsharpVersion
         public static GuidanceConfig GuidanceController { get; set; } = GuidanceConfig.G3dMPF;
         public static AttitudeConfig AttitudeController { get; set; } = AttitudeConfig.IDLC;
         public static AngularRateConfig AngularRateController { get; set; } = AngularRateConfig.NDI;
-        public static DisturbanceObserverConfig DisturbanceObserver { get; set; } = DisturbanceObserverConfig.NDO;
+        public static DisturbanceObserverConfig DisturbanceObserver { get; set; } = DisturbanceObserverConfig.NONE;
 
         // 导数滤波器配置参数
         public static bool guidance_command_filter_flag = true; // 1 使用command filter计算导数
@@ -66,8 +66,8 @@ namespace CsharpVersion
         // 扰动类型配置
         public static bool DisturbanceTypeI = true; // 1 典型舰尾流扰动
 
-        public static bool wind_enable = false; // 是否使能风场扰动 0:不使能 1:使能
-        public static bool deck_enable = false; // 是否使能甲板运动补偿 0:不使能 1:使能
+        public static bool wind_enable = true; // 是否使能风场扰动 0:不使能 1:使能
+        public static bool deck_enable = true; // 是否使能甲板运动补偿 0:不使能 1:使能
 
         public static bool L1_adaptive_flag = true;
         // epsilon_gamma = 0.000001;

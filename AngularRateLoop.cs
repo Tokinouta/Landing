@@ -330,7 +330,7 @@ namespace CsharpVersion
                 + Ixx * (plane.N - plane.Flow * WingS * WingL * (plane.CN_delta_r * plane.DeltaR + plane.CN_delta_a * plane.DeltaA)));
 
             _Fpr = vb.Dense(new[] { Fpr_0, Fpr_1 });
-            Gpr = plane.Flow * WingS * WingL / (Ixx * Izz - Math.Pow(Ixz, 2)) * mb.DenseOfArray(new[,] {
+            _Gpr = plane.Flow * WingS * WingL / (Ixx * Izz - Math.Pow(Ixz, 2)) * mb.DenseOfArray(new[,] {
                 {Izz * plane.CL_delta_a + Ixz * plane.CN_delta_a, Izz * plane.CL_delta_r + Ixz * plane.CN_delta_r },
                 {Ixz * plane.CL_delta_a + Ixx * plane.CN_delta_a, Ixz * plane.CL_delta_r + Ixx * plane.CN_delta_r }
             });

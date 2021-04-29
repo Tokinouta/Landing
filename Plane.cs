@@ -107,7 +107,7 @@ namespace CsharpVersion
         public double T;
         public Vector<double> DesiredPosition;
         public double GammaDerive = 0;
-        public double KaiDerive = 0;
+        public double ChiDerive = 0;
         public double l_path_0 = 3500; // 期望路径参数，初始路径长度
         public double l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
 
@@ -141,6 +141,7 @@ namespace CsharpVersion
         public double CL_beta;
         public double CM_alpha1;
         public double CM_alpha2;
+        public double CM_alpha;
         public double CN_beta;
 
 
@@ -161,24 +162,24 @@ namespace CsharpVersion
         {
             PlaneInertia = new()
             {
-                Ixx = 31183.40,// 转动惯量 kg/m2
-                Iyy = 205123.05,
-                Izz = 230411.43,
-                Ixz = 4028.08,
-                WingS = 37.16, // 翼面积
-                WingC = 3.51, // 平均气动弦长
-                WingL = 11.41, // 翼展
-                Mass = 15097.39, // 空重 kg
-                TMax = 130.6 * 1000, // 军用推力（两台）
+                Ixx = 74608.24,// 转动惯量 kg/m2
+                Iyy = 227616.4,
+                Izz = 231114.32,
+                Ixz = 0,
+                WingS = 62.006, // 翼面积
+                WingC = 4.218, // 平均气动弦长
+                WingL = 14.70, // 翼展
+                Mass = 16382.85, // 空重 kg
+                TMax = 122.6 * 1000, // 军用推力（两台）
                 Rou = 1.225, // 空气密度
                 G = 9.8
-            };
+        };
             DesiredParameter = new()
             {
-                Alpha = 9.1 * Pi / 180, // 期望迎角 9.1
+                Alpha = 10 * Pi / 180, // 期望迎角 9.1
                 Chi = 0 * Pi / 180, // 期望航向角
                 Gamma = -3.5 * Pi / 180, // 期望爬升角
-                Vk = 75, // 期望速度 71
+                Vk = 62, // 期望速度 71
                 EngineDelta = 0 * Pi / 180// 发动机安装角
             };
 
@@ -191,7 +192,7 @@ namespace CsharpVersion
             Initialize(ship);
             Theta = Gamma + Alpha;
             DeltaTEFDesired = DeltaTEF;
-            DesiredPosition = Position;
+            DesiredPosition = vb.Dense(3, Position[0]);
             DesiredPosition.SetSubVector(
                 1, 2, HelperFunction.ideal_path(Position, ship.Position, ship.Theta, ship.Psi));
         }
@@ -290,7 +291,7 @@ namespace CsharpVersion
             CY_alpha = CY_alpha3 * Math.Pow(Alpha, 2) + CY_alpha2 * Alpha + CY_alpha1;
             double CY_delta_e = 0.6;
             double CY_delta_lef = 0;
-            double CY_delta_tef = 0.02 * 57.3;
+            CY_delta_tef = 0.02 * 57.3;
             CY = CY_0
                 + CY_alpha * Alpha
                 + CY_delta_e * DeltaE
@@ -344,7 +345,7 @@ namespace CsharpVersion
             // 俯仰力矩相关参数 弧度制
             CM_delta_e = 0.35 * (Vk / 340) - 1.1;
             double CM_q = -23;
-            double CM_alpha = -0.1;
+            CM_alpha = -0.1;
             double CM_alpha_dot = -9;
             CM = CM_alpha * Alpha                     // 由alpha引起的俯仰力矩
                 + CM_delta_e * DeltaE                 // 升降舵产生的俯仰力矩
@@ -428,13 +429,13 @@ namespace CsharpVersion
             Psi += current_psi_dot * dt;
 
             // 绕质心运动学方程
-            double current_beta_dot = P * Sin(Alpha) - R * Cos(Alpha) - GammaDerive * Sin(Miu) + KaiDerive * Cos(Miu) * Cos(Gamma);
-            double current_miu_dot = (P * Cos(Alpha) + R * Sin(Alpha) + GammaDerive * Sin(Beta) * Cos(Miu) + KaiDerive * (Sin(Gamma)
+            double current_beta_dot = P * Sin(Alpha) - R * Cos(Alpha) - GammaDerive * Sin(Miu) + ChiDerive * Cos(Miu) * Cos(Gamma);
+            double current_miu_dot = (P * Cos(Alpha) + R * Sin(Alpha) + GammaDerive * Sin(Beta) * Cos(Miu) + ChiDerive * (Sin(Gamma)
                 * Cos(Beta) + Sin(Beta) * Sin(Miu) * Cos(Gamma))) / Cos(Beta);
             double current_alpha_dot = (Q * Cos(Beta) - (P * Cos(Alpha) + R * Sin(Alpha)) * Sin(Beta) - GammaDerive * Cos(Miu)
-                    - KaiDerive * Sin(Miu) * Cos(Gamma)) / Cos(Beta);
+                - ChiDerive * Sin(Miu) * Cos(Gamma)) / Cos(Beta);
 
-            Vector<double> current_X3_dot = vb.Dense(new[] { current_alpha_dot, current_beta_dot, current_miu_dot });
+            Vector<double> current_X3_dot = vb.Dense(new[] { current_theta_dot, current_beta_dot, current_miu_dot });
 
             // update state parameters
             Alpha += current_alpha_dot * dt;
@@ -477,7 +478,7 @@ namespace CsharpVersion
             Flow = 0.5 * Rou * Math.Pow(Vk, 2);
 
             GammaDerive = current_gamma_dot;
-            KaiDerive = current_kai_dot;
+            ChiDerive = current_kai_dot;
 
             X2ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X2_dot));
             //ev = XChangedEventArgs(dt, current_X2_dot);
@@ -521,7 +522,7 @@ namespace CsharpVersion
             DeltaTEF = 45 * Pi / 180 * 1; // tailing - edge flap
 
             GammaDerive = 0;
-            KaiDerive = 0;
+            ChiDerive = 0;
             Flow = 0.5 * PlaneInertia.Rou * Math.Pow(Vk, 2);
             T = PlaneInertia.TMax * DeltaP;
 

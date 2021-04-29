@@ -114,7 +114,7 @@ namespace CsharpVersion
             };
 
             DataSendTimer.Start();
-            while ((Plane.Position[0] - Ship.Position[0]) < 0)
+            while ((Plane.Position[2] - Ship.Position[2]) < 0)
             {
                 SingleStep();
                 if (step_count % 50 == 0)
@@ -162,7 +162,7 @@ namespace CsharpVersion
             AttitudeLoop.CalculateLimiter(dt);
 
             AngularRateLoop.CalculateState(dt, AttitudeLoop.U3);
-            AngularRateLoop.CalculateOutput();
+            AngularRateLoop.CalculateOutput(dt, current_time, step_count);
             AngularRateLoop.CalculateLimiter(dt);
             AngularRateLoop.CalculateFilter(dt);
 

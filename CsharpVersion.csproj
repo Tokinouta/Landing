@@ -16,4 +16,16 @@
     <ProjectReference Include="..\HistoryDemo\HistoryDemo\HistoryDemo.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ForwardFilter.mat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="matlab.mat">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="WindModel.mat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

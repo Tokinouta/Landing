@@ -31,7 +31,7 @@ namespace CsharpVersion.Controllers
         double q_est = 0;
         double q_est_dot = 0;
         double q_est_err = 0;
-        double T_cq = 1 / 5;
+        double T_cq = 1.0 / 5;
         double w_cq;
         double q_ad_dot = 0;
         double q_ad_dot2 = 0;
@@ -54,7 +54,7 @@ namespace CsharpVersion.Controllers
         double p_est = 0;
         double p_est_dot = 0;
         double p_est_err = 0;
-        double T_cp = 1 / 5;
+        double T_cp = 1.0 / 5;
         double w_cp;
         double p_ad_dot = 0;
         double p_ad_dot2 = 0;
@@ -68,7 +68,7 @@ namespace CsharpVersion.Controllers
         double r_est = 0;
         double r_est_dot = 0;
         double r_est_err = 0;
-        double T_cr = 1 / 5;
+        double T_cr = 1.0 / 5;
         double w_cr;
         double r_ad_dot = 0;
         double r_ad_dot2 = 0;
@@ -213,7 +213,7 @@ namespace CsharpVersion.Controllers
 
         public void InvokeRecordEvent()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void Reset()

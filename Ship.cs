@@ -2,6 +2,7 @@
 using static MathNet.Numerics.Trig;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Data.Matlab;
+using System;
 
 namespace CsharpVersion
 {
@@ -16,7 +17,7 @@ namespace CsharpVersion
         public double Psi = 0 * Pi / 180; // 航母初始偏转角度
         public double omega_dx_2i = 0;
         public double omega_dy_2i = 0;
-        public double omega_dz_2i = -0.2 * Pi / 180; // 航母转动角速度，惯性系下表示 -0.2
+        public double omega_dz_2i = 0; // 航母转动角速度，惯性系下表示 -0.2
         public Vector<double> omega_d_2i;
         public Vector<double> Position = vb.Dense(3, 0); // 航母初始位置  特别注意，current_position_ship仅代表航母直线前进位置，未考虑甲板起伏与侧向偏移
         public Vector<double> DeckPosition; // current_deck_position在top文件中有定义
@@ -52,6 +53,9 @@ namespace CsharpVersion
             if (DeckEnable)
             {
                 ForwardFilterState = MatlabReader.Read<double>("./ForwardFilter.mat", "forward_filter_state");
+                CurrentDeckPredict = MatlabReader.Read<double>("./ForwardFilter.mat", "current_deck_predict").Column(0);
+                CurrentDeckControl = MatlabReader.Read<double>("./ForwardFilter.mat", "current_deck_control").Column(0);
+                CurrentDeckLateralControl = MatlabReader.Read<double>("./ForwardFilter.mat", "current_deck_control_lat").Column(0);
             }
 
         }
@@ -60,9 +64,13 @@ namespace CsharpVersion
         {
             double x_ship_dot = Velocity * Cos(Psi);
             double y_ship_dot = Velocity * Sin(Psi);
+            if (y_ship_dot != 0)
+            {
+                Console.WriteLine("ra");
+            }
             Position[0] += x_ship_dot * dt; // 更新航母位置
             Position[1] += y_ship_dot * dt;
-            Position[2] = Position[2];
+            // Position[2] = Position[2];
             Psi += omega_dz_2i * dt;
         }
 

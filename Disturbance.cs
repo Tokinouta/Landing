@@ -58,7 +58,7 @@ namespace CsharpVersion
                 // load_system('wind_model');
                 //[cal_count, wind_model_state, wind, wind_lat] = sim('wind_model');
                 cal_count = MatlabReader.Read<double>("./WindModel.mat", nameof(cal_count)).Column(0);
-                wind_model_state = MatlabReader.Read<double>("./WindModel.mat", nameof(wind_model_state);
+                wind_model_state = MatlabReader.Read<double>("./WindModel.mat", nameof(wind_model_state));
                 wind = MatlabReader.Read<double>("./WindModel.mat", nameof(wind)).Column(0);
                 wind_lat = MatlabReader.Read<double>("./WindModel.mat", nameof(wind_lat)).Column(0);
             }
@@ -124,6 +124,7 @@ namespace CsharpVersion
             double CM_alpha1 = plane.CM_alpha1;
             double CM_alpha2 = plane.CM_alpha2;
             double CN_beta = plane.CN_beta;
+            double CY_alpha = plane.CY_alpha;
             double current_alpha = plane.Alpha;
             double current_D = plane.D;
             double current_gamma = plane.Gamma;
@@ -131,7 +132,6 @@ namespace CsharpVersion
             double current_Q = plane.Flow;
             double current_Vk = plane.Vk;
             double current_Y = plane.Y;
-            double CY_alpha = plane.CY_alpha;
 
             double Ixx = plane.PlaneInertia.Ixx;
             double Iyy = plane.PlaneInertia.Iyy;
@@ -179,13 +179,11 @@ namespace CsharpVersion
                     // 典型舰尾流模型
                     double current_L_wind = current_Q * WingS * WingL * CL_beta * current_beta_wind;
                     double current_N_wind = current_Q * WingS * WingL * CN_beta * current_beta_wind;
-                    double current_M_wind = current_Q * WingS * (CM_alpha2 * current_alpha + CM_alpha1) * current_alpha_wind;
+                    double current_M_wind = current_Q * WingS * plane.CM_alpha * current_alpha_wind;
                     disturbance_p = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
-                        * (Izz * current_L_wind
-                        + Ixz * current_N_wind);
+                        * (Izz * current_L_wind + Ixz * current_N_wind);
                     disturbance_r = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
-                        * (Ixz * current_L_wind
-                        + Ixx * current_N_wind);
+                        * (Ixz * current_L_wind + Ixx * current_N_wind);
                     disturbance_q = 1 / Iyy * (current_M_wind);
                 }
                 else

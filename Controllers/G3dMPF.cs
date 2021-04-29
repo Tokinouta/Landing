@@ -32,7 +32,7 @@ namespace CsharpVersion.Controllers
             this.plane = plane;
             this.ship = ship;
             ControlModule = module;
-            current_deck_position_ship = ship.Position;
+            current_deck_position_ship = ship.Position.Clone();
         }
 
         public Plane Plane { get => plane; set => plane = value; }
@@ -92,7 +92,7 @@ namespace CsharpVersion.Controllers
                 y_d_2p = (l_path_0 - l_path) * Sin(ship.Theta) * Cos(ship.Gamma);
                 z_d_2p = (l_path_0 - l_path) * Sin(ship.Gamma);
 
-                current_deck_position_ship = ship.Position; // 甲板在I系下坐标，考虑甲板起伏与侧向偏移影响
+                current_deck_position_ship = ship.Position.Clone(); // 甲板在I系下坐标，考虑甲板起伏与侧向偏移影响
                 // if (deck_compensation_start_flag > 0)
                 if (ship.DeckCompensationStartCount > (ship.DeckCompensationStartThreshold - 1))
                 {

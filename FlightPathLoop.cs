@@ -423,8 +423,8 @@ namespace CsharpVersion
                     {
                         current_desired_miu = (-F_chi_b2f + k_kai_mpf * eChi + deriveChiDesired)
                             / B_chi_b2f; // 不使用干扰观测器
-                        desiredDeltaTEF = (-F_gamma_b2f + k_gamma_mpf * eGamma + deriveGammaDesired)
-                            / B_gamma_b2f;
+                        //desiredDeltaTEF = (-F_gamma_b2f + k_gamma_mpf * eGamma + deriveGammaDesired)
+                            /// B_gamma_b2f;
                     }
                     else
                     {
@@ -463,7 +463,7 @@ namespace CsharpVersion
             {
                 delta_alpha = 0.2 * Math.PI / 180;
             }
-            else if (delta_alpha < 0.2 * Math.PI / 180)
+            else if (delta_alpha < -0.2 * Math.PI / 180)
             {
                 delta_alpha = -0.2 * Math.PI / 180;
             }

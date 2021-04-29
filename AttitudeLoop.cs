@@ -154,7 +154,7 @@ namespace CsharpVersion
             double current_beta = plane.Beta;
             double current_gamma = plane.Gamma;
             double current_miu = plane.Miu;
-            double derive_kai = plane.KaiDerive;
+            double derive_kai = plane.ChiDerive;
             double derive_gamma = plane.GammaDerive;
 
             F3 = vb.Dense(new[] {

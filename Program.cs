@@ -50,7 +50,7 @@ namespace CsharpVersion
             sim.Simulate();
             Console.WriteLine(w.Elapsed);
             //Task.WaitAll();
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
             Console.WriteLine(sim.Plane.Position.ToString("G40"));
         }
     }
