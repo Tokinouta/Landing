@@ -83,19 +83,19 @@ namespace CsharpVersion.Controllers
         Vector<double> pr_est_dot => vb.Dense(new[] { p_est_dot, r_est_dot });
         Vector<double> pr_est_err => vb.Dense(new[] { p_est_err, r_est_err });
         Matrix<double> w_cpr => mb.DenseOfDiagonalArray(new[] { w_cp, w_cr });
-        Vector<double> pr_ad_dot
-        {
-            // 这里可能需要考虑改成一个能存储这个向量的字段或者属性，
-            // 要不然每次用到的时候都需要新建一个向量
-            // 这样可能会很耗时间
-            // 到时候再看吧，毕竟这种方式其实还是挺直观的
-            get => vb.Dense(new[] { p_ad_dot, r_ad_dot });
-            set
-            {
-                p_ad_dot = value[0];
-                r_ad_dot = value[1];
-            }
-        }
+        Vector<double> pr_ad_dot { get; set; }
+        //{
+        //    // 这里可能需要考虑改成一个能存储这个向量的字段或者属性，
+        //    // 要不然每次用到的时候都需要新建一个向量
+        //    // 这样可能会很耗时间
+        //    // 到时候再看吧，毕竟这种方式其实还是挺直观的
+        //    get => vb.Dense(new[] { p_ad_dot, r_ad_dot });
+        //    set
+        //    {
+        //        p_ad_dot = value[0];
+        //        r_ad_dot = value[1];
+        //    }
+        //}
         Vector<double> pr_ad_dot2 => vb.Dense(new[] { p_ad_dot2, r_ad_dot2 });
         Vector<double> pr_mear => vb.Dense(new[] { p_mear, r_mear });
 
@@ -115,6 +115,7 @@ namespace CsharpVersion.Controllers
             w_cp = 1 / T_cp;
             Amr = -1 / T_yaw;
             w_cr = 1 / T_cr;
+            pr_ad_dot = vb.Dense(new[] { p_ad_dot, r_ad_dot });
         }
 
         public Vector<double> CalculateOutput(double dt, double current_time, int step_count)
@@ -125,11 +126,11 @@ namespace CsharpVersion.Controllers
             double q_ref = controlModule.FilteredU3[1];
             double r_ref = controlModule.FilteredU3[2];
             Vector<double> pr_ref = vb.Dense(new[] { p_ref, r_ref });
+
             double p_ref_dot = controlModule.DeriveX4[0];
             double q_ref_dot = controlModule.DeriveX4[1];
             double r_ref_dot = controlModule.DeriveX4[2];
             Vector<double> pr_ref_dot = vb.Dense(new[] { p_ref_dot, r_ref_dot });
-
 
             double p_mear = controlModule.X4[0];
             double q_mear = controlModule.X4[1];

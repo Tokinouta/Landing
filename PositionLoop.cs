@@ -187,7 +187,7 @@ namespace CsharpVersion
             throw new NotImplementedException();
         }
 
-        public void calculateOutput(double dt, double current_time, int step_count)
+        public void CalculateOutput(double dt, double current_time, int step_count)
         {
             U1 = controller.CalculateOutput(dt, current_time, step_count);
             controller.InvokeRecordEvent();

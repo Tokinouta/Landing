@@ -14,7 +14,7 @@ namespace CsharpVersion
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
         Plane plane;
         Ship ship;
-        
+
         // Input Variable
         Vector<double> U2;
 
@@ -164,7 +164,7 @@ namespace CsharpVersion
                      + Sin(current_beta) * Sin(current_miu) * Cos(current_gamma))) / (Cos(current_beta))});
             // 保持迎角
             B3 = mb.DenseOfArray(new[,] {
-                {-Cos(current_alpha) * Tan(current_beta), 1, -Sin(current_alpha) * Tan(current_beta) },
+                {-Cos(current_alpha) * Tan(current_beta), 1 / Cos(current_beta), -Sin(current_alpha) * Tan(current_beta) },
                 { Sin(current_alpha), 0, -Cos(current_alpha) },
                 { Cos(current_alpha) / Cos(current_beta), 0, Sin(current_alpha) / Cos(current_beta) }});
         }
@@ -196,6 +196,8 @@ namespace CsharpVersion
         }
 
         public void CalculateState(double dt, Vector<double> input)
+        { }
+        public void CalculateState(double dt, Vector<double> input, double derive)
         {
             U2 = input;
 
@@ -205,6 +207,7 @@ namespace CsharpVersion
                 var derive2_X3 = -2 * epsilonX3 * omegaX3 * deriveX3 - omegaX3.Power(2) * (filteredU2 - U2);
                 deriveX3 += derive2_X3 * dt;
                 filteredU2 += deriveX3 * dt;
+                deriveX3[0] = derive;
                 e3 = filteredU2 - X3;
                 previousU3 = U3;
             }

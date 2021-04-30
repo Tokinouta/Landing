@@ -83,6 +83,7 @@ namespace CsharpVersion
         double alphaI_sum = 0;
         double VkI_sum = 0;
         double current_err_alpha = 0;
+        double err_alpha = 0;
         double current_err_Vk = 0;
         double current_delta_e_T = 0.10; // 升降舵惯性环节参数
         double accel_z_T = 0.10; // 法向过载惯性环节参数
@@ -98,6 +99,8 @@ namespace CsharpVersion
         double previousDesiredDeltaTEF;
         double filteredDeltaTEF;
         double previousT;
+
+        public Vector<double> DeriveX2 { get => deriveX2; }
 
         //event RecordFlightPathLoopEvent;
         //event RecordFlightPathLoopVarEvent;
@@ -468,7 +471,7 @@ namespace CsharpVersion
                 delta_alpha = -0.2 * Math.PI / 180;
             }
             U2 = vb.Dense(new double[] {
-                U1[1] + plane.gamma_b2f - plane.Gamma + plane.DesiredParameter.Alpha - delta_alpha,
+                U1[1] + plane.Gamma - plane.gamma_b2f + plane.DesiredParameter.Alpha - delta_alpha,
                 0,
                 current_desired_miu
             });
@@ -479,12 +482,12 @@ namespace CsharpVersion
                 if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)// 判断使用何种干扰观测器
                 {
                     plane.T =
-                        (-F_Vk + k_Vk_backstepping * current_err_Vk - NDO_d_Vk_output) / B_Vk; // 保持速度
+                        (-F_alpha + k_alpha_backstepping * err_alpha - NDO_d_Vk_output) / B_alpha; // 保持速度
                 }
                 else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
                 {
                     plane.T =
-                        (-F_Vk + k_Vk_backstepping * current_err_Vk) / B_Vk; // backstepping control without disturbance observer 保持速度
+                        (-F_alpha + k_alpha_backstepping * err_alpha) / B_alpha; // backstepping control without disturbance observer 保持速度
                 }
                 else
                 {
@@ -541,7 +544,7 @@ namespace CsharpVersion
             // Description    : 保持迎角自动油门参量
             var previous_err_alpha = current_err_alpha;
             current_err_alpha = plane.Alpha - plane.DesiredParameter.Alpha; // 保持迎角自动油门P项
-                                                                                   // err_alpha = plane.desired_alpha - plane.current_alpha;
+            err_alpha = plane.DesiredParameter.Alpha - plane.Alpha;
             alphaI_sum = alphaI_sum + current_err_alpha * dt; // 保持迎角自动油门I项
             var derive_err_alpha = (current_err_alpha - previous_err_alpha) / dt; // 保持迎角 自动油门D项
 

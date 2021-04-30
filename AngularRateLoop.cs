@@ -315,7 +315,9 @@ namespace CsharpVersion
                 { WingL * (Ixz * plane.CL_delta_a + Ixx * plane.CN_delta_a) / (Ixx * Izz - Math.Pow(Ixz, 2)), 0,
                     WingL * (Ixz * plane.CL_delta_r + Ixx * plane.CN_delta_r) / (Ixx * Izz - Math.Pow(Ixz, 2)) } });
 
-            _Fq = 1 / Iyy * ((Izz - Ixx) * plane.P * plane.R - Ixz * Math.Pow(plane.P, 2) + Ixz * Math.Pow(plane.R, 2) + (plane.M - plane.Flow * WingS * WingC * (plane.CM_delta_e * plane.DeltaE)));
+            _Fq = 1 / Iyy * ((Izz - Ixx) * plane.P * plane.R - Ixz * Math.Pow(plane.P, 2)
+                + Ixz * Math.Pow(plane.R, 2)
+                + (plane.M - plane.Flow * WingS * WingC * (plane.CM_delta_e * plane.DeltaE)));
             _Gq = plane.Flow * WingS * WingC * plane.CM_delta_e / Iyy;
 
             double Fpr_0 = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))

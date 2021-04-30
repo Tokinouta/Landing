@@ -76,7 +76,7 @@ namespace CsharpVersion
 
         public void calculateCompensation(double dt, Plane plane, PositionLoop positionLoop, int step_count)
         {
-            if (DeckEnable && plane.l_path > plane.l_path_0 - 1620)
+            if (DeckEnable && (plane.l_path > plane.l_path_0 - 1620))
             {
                 if (DeckCompensationStartCount < DeckCompensationStartThreshold)
                 {
@@ -96,7 +96,7 @@ namespace CsharpVersion
                 else
                 {
                     DeckMotionLateralCount++;
-                    positionLoop.X1Desired[1] = positionLoop.X1Desired[1] + CurrentDeckLateralControl[step_count];
+                    positionLoop.X1Desired[0] = positionLoop.X1Desired[0] + CurrentDeckLateralControl[step_count];
 
                 }
             }
@@ -117,6 +117,17 @@ namespace CsharpVersion
                     {
                         //vector_trac_err(2) = vector_trac_err(2);
                         DeriveDeckControl = 0;
+                    }
+                    // 横向运动与补偿 new added in mk4.1
+                    if (DeckCompensationLateralStartCount > (DeckCompensationLateralStartThreshold - 1))
+                    {
+                        vector_trac_err[0] = vector_trac_err[0] - (CurrentDeckLateralControl[step_count]);
+                        DeriveDeckLateralControl = ((CurrentDeckLateralControl[step_count]) - (CurrentDeckLateralControl[step_count - 1])) / dt; // 向右为正
+                    }
+                    else
+                    {             
+                        //vector_trac_err(1) = vector_trac_err(1);
+                        DeriveDeckLateralControl = 0;
                     }
                     break;
                 default:
