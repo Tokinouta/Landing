@@ -46,7 +46,6 @@ namespace CsharpVersion
             FlightPathLoop = new FlightPathLoop(Plane, Ship);
             AttitudeLoop = new AttitudeLoop(Plane, Ship);
             AngularRateLoop = new AngularRateLoop(Plane, Ship);
-            // plane.addListeners(positionLoop, flightPathLoop, attitudeLoop, angularRateLoop);
             Record = new SimulationRecord();
 
             Plane.X1ChangedEvent += PositionLoop.OnUpdateState;
@@ -54,8 +53,6 @@ namespace CsharpVersion
             Plane.X3ChangedEvent += AttitudeLoop.OnUpdateState;
             Plane.X4ChangedEvent += AngularRateLoop.OnUpdateState;
             Plane.RecordPlaneStateEvent += Record.OnRecordPlaneState;
-            //disturbance.AddListener(flightPathLoop);
-            // addlistener(app, "simulationStep", "PostSet", @modifyFrequency);
             DataSendTimer = new Timer(100);
             DataSendTimer.Elapsed += (sender, e) =>
             {
@@ -114,20 +111,6 @@ namespace CsharpVersion
             };
 
             DataSendTimer.Start();
-            Matrix<double> position_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "position_record");
-            Matrix<double> position_ship_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "position_ship_record");
-            Matrix<double> u1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "u1_record");
-            Matrix<double> u2_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "u2_record");
-            Matrix<double> u3_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "u3_record");
-            Matrix<double> uact_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "uact_record");
-            Matrix<double> x1_dot_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "x1_dot_record");
-            Matrix<double> X1_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "X1_record");
-            Matrix<double> x2_dot_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "x2_dot_record");
-            Matrix<double> X2_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "X2_record");
-            Matrix<double> x3_dot_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "x3_dot_record");
-            Matrix<double> X3_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "X3_record");
-            Matrix<double> x4_dot_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "x4_dot_record");
-            Matrix<double> X4_record = MatlabReader.Read<double>(@"E:\大学课程文件\毕业设计\Experimental code\CsharpVersion\matlab2.mat", "X4_record");
             while ((Plane.Position[2] - Ship.Position[2]) < 0)
             {
                 SingleStep();
@@ -135,64 +118,10 @@ namespace CsharpVersion
                 {
                     DataQueue.Enqueue(Plane.Alpha);
                 }
-                if (!position_record.Row(step_count).Equals(Plane.Position))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!position_ship_record.Row(step_count).Equals(Ship.Position))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!u1_record.Row(step_count ).Equals(PositionLoop.U1))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!u2_record.Row(step_count).Equals(FlightPathLoop.U2))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!u3_record.Row(step_count ).Equals(AttitudeLoop.U3))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!uact_record.Row(step_count ).Equals(AngularRateLoop.filteredUact))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!X1_record.Row(step_count ).Equals(PositionLoop.X1))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!X2_record.Row(step_count).Equals(FlightPathLoop.X2))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!X3_record.Row(step_count ).Equals(AttitudeLoop.X3))
-                {
-                    Console.WriteLine(step_count);
-                }
-                if (!X4_record.Row(step_count ).Equals(AngularRateLoop.X4))
-                {
-                    Console.WriteLine(step_count);
-                }
-                //if (!position_record.Row(step_count - 1).Equals(Plane.Position))
-                //{ Console.WriteLine(step_count); }
-                //if (!position_record.Row(step_count - 1).Equals(Plane.Position))
-                //{ Console.WriteLine(step_count); }
-                //if (!position_record.Row(step_count - 1).Equals(Plane.Position))
-                //{ Console.WriteLine(step_count); }
-                //if (!position_record.Row(step_count - 1).Equals(Plane.Position))
-                //{ Console.WriteLine(step_count); }
-                //if (!position_record.Row(step_count - 1).Equals(Plane.Position))
-                //{ Console.WriteLine(step_count); }
-                //if (!position_record.Row(step_count - 1).Equals(Plane.Position))
-                //{ Console.WriteLine(step_count); }
-                //if (!position_record.Row(step_count - 1).Equals(Plane.Position))
-                //{ Console.WriteLine(step_count); }
             }
 
             Console.WriteLine(step_count);
-            Record.SaveToDatabase(ini, conf);
+            //Record.SaveToDatabase(ini, conf);
         }
 
         ~Simulation()
@@ -214,8 +143,8 @@ namespace CsharpVersion
             FlightPathLoop.CalculateNonlinearObserver(dt, Disturbance);
             AngularRateLoop.CalculateNonlinearObserver(dt, Disturbance);
 
-            PositionLoop.calculatePrescribedParameter();
-            Ship.calculateCompensation(dt, Plane, PositionLoop, step_count);
+            PositionLoop.CalculatePrescribedParameter();
+            Ship.CalculateCompensation(dt, Plane, PositionLoop, step_count);
             PositionLoop.CalculateState(dt, null);
             PositionLoop.CalculateOutput(dt, current_time, step_count);
             PositionLoop.CalculateLimiter(dt);
@@ -235,7 +164,7 @@ namespace CsharpVersion
             AngularRateLoop.CalculateFilter(dt);
 
             Plane.UpdateState(dt, Disturbance);
-            Ship.updateState(dt);
+            Ship.UpdateState(dt);
             Disturbance.updateWind(Plane, Ship, step_count);
 
             Plane.Record();
@@ -244,7 +173,6 @@ namespace CsharpVersion
             FlightPathLoop.Record(dt);
             AttitudeLoop.Record(dt);
             AngularRateLoop.Record(dt);
-            //Task.Run(() => Console.WriteLine(step_count));
             Record.time_record.Add(current_time);
             if (Plane.l_path > 1000)
             {

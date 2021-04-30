@@ -59,8 +59,6 @@ namespace CsharpVersion
         {
             _plane = plane;
             _ship = ship;
-            //var current_position = plane.Position;
-            //var current_desired_position = plane.DesiredPosition;
             X1 = plane.Position.SubVector(1, 2);
             X1Desired = plane.DesiredPosition.SubVector(1, 2);
             filterdX1Desired = X1Desired;
@@ -109,17 +107,10 @@ namespace CsharpVersion
                 U1FilterBufferIndex = 0;
             }
             U1 = U1FilterBuffer.ColumnSums() / sampleNumber;
-
-            //current_u1(1) = sum(current_u1_index(:, 1)) / sample_num_u1; // kai
-            //current_u1(2) = sum(current_u1_index(:, 2)) / sample_num_u1; // gamma
         }
 
         public void CalculateLimiter(double dt)
         {
-            //kai_range = plane.kai_range;
-            //gamma_range = plane.gamma_range;
-            //kai_rate_range = plane.kai_rate_range;
-            //gamma_rate_range = plane.gamma_rate_range;
             // chi gamma变化幅度限制
             if (U1[0] < _plane.ChiRange[0])
             {
@@ -138,10 +129,6 @@ namespace CsharpVersion
                 U1[1] = _plane.GammaRange[1];
             }
 
-            // ********************************************************************************************************
-
-            // Description    : kai gamma变化速率限制
-            //********************************************************************************************************//
             // kai gamma变化速率限制
             var derive_u1 = (U1 - previousU1) / dt;
 
@@ -170,16 +157,11 @@ namespace CsharpVersion
 
         public void CalculateObservation()
         {
-            //current_Vk = plane.current_Vk;
-            //current_gamma = plane.current_gamma;
-            //current_kai = plane.current_kai;
-
             // 位置控制环
             F1 = vb.Dense(new[] {
                 _plane.Vk * (Cos(_plane.Gamma) * Sin(_plane.Chi) - _plane.Chi),
                 -_plane.Vk * (Sin(_plane.Gamma) - _plane.Gamma)});
-            B1 = mb.DenseDiagonal(2, _plane.Vk);
-            B1[1, 1] *= -1;
+            B1 = mb.DenseOfDiagonalArray(new double[] { _plane.Vk, -_plane.Vk });
         }
 
         public void CalculateOutput()
@@ -195,21 +177,22 @@ namespace CsharpVersion
 
         public void CalculateState(double dt, Vector<double> input)
         {
-            if (Configuration.guidance_command_filter_flag)// 判断使用何种滤波器
-            {                                                         // 使用指令滤波器
-                var derive2_X1 = -2 * epsilonX1 * omegaX1 * deriveX1
-                    - omegaX1.Power(2) * (filterdX1Desired - X1Desired);
-                deriveX1 += derive2_X1 * dt;
-                filterdX1Desired += deriveX1 * dt;
-                epc = filterdX1Desired - X1;
-                previousX1Desired = X1Desired;
-                previousU1 = U1;
-
-                epc /= Cos(-_ship.Theta + _ship.Psi);
-            }
-            else
+            switch (Configuration.GuidanceFilter)// 判断使用何种滤波器
             {
-                Console.WriteLine("请指定滤波器种类 id 11");
+                case GuidanceFilters.Command: // 使用指令滤波器
+                    var derive2_X1 = -2 * epsilonX1 * omegaX1 * deriveX1
+                        - omegaX1.Power(2) * (filterdX1Desired - X1Desired);
+                    deriveX1 += derive2_X1 * dt;
+                    filterdX1Desired += deriveX1 * dt;
+                    epc = filterdX1Desired - X1;
+                    previousX1Desired = X1Desired;
+                    previousU1 = U1;
+
+                    epc /= Cos(-_ship.Theta + _ship.Psi);
+                    break;
+                default:
+                    Console.WriteLine("请指定滤波器种类 id 11");
+                    break;
             }
         }
 
@@ -241,13 +224,8 @@ namespace CsharpVersion
             X1 += e.Data * e.Dt;
         }
 
-        public void calculatePrescribedParameter()
+        public void CalculatePrescribedParameter()
         {
-            //current_position = plane.current_position;
-
-            //current_position_ship = ship.current_position_ship;
-            //theta_s = ship.theta_s;
-            //psi_s = ship.psi_s;
             previousX1Desired = X1Desired;
 
             var current_desired_position = vb.Dense(3, _plane.Position[0]);

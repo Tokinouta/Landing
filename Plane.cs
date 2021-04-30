@@ -147,16 +147,11 @@ namespace CsharpVersion
 
         // 着舰过程中期望参量
 
-        //event RecordPlaneStateEvent;
         public event EventHandler<XChangedEventArgs> X1ChangedEvent;
         public event EventHandler<XChangedEventArgs> X2ChangedEvent;
         public event EventHandler<XChangedEventArgs> X3ChangedEvent;
         public event EventHandler<XChangedEventArgs> X4ChangedEvent;
         public event EventHandler RecordPlaneStateEvent;
-        //event X1ChangedEvent;
-        //event X2ChangedEvent;
-        //event X3ChangedEvent;
-        //event X4ChangedEvent;
 
         public Plane(Ship ship)
         {
@@ -173,7 +168,7 @@ namespace CsharpVersion
                 TMax = 122.6 * 1000, // 军用推力（两台）
                 Rou = 1.225, // 空气密度
                 G = 9.8
-        };
+            };
             DesiredParameter = new()
             {
                 Alpha = 10 * Pi / 180, // 期望迎角 9.1
@@ -198,19 +193,10 @@ namespace CsharpVersion
         }
 
         void AddListeners()
-        {
-            //addlistener(varargin{ 1}, 'X1ChangedEvent', @X1ChangedEventHandler);
-            //addlistener(varargin{ 2}, 'X2ChangedEvent', @X2ChangedEventHandler);
-            //addlistener(varargin{ 3}, 'X3ChangedEvent', @X3ChangedEventHandler);
-            //addlistener(varargin{ 4}, 'X4ChangedEvent', @X4ChangedEventHandler);
-        }
+        { }
 
         void Initialize(Ship ship)
         {
-            //double ship.Theta = ship.Theta;
-            //double ship.Psi = ship.Psi;
-            //double ship.Gamma = ship.Gamma;
-
             Vector<double> p_d_2p;
             if (l_path_0 > 1620)
             {
@@ -265,7 +251,6 @@ namespace CsharpVersion
 
         public void Record()
         {
-            //notify(obj, "RecordPlaneStateEvent
             RecordPlaneStateEvent?.Invoke(this, null);
         }
 
@@ -417,8 +402,6 @@ namespace CsharpVersion
             R += current_r_dot * dt;
 
             X4ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X4_dot));
-            //ev = XChangedEventArgs(dt, current_X4_dot);
-            //notify(obj, "X4ChangedEvent", ev);
 
             // 欧拉角
             double current_phi_dot = P + Tan(Theta) * (Q * Sin(Phi) + R * Cos(Phi));
@@ -443,8 +426,6 @@ namespace CsharpVersion
             Miu += current_miu_dot * dt;
 
             X3ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X3_dot));
-            //ev = XChangedEventArgs(dt, current_X3_dot);
-            //notify(obj, "X3ChangedEvent", ev);
 
             // 质心动力方程
             double current_kai_dot = 1 / (Mass * Vk * Cos(Gamma))
@@ -472,7 +453,6 @@ namespace CsharpVersion
             Chi += current_kai_dot * dt;
             Gamma += current_gamma_dot * dt;
 
-            // previous_delta_p = current_delta_p;
             DeltaP = T / TMax;
             Vk += current_Vk_dot * dt;
             Flow = 0.5 * Rou * Math.Pow(Vk, 2);
@@ -481,8 +461,6 @@ namespace CsharpVersion
             ChiDerive = current_kai_dot;
 
             X2ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X2_dot));
-            //ev = XChangedEventArgs(dt, current_X2_dot);
-            //notify(obj, "X2ChangedEvent", ev);
 
             // 质心运动方程
             double current_x_dot = Vk * Cos(Gamma) * Cos(Chi);
@@ -495,8 +473,6 @@ namespace CsharpVersion
             Position[2] += current_z_dot * dt;
 
             X1ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X1_dot));
-            //ev = XChangedEventArgs(dt, current_X1_dot);
-            //notify(obj, "X1ChangedEvent", ev);
         }
 
         public void Reset(Ship ship)

@@ -47,7 +47,7 @@ namespace CsharpVersion
 
         public Ship()
         {
-            DeckEnable = Configuration.deck_enable;
+            DeckEnable = Configuration.IsDeckCompensationEnabled;
             omega_d_2i = vb.Dense(new double[] { omega_dx_2i, omega_dy_2i, omega_dz_2i });
             DeckPosition = Position;
             if (DeckEnable)
@@ -60,21 +60,17 @@ namespace CsharpVersion
 
         }
 
-        public void updateState(double dt)
+        public void UpdateState(double dt)
         {
             double x_ship_dot = Velocity * Cos(Psi);
             double y_ship_dot = Velocity * Sin(Psi);
-            if (y_ship_dot != 0)
-            {
-                Console.WriteLine("ra");
-            }
             Position[0] += x_ship_dot * dt; // 更新航母位置
             Position[1] += y_ship_dot * dt;
             // Position[2] = Position[2];
             Psi += omega_dz_2i * dt;
         }
 
-        public void calculateCompensation(double dt, Plane plane, PositionLoop positionLoop, int step_count)
+        public void CalculateCompensation(double dt, Plane plane, PositionLoop positionLoop, int step_count)
         {
             if (DeckEnable && (plane.l_path > plane.l_path_0 - 1620))
             {
@@ -115,7 +111,6 @@ namespace CsharpVersion
                     }
                     else
                     {
-                        //vector_trac_err(2) = vector_trac_err(2);
                         DeriveDeckControl = 0;
                     }
                     // 横向运动与补偿 new added in mk4.1
@@ -126,7 +121,6 @@ namespace CsharpVersion
                     }
                     else
                     {             
-                        //vector_trac_err(1) = vector_trac_err(1);
                         DeriveDeckLateralControl = 0;
                     }
                     break;
@@ -147,7 +141,7 @@ namespace CsharpVersion
             Psi = 0 * Pi / 180; // 航母初始偏转角度
             omega_dx_2i = 0;
             omega_dy_2i = 0;
-            omega_dz_2i = -0.2 * Pi / 180; // 航母转动角速度，惯性系下表示 - 0.2
+            omega_dz_2i = 0 * Pi / 180; // 航母转动角速度，惯性系下表示 - 0.2
             // 这里需要考虑避免这种方式，没有必要每次都重新分配一块内存，
             // 比如可以考虑用备份变量的形式
             omega_d_2i = vb.Dense(new double[] { omega_dx_2i, omega_dy_2i, omega_dz_2i });

@@ -72,22 +72,11 @@ namespace CsharpVersion
             {
                 U3FilterBufferIndex = 1;
             }
-
-            //current_u3(1) = sum(current_u3_index(:, 1)) / sample_num_u3; // theta
-            //current_u3(2) = sum(current_u3_index(:, 2)) / sample_num_u3; // beta
-            //current_u3(3) = sum(current_u3_index(:, 3)) / sample_num_u3; // miu
             U3 = U3FilterBuffer.ColumnSums() / sampleNumber;
         }
 
         public void CalculateLimiter(double dt)
         {
-            //p_range = plane.p_range;
-            //q_range = plane.q_range;
-            //r_range = plane.r_range;
-            //p_rate_range = plane.p_rate_range;
-            //q_rate_range = plane.q_rate_range;
-            //r_rate_range = plane.r_rate_range;
-
             if (U3[0] < plane.PRange[0])
             {
                 U3[0] = plane.PRange[0];
@@ -114,7 +103,6 @@ namespace CsharpVersion
             }
 
             // Description    : p q r变化速率限制
-            // p q r变化速率限制
             var derive_u3 = (U3 - previousU3) / dt;
 
             if (derive_u3[0] < plane.PRateRange[0])
@@ -174,18 +162,23 @@ namespace CsharpVersion
             if (Configuration.AttitudeController == AttitudeConfig.IDLC)
             {
                 // 直接升力控制
-                if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)
+                switch (Configuration.DisturbanceObserver)
                 {
-                    U3 = B3.Inverse() * (-F3 + k3_backstepping * e3 + deriveX3); //[p, q, r] nonlinear disturbance observer attitude环不使用DO
-                }
-                else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
-                {
-                    U3 = B3.Inverse() * (-F3 + k3_backstepping * e3 + deriveX3); //[p, q, r] 不使用DO
-                }
-                else
-                {
-                    Console.WriteLine("请指定干扰观测器种类 id 34");
-                    return;
+                    case DisturbanceObserverConfig.NDO:
+                        U3 = B3.Inverse() * (-F3 + k3_backstepping * e3 + deriveX3); //[p, q, r] nonlinear disturbance observer attitude环不使用DO
+                        break;
+                    case DisturbanceObserverConfig.FTO:
+                        break;
+                    case DisturbanceObserverConfig.HOSMO:
+                        break;
+                    case DisturbanceObserverConfig.ESO:
+                        break;
+                    case DisturbanceObserverConfig.NONE:
+                        U3 = B3.Inverse() * (-F3 + k3_backstepping * e3 + deriveX3); //[p, q, r] 不使用DO
+                        break;
+                    default:
+                        Console.WriteLine("请指定干扰观测器种类 id 34");
+                        break;
                 }
             }
             else
@@ -201,25 +194,20 @@ namespace CsharpVersion
         {
             U2 = input;
 
-            if (Configuration.attitude_command_filter_flag)// 判断使用何种滤波器
+            switch (Configuration.AttitudeFilter)// 判断使用何种滤波器
             {
-                // 使用指令滤波器
-                var derive2_X3 = -2 * epsilonX3 * omegaX3 * deriveX3 - omegaX3.Power(2) * (filteredU2 - U2);
-                deriveX3 += derive2_X3 * dt;
-                filteredU2 += deriveX3 * dt;
-                deriveX3[0] = derive;
-                e3 = filteredU2 - X3;
-                previousU3 = U3;
+                case AttitudeFilters.Command:  // 使用指令滤波器
+                    var derive2_X3 = -2 * epsilonX3 * omegaX3 * deriveX3 - omegaX3.Power(2) * (filteredU2 - U2);
+                    deriveX3 += derive2_X3 * dt;
+                    filteredU2 += deriveX3 * dt;
+                    deriveX3[0] = derive;
+                    e3 = filteredU2 - X3;
+                    previousU3 = U3;
+                    break;
+                default:
+                    Console.WriteLine("请指定滤波器种类 id 31");
+                    break;
             }
-            else
-            {
-                Console.WriteLine("请指定滤波器种类 id 31");
-            }
-        }
-
-        public void calculateState(double dt, Vector<double> input, Plane plane)
-        {
-            throw new NotImplementedException();
         }
 
         public void Record(double dt)

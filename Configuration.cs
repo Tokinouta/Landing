@@ -47,6 +47,16 @@ namespace CsharpVersion
         NDI
     }
 
+    public enum GuidanceFilters
+    {
+        Command // 1 使用command filter计算导数
+    }
+
+    public enum AttitudeFilters
+    {
+        Command // 1 使用command filter计算导数
+    }
+
     public static class Configuration
     {
         public static GuidanceConfig GuidanceController { get; set; } = GuidanceConfig.G3dMPF;
@@ -55,22 +65,20 @@ namespace CsharpVersion
         public static DisturbanceObserverConfig DisturbanceObserver { get; set; } = DisturbanceObserverConfig.NONE;
 
         // 导数滤波器配置参数
-        public static bool guidance_command_filter_flag = true; // 1 使用command filter计算导数
-        public static bool attitude_command_filter_flag = true; // 1 使用command filter计算导数
-        public static bool attitude_tracking_differentiator = false; // 1 使用tracking_differentiator计算导数
+        public static GuidanceFilters GuidanceFilter { get; set; } = GuidanceFilters.Command;
+        public static AttitudeFilters AttitudeFilter { get; set; } = AttitudeFilters.Command;
+        public static bool UseAttitudeTrackingDifferentiator { get; set; } = false; // 1 使用tracking_differentiator计算导数
 
         // 轨迹配置
         // 特别注意，更改轨迹类型后，还需更改initial文件中控制器参数
         public static TrajactoryType TrajactoryConfig { get; set; } = TrajactoryType.TypeII;
 
         // 扰动类型配置
-        public static bool DisturbanceTypeI = true; // 1 典型舰尾流扰动
+        public static bool UseDisturbanceTypeI { get; set; } = true; // 1 典型舰尾流扰动
 
-        public static bool wind_enable = true; // 是否使能风场扰动 0:不使能 1:使能
-        public static bool deck_enable = true; // 是否使能甲板运动补偿 0:不使能 1:使能
+        public static bool IsWindEnabled { get; set; } = true; // 是否使能风场扰动 0:不使能 1:使能
+        public static bool IsDeckCompensationEnabled { get; set; } = true; // 是否使能甲板运动补偿 0:不使能 1:使能
 
-        public static bool L1_adaptive_flag = true;
-        // epsilon_gamma = 0.000001;
-        // epsilon_kai = 0.000001;
+        public static bool UseL1Adaptive { get; set; } = true;
     }
 }

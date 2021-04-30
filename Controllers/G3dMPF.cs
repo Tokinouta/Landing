@@ -17,11 +17,9 @@ namespace CsharpVersion.Controllers
         Ship ship;
 
         // 3D路径跟踪
-        //double l_path_initial = 3500; // 期望路径参数，初始路径长度
         double k_x = 0.6;
         double k_y = 0.5;
         double k_z = 0.8;
-        //double l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
         double l_path_dot;
         double psi_dmc_p2i_y;
         double psi_dmc_p2i_z;
@@ -41,10 +39,6 @@ namespace CsharpVersion.Controllers
 
         public Vector<double> CalculateOutput(double dt, double current_time, int step_count)
         {
-            //double ship.Theta = ship.Theta;
-            //double ship.Gamma = ship.Gamma;
-            //double ship.Psi = ship.Psi;
-            //double plane.Vk = plane.Vk;
             double l_path = Plane.l_path;
             double l_path_0 = Plane.l_path_0;
 
@@ -93,12 +87,10 @@ namespace CsharpVersion.Controllers
                 z_d_2p = (l_path_0 - l_path) * Sin(ship.Gamma);
 
                 current_deck_position_ship = ship.Position.Clone(); // 甲板在I系下坐标，考虑甲板起伏与侧向偏移影响
-                // if (deck_compensation_start_flag > 0)
                 if (ship.DeckCompensationStartCount > (ship.DeckCompensationStartThreshold - 1))
                 {
                     current_deck_position_ship[1] += ship.CurrentDeckLateralControl[step_count];
                 }
-                // if (deck_compensation_start_flag_lat > 0)
                 if (ship.DeckCompensationLateralStartCount > (ship.DeckCompensationLateralStartThreshold - 1))
                 {
                     current_deck_position_ship[2] -= ship.CurrentDeckControl[step_count];
@@ -141,7 +133,7 @@ namespace CsharpVersion.Controllers
                 - Cos(gamma_f) * Sin(kai_f) * (velocity_ship_y + ship.DeriveDeckLateralControl + omega_dz_2i * delta_d20_x - omega_dx_2i * delta_d20_z)
                 + Sin(gamma_f) * (ship.DeriveDeckControl + omega_dx_2i * delta_d20_y - omega_dy_2i * delta_d20_x)
                 + k_x * plane.x_b_2f;
-            double kai_b2f_desired = (1 / plane.Vk)
+            double kai_b2f_desired = 1 / plane.Vk
                 * (-plane.Vk * (Cos(gamma_b2f) * Sin(kai_b2f) - kai_b2f)
                 - Sin(kai_f) * (velocity_ship_x + omega_dy_2i * delta_d20_z - omega_dz_2i * delta_d20_y)
                 + Cos(kai_f) * (velocity_ship_y + ship.DeriveDeckLateralControl + omega_dz_2i * delta_d20_x - omega_dx_2i * delta_d20_z)

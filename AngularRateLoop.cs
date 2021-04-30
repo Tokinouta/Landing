@@ -100,8 +100,6 @@ namespace CsharpVersion
         public void CalculateFilter(double dt)
         {
             filteredUactPrevious = filteredUact;
-            //filter_Uact = 1 / 48 / (1 / 48 + dt * sample_num_rudder) * filter_Uact_previous
-            //    + dt * sample_num_rudder / (1 / 48 + dt * sample_num_rudder) * current_Uact;
             filteredUact[0] = 1 / 48.0 / (1 / 48.0 + dt * sampleNumber) * filteredUactPrevious[0]
                 + dt * sampleNumber / (1 / 48.0 + dt * sampleNumber) * Uact[0];
             filteredUact[1] = 1 / 30.0 / (1 / 30.0 + dt * sampleNumber) * filteredUactPrevious[1]
@@ -118,9 +116,6 @@ namespace CsharpVersion
             }
 
             filteredUact = UactFilterBuffer.ColumnSums() / sampleNumber;
-            //filter_Uact(1) = sum(current_Uact_index(:, 1)) / sample_num_rudder;
-            //filter_Uact(2) = sum(current_Uact_index(:, 2)) / sample_num_rudder;
-            //filter_Uact(3) = sum(current_Uact_index(:, 3)) / sample_num_rudder;
             plane.DeltaA = filteredUact[0];
             plane.DeltaE = filteredUact[1];
             plane.DeltaR = filteredUact[2];
@@ -128,42 +123,29 @@ namespace CsharpVersion
 
         public void CalculateLimiter(double dt)
         {
-            //delta_e_range = plane.delta_e_range;
-            //delta_e_rate_range = plane.delta_e_rate_range;
-            //delta_a_range = plane.delta_a_range;
-            //delta_a_rate_range = plane.delta_a_rate_range;
-            //delta_r_range = plane.delta_r_range;
-            //delta_r_rate_range = plane.delta_r_rate_range;
-            int step_count = 0;
             // 舵面偏转角度限幅
             if (Uact[0] < plane.DeltaARange[0])
             {
-                //Console.WriteLine($"Aileron over range bottom, {step_count}");
                 Uact[0] = plane.DeltaARange[0];
             }
             if (Uact[0] > plane.DeltaARange[1])
             {
-                //Console.WriteLine($"Aileron over range top, {step_count}");
                 Uact[0] = plane.DeltaARange[1];
             }
             if (Uact[1] < plane.DeltaERange[0])
             {
-                //Console.WriteLine($"Elevator over range bottom, {step_count}");
                 Uact[1] = plane.DeltaERange[0];
             }
             if (Uact[1] > plane.DeltaERange[1])
             {
-                //Console.WriteLine($"Elevator over range top, {step_count}");
                 Uact[1] = plane.DeltaERange[1];
             }
             if (Uact[2] < plane.DeltaRRange[0])
             {
-                //Console.WriteLine($"Rudder over range bottom, {step_count}");
                 Uact[2] = plane.DeltaRRange[0];
             }
             if (Uact[2] > plane.DeltaRRange[1])
             {
-                //Console.WriteLine($"Rudder over range top, {step_count}");
                 Uact[2] = plane.DeltaRRange[1];
             }
 
@@ -196,14 +178,8 @@ namespace CsharpVersion
             }
         }
 
-        public void calculateLimiter(double dt, int step_count)
+        public void CalculateLimiter(double dt, int step_count)
         {
-            //delta_e_range = plane.delta_e_range;
-            //delta_e_rate_range = plane.delta_e_rate_range;
-            //delta_a_range = plane.delta_a_range;
-            //delta_a_rate_range = plane.delta_a_rate_range;
-            //delta_r_range = plane.delta_r_range;
-            //delta_r_rate_range = plane.delta_r_rate_range;
             // 舵面偏转角度限幅
             if (Uact[0] < plane.DeltaARange[0])
             {
@@ -274,7 +250,7 @@ namespace CsharpVersion
             Vector<double> derive_NDO_p_omega = -NDO_l_omega * (NDO_l_omega * X4 + current_NDO_p_omega + F4 + B4 * Uact);
             current_NDO_p_omega = previous_NDO_p_omega + derive_NDO_p_omega * dt;
             Vector<double> NDO_d_omega = current_NDO_p_omega + NDO_l_omega * X4;
-            NDO_d_omega_output = disturbance.wind_disturbance_start ? NDO_d_omega : vb.Dense(3, 0);
+            NDO_d_omega_output = disturbance.IsWindDisturbanceStarted ? NDO_d_omega : vb.Dense(3, 0);
             //ev = XChangedEventArgs(NDO_d_omega);
             //notify(obj, "RecordAngularRateLoopVarEvent", ev);
         }
@@ -350,17 +326,23 @@ namespace CsharpVersion
                 {
                     case AngularRateConfig.BS:
                         // 直接升力控制
-                        if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NDO)// 判断使用何种干扰观测器
+                        switch (Configuration.DisturbanceObserver)// 判断使用何种干扰观测器
                         {
-                            Uact = B4.Inverse() * (-F4 + k4_backstepping * e4 + deriveX4 - NDO_d_omega_output); // 使用NDO
-                        }
-                        else if (Configuration.DisturbanceObserver == DisturbanceObserverConfig.NONE)
-                        {
-                            Uact = B4.Inverse() * (-F4 + k4_backstepping * e4 + deriveX4); // 不使用DO
-                        }
-                        else
-                        {
-                            Console.WriteLine("请指定干扰观测器种类 id 44");
+                            case DisturbanceObserverConfig.NDO:
+                                Uact = B4.Inverse() * (-F4 + k4_backstepping * e4 + deriveX4 - NDO_d_omega_output); // 使用NDO
+                                break;
+                            case DisturbanceObserverConfig.FTO:
+                                break;
+                            case DisturbanceObserverConfig.HOSMO:
+                                break;
+                            case DisturbanceObserverConfig.ESO:
+                                break;
+                            case DisturbanceObserverConfig.NONE:
+                                Uact = B4.Inverse() * (-F4 + k4_backstepping * e4 + deriveX4); // 不使用DO
+                                break;
+                            default:
+                                Console.WriteLine("请指定干扰观测器种类 id 44");
+                                break;
                         }
                         break;
                     case AngularRateConfig.NDI:
@@ -379,22 +361,21 @@ namespace CsharpVersion
 
         public void CalculateState(double dt, Vector<double> input)
         {
-            // 可能需要添加检查向量维度的代码
             U3 = input;
 
-            if (Configuration.attitude_command_filter_flag)// 判断使用何种滤波器
+            switch (Configuration.AttitudeFilter)// 判断使用何种滤波器
             {
-                // 角速度环使用指令滤波器
-                Vector<double> derive2_X4 = -2 * epsilonX4 * omegaX4 * deriveX4 - omegaX4.Power(2) * (filteredU3 - U3);
-                deriveX4 += derive2_X4 * dt;
-                filteredU3 += deriveX4 * dt;
-                e4 = filteredU3 - X4;
-                previousUact = Uact;
-            }
-            else
-            {
-                Console.WriteLine("请指定滤波器种类 id 41");
-                return;
+                case AttitudeFilters.Command: // 角速度环使用指令滤波器
+                    Vector<double> derive2_X4 = -2 * epsilonX4 * omegaX4 * deriveX4
+                        - omegaX4.Power(2) * (filteredU3 - U3);
+                    deriveX4 += derive2_X4 * dt;
+                    filteredU3 += deriveX4 * dt;
+                    e4 = filteredU3 - X4;
+                    previousUact = Uact;
+                    break;
+                default:
+                    Console.WriteLine("请指定滤波器种类 id 41");
+                    break;
             }
         }
 
@@ -406,13 +387,6 @@ namespace CsharpVersion
 
         public void Reset()
         {
-            //current_p = plane.current_p;
-            //current_q = plane.current_q;
-            //current_r = plane.current_r;
-            //current_delta_a = plane.current_delta_a;
-            //current_delta_e = plane.current_delta_e;
-            //current_delta_r = plane.current_delta_r;
-
             X4 = vb.Dense(new[]
                 { plane.P, plane.Q, plane.R });
             Uact = vb.Dense(new[]

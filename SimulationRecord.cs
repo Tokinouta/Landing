@@ -19,11 +19,8 @@ namespace CsharpVersion
         public List<double> time_record;
 
         // Data record
-
         readonly List<Vector<double>> position_ship_record;
         readonly List<double> psi_s_record; // 航母偏航角记录
-                                            // Data record
-
 
         readonly List<double> delta_tef_record;
         readonly List<Vector<double>> position_record;

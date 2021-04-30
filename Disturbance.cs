@@ -14,17 +14,17 @@ namespace CsharpVersion
 
         // 风场扰动参数
 
-        bool wind_enable = true; // 是否使能风场扰动 0:不使能 1:使能
-        int wind_count = 0; // 在dof_update中调用，用于记录到达风场作用区时，经过的仿真步长
-        double current_alpha_wind = 0; // angle of attck caused by wind
-        double current_beta_wind = 0; // new added in mk4.1
-        double wind_act_position = -800; // 考虑风场作用的距离，修改风场作用距离，要在此处和.m文件中同时修改
-        public bool wind_disturbance_start = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
+        bool IsWindEnabled = true; // 是否使能风场扰动 0:不使能 1:使能
+        int WindCount = 0; // 在dof_update中调用，用于记录到达风场作用区时，经过的仿真步长
+        double WindAlpha = 0; // angle of attck caused by wind
+        double WindBeta = 0; // new added in mk4.1
+        double WindActPosition = -800; // 考虑风场作用的距离，修改风场作用距离，要在此处和.m文件中同时修改
+        public bool IsWindDisturbanceStarted = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
 
-        Vector<double> cal_count;
-        Matrix<double> wind_model_state;
-        Vector<double> wind;
-        Vector<double> wind_lat;
+        Vector<double> CalCount;
+        Matrix<double> WindModelState;
+        Vector<double> Wind;
+        Vector<double> WindLateral;
 
         double wind_estimation_NDO;
         double wind_estimation_NDO_lat;
@@ -45,22 +45,18 @@ namespace CsharpVersion
         List<double> d_Vk_record;
         List<double[]> d_omega_record;
 
-        // wind_estimation_NDO;
-        // wind_estimation_NDO_lat;
         public double wind_actual;
         public double wind_actual_lat;
 
         public Disturbance()
         {
-            wind_enable = Configuration.wind_enable;
-            if (wind_enable)
+            IsWindEnabled = Configuration.IsWindEnabled;
+            if (IsWindEnabled)
             {
-                // load_system('wind_model');
-                //[cal_count, wind_model_state, wind, wind_lat] = sim('wind_model');
-                cal_count = MatlabReader.Read<double>("./WindModel.mat", nameof(cal_count)).Column(0);
-                wind_model_state = MatlabReader.Read<double>("./WindModel.mat", nameof(wind_model_state));
-                wind = MatlabReader.Read<double>("./WindModel.mat", nameof(wind)).Column(0);
-                wind_lat = MatlabReader.Read<double>("./WindModel.mat", nameof(wind_lat)).Column(0);
+                CalCount = MatlabReader.Read<double>("./WindModel.mat", "cal_count").Column(0);
+                WindModelState = MatlabReader.Read<double>("./WindModel.mat", "wind_model_state");
+                Wind = MatlabReader.Read<double>("./WindModel.mat", "wind").Column(0);
+                WindLateral = MatlabReader.Read<double>("./WindModel.mat", "wind_lat").Column(0);
             }
         }
 
@@ -73,43 +69,32 @@ namespace CsharpVersion
             disturbance_p = 0;
             disturbance_q = 0;
             disturbance_r = 0;
-            wind_count = 0; // 在dof_update中调用，用于记录到达风场作用区时，经过的仿真步长
-            current_alpha_wind = 0; // angle of attck caused by wind
-            current_beta_wind = 0; // new added in mk4.1
-            wind_act_position = -800; // 考虑风场作用的距离，修改风场作用距离，要在此处和.m文件中同时修改
-            wind_disturbance_start = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
+            WindCount = 0; // 在dof_update中调用，用于记录到达风场作用区时，经过的仿真步长
+            WindAlpha = 0; // angle of attck caused by wind
+            WindBeta = 0; // new added in mk4.1
+            WindActPosition = -800; // 考虑风场作用的距离，修改风场作用距离，要在此处和.m文件中同时修改
+            IsWindDisturbanceStarted = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
         }
-
-        //void AddListener(fpl flightPathLoop)
-        //{
-        //    //addlistener(flightPathLoop, "RecordFlightPathLoopVarEvent", @updateWindSpeedEventHandler);
-        //}
-
-        //void updateWindSpeedEventHandler(EventArgs e)
-        //{
-        //    wind_estimation_NDO = e.data[4];
-        //    wind_estimation_NDO_lat = e.data[5];
-        //}
 
         public void updateWind(Plane plane, Ship ship, int step_count)
         {
-            if (wind_enable)
+            if (IsWindEnabled)
             {
                 var current_position_ship = ship.Position;
                 var current_position = plane.Position;
                 var current_Vk = plane.Vk;
 
-                if (Math.Abs(current_position_ship[0] - current_position[0]) < Math.Abs(wind_act_position))
+                if (Math.Abs(current_position_ship[0] - current_position[0]) < Math.Abs(WindActPosition))
                 {
-                    wind_disturbance_start = true;
-                    current_alpha_wind = wind[step_count - wind_count] / (current_Vk);
-                    current_beta_wind = -wind_lat[step_count - wind_count] / (current_Vk);
+                    IsWindDisturbanceStarted = true;
+                    WindAlpha = Wind[step_count - WindCount] / (current_Vk);
+                    WindBeta = -WindLateral[step_count - WindCount] / (current_Vk);
                 }
                 else
                 {
-                    wind_count = wind_count + 1;
-                    current_alpha_wind = 0;
-                    current_beta_wind = 0;
+                    WindCount = WindCount + 1;
+                    WindAlpha = 0;
+                    WindBeta = 0;
                 }
             }
         }
@@ -142,20 +127,19 @@ namespace CsharpVersion
             double Mass = plane.PlaneInertia.Mass;
 
 
-            if (wind_enable)
+            if (IsWindEnabled)
             {
-                if (Configuration.DisturbanceTypeI)
+                if (Configuration.UseDisturbanceTypeI)
                 {
                     // 典型舰尾流模型
-                    // previous_disturbance_gamma = disturbance_gamma;
-                    disturbance_kai = 1 / (Mass * current_Vk * Cos(current_gamma)) * (current_D * current_alpha_wind * Sin(current_miu)
-                        + current_Q * WingS * (CY_alpha * current_alpha_wind) * Sin(current_miu)
-                        - current_D * current_beta_wind * Cos(current_miu) + current_Q * WingS * CC_beta * current_beta_wind * Cos(current_miu));
-                    disturbance_gamma = 1 / (Mass * current_Vk) * (current_D * current_alpha_wind * Cos(current_miu)
-                        + current_Q * WingS * (CY_alpha * current_alpha_wind) * Cos(current_miu)
-                        + current_D * current_beta_wind * Sin(current_miu) - current_Q * WingS * CC_beta * current_beta_wind * Sin(current_miu));
+                    disturbance_kai = 1 / (Mass * current_Vk * Cos(current_gamma)) * (current_D * WindAlpha * Sin(current_miu)
+                        + current_Q * WingS * (CY_alpha * WindAlpha) * Sin(current_miu)
+                        - current_D * WindBeta * Cos(current_miu) + current_Q * WingS * CC_beta * WindBeta * Cos(current_miu));
+                    disturbance_gamma = 1 / (Mass * current_Vk) * (current_D * WindAlpha * Cos(current_miu)
+                        + current_Q * WingS * (CY_alpha * WindAlpha) * Cos(current_miu)
+                        + current_D * WindBeta * Sin(current_miu) - current_Q * WingS * CC_beta * WindBeta * Sin(current_miu));
                     disturbance_Vk = 1 / Mass
-                        * (current_Y * current_alpha_wind - current_Q * WingS * (CD_alpha * current_alpha_wind));
+                        * (current_Y * WindAlpha - current_Q * WingS * (CD_alpha * WindAlpha));
                     disturbance_alpha = -disturbance_gamma;
                 }
                 else
@@ -172,14 +156,14 @@ namespace CsharpVersion
                 disturbance_alpha = -disturbance_gamma;
             }
 
-            if (wind_enable)
+            if (IsWindEnabled)
             {
-                if (Configuration.DisturbanceTypeI)
+                if (Configuration.UseDisturbanceTypeI)
                 {
                     // 典型舰尾流模型
-                    double current_L_wind = current_Q * WingS * WingL * CL_beta * current_beta_wind;
-                    double current_N_wind = current_Q * WingS * WingL * CN_beta * current_beta_wind;
-                    double current_M_wind = current_Q * WingS * plane.CM_alpha * current_alpha_wind;
+                    double current_L_wind = current_Q * WingS * WingL * CL_beta * WindBeta;
+                    double current_N_wind = current_Q * WingS * WingL * CN_beta * WindBeta;
+                    double current_M_wind = current_Q * WingS * plane.CM_alpha * WindAlpha;
                     disturbance_p = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
                         * (Izz * current_L_wind + Ixz * current_N_wind);
                     disturbance_r = 1 / (Ixx * Izz - Math.Pow(Ixz, 2))
@@ -219,9 +203,9 @@ namespace CsharpVersion
             d_Vk_record.Add(disturbance_Vk);
             d_omega_record.Add(new[] { disturbance_p, disturbance_q, disturbance_r });
 
-            if (wind_enable)
+            if (IsWindEnabled)
             {
-                if (Math.Abs(ship.Position[0] - plane.Position[0]) < Math.Abs(wind_act_position))
+                if (Math.Abs(ship.Position[0] - plane.Position[0]) < Math.Abs(WindActPosition))
                 {
                     //wind_actual(end + 1) = wind(step_count - wind_count); // 实际风速
                     //wind_actual_lat(end + 1) = wind_lat(step_count - wind_count); // 实际风速

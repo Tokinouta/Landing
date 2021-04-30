@@ -29,19 +29,19 @@ namespace CsharpVersion.Controllers
         double Bmq = 1;
         double sigma_q_est = 0;
         double q_est = 0;
-        double q_est_dot = 0;
-        double q_est_err = 0;
+        //double q_est_dot = 0;
+        //double q_est_err = 0;
         double T_cq = 1.0 / 5;
         double w_cq;
         double q_ad_dot = 0;
-        double q_ad_dot2 = 0;
+        //double q_ad_dot2 = 0;
         double ksq = 0;
         double Asq;
         // lockheed 增强参数
-        double hq = 0;
+        //double hq = 0;
         double k_ad_q = 1.0;
 
-        double q_mear = 0;
+        //double q_mear = 0;
 
         // 横侧向
         double T_roll = 2;
@@ -52,52 +52,40 @@ namespace CsharpVersion.Controllers
         double Bmp = 1;
         double sigma_p_est = 0;
         double p_est = 0;
-        double p_est_dot = 0;
-        double p_est_err = 0;
+        //double p_est_dot = 0;
+        //double p_est_err = 0;
         double T_cp = 1.0 / 5;
         double w_cp;
         double p_ad_dot = 0;
-        double p_ad_dot2 = 0;
+        //double p_ad_dot2 = 0;
 
-        double p_mear = 0;
+        //double p_mear = 0;
 
         // 偏航轴
         double Amr;
         double Bmr = 1;
         double sigma_r_est = 0;
         double r_est = 0;
-        double r_est_dot = 0;
-        double r_est_err = 0;
+        //double r_est_dot = 0;
+        //double r_est_err = 0;
         double T_cr = 1.0 / 5;
         double w_cr;
         double r_ad_dot = 0;
-        double r_ad_dot2 = 0;
+        //double r_ad_dot2 = 0;
 
-        double r_mear = 0;
+        //double r_mear = 0;
 
         // 横侧向双通道
-        Matrix<double> Ampr => mb.DenseOfDiagonalArray(new[] { -1 / T_roll, -1 / T_yaw });
-        Matrix<double> Bmpr => mb.DenseOfDiagonalArray(new[] { Bmp, Bmr });
-        Vector<double> sigma_pr_est => vb.Dense(new[] { sigma_p_est, sigma_r_est });
-        Vector<double> pr_est => vb.Dense(new[] { p_est, r_est });
-        Vector<double> pr_est_dot => vb.Dense(new[] { p_est_dot, r_est_dot });
-        Vector<double> pr_est_err => vb.Dense(new[] { p_est_err, r_est_err });
-        Matrix<double> w_cpr => mb.DenseOfDiagonalArray(new[] { w_cp, w_cr });
         Vector<double> pr_ad_dot { get; set; }
-        //{
-        //    // 这里可能需要考虑改成一个能存储这个向量的字段或者属性，
-        //    // 要不然每次用到的时候都需要新建一个向量
-        //    // 这样可能会很耗时间
-        //    // 到时候再看吧，毕竟这种方式其实还是挺直观的
-        //    get => vb.Dense(new[] { p_ad_dot, r_ad_dot });
-        //    set
-        //    {
-        //        p_ad_dot = value[0];
-        //        r_ad_dot = value[1];
-        //    }
-        //}
-        Vector<double> pr_ad_dot2 => vb.Dense(new[] { p_ad_dot2, r_ad_dot2 });
-        Vector<double> pr_mear => vb.Dense(new[] { p_mear, r_mear });
+        //Matrix<double> Ampr => mb.DenseOfDiagonalArray(new[] { -1 / T_roll, -1 / T_yaw });
+        //Matrix<double> Bmpr => mb.DenseOfDiagonalArray(new[] { Bmp, Bmr });
+        //Vector<double> sigma_pr_est => vb.Dense(new[] { sigma_p_est, sigma_r_est });
+        //Vector<double> pr_est => vb.Dense(new[] { p_est, r_est });
+        //Vector<double> pr_est_dot => vb.Dense(new[] { p_est_dot, r_est_dot });
+        //Vector<double> pr_est_err => vb.Dense(new[] { p_est_err, r_est_err });
+        //Matrix<double> w_cpr => mb.DenseOfDiagonalArray(new[] { w_cp, w_cr });
+        //Vector<double> pr_ad_dot2 => vb.Dense(new[] { p_ad_dot2, r_ad_dot2 });
+        //Vector<double> pr_mear => vb.Dense(new[] { p_mear, r_mear });
 
 
         double adap_constraint = 0.5;
@@ -141,34 +129,37 @@ namespace CsharpVersion.Controllers
             q_ndi_dot = k_q * (q_ref - q_mear) + q_ref_dot;
             pr_ndi_dot = k_pr * (pr_ref - pr_mear) + pr_ref_dot;
 
-            if (Configuration.L1_adaptive_flag)
+            if (Configuration.UseL1Adaptive)
             {
                 double r_q = k_ad_q * q_ref / T_pitch;
-                q_est_dot = Amq * q_est + Bmq * (r_q + q_ref_dot + q_ad_dot + sigma_q_est);
-                q_est = q_est + q_est_dot * dt;
-                q_est_err = q_est - q_mear;
+                double q_est_dot = Amq * q_est + Bmq * (r_q + q_ref_dot + q_ad_dot + sigma_q_est);
+                q_est += q_est_dot * dt;
+                double q_est_err = q_est - q_mear;
                 double phi_q = (1 / Amq) * (Math.Exp(Amq * dt) - 1);
                 double mu_q = Math.Exp(Amq * dt) * q_est_err;
                 sigma_q_est = -(1 / Bmq) * (1 / phi_q) * mu_q;
-                q_ad_dot2 = -w_cq * q_ad_dot - w_cq * sigma_q_est;
-                q_ad_dot = q_ad_dot + q_ad_dot2 * dt;
+                double q_ad_dot2 = -w_cq * q_ad_dot - w_cq * sigma_q_est;
+                q_ad_dot += q_ad_dot2 * dt;
 
                 if (q_ad_dot > adap_constraint)
+                {
                     q_ad_dot = adap_constraint;
+                }
                 else if (q_ad_dot < -adap_constraint)
+                {
                     q_ad_dot = -adap_constraint;
-
+                }
 
                 // 单通道设计 roll
                 double r_p = p_ref / T_roll;
-                p_est_dot = Amp * p_est + Bmp * (r_p + p_ad_dot + p_ref_dot + sigma_p_est);
-                p_est = p_est + p_est_dot * dt;
-                p_est_err = p_est - p_mear;
+                double p_est_dot = Amp * p_est + Bmp * (r_p + p_ad_dot + p_ref_dot + sigma_p_est);
+                p_est += p_est_dot * dt;
+                double p_est_err = p_est - p_mear;
                 double phi_p = (1 / Amp) * (Math.Exp(Amp * dt) - 1);
                 double mu_p = Math.Exp(Amp * dt) * p_est_err;
                 sigma_p_est = -(1 / Bmp) * (1 / phi_p) * mu_p;
-                p_ad_dot2 = -w_cp * p_ad_dot - w_cp * sigma_p_est;
-                p_ad_dot = p_ad_dot + p_ad_dot2 * dt;
+                double p_ad_dot2 = -w_cp * p_ad_dot - w_cp * sigma_p_est;
+                p_ad_dot += p_ad_dot2 * dt;
 
                 if (p_ad_dot > adap_constraint)
                 {
@@ -178,16 +169,17 @@ namespace CsharpVersion.Controllers
                 {
                     p_ad_dot = -adap_constraint;
                 }
+
                 // 单通道设计 yaw
                 double r_r = r_ref / T_yaw;
-                r_est_dot = Amr * r_est + Bmr * (r_r + r_ad_dot + r_ref_dot + sigma_r_est);
-                r_est = r_est + r_est_dot * dt;
-                r_est_err = r_est - r_mear;
+                double r_est_dot = Amr * r_est + Bmr * (r_r + r_ad_dot + r_ref_dot + sigma_r_est);
+                r_est += r_est_dot * dt;
+                double r_est_err = r_est - r_mear;
                 double phi_r = (1 / Amr) * (Math.Exp(Amr * dt) - 1);
                 double mu_r = Math.Exp(Amr * dt) * r_est_err;
                 sigma_r_est = -(1 / Bmr) * (1 / phi_r) * mu_r;
-                r_ad_dot2 = -w_cr * r_ad_dot - w_cr * sigma_r_est;
-                r_ad_dot = r_ad_dot + r_ad_dot2 * dt;
+                double r_ad_dot2 = -w_cr * r_ad_dot - w_cr * sigma_r_est;
+                r_ad_dot += r_ad_dot2 * dt;
 
                 if (r_ad_dot > adap_constraint)
                 {
