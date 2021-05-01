@@ -6,12 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MathNet.Numerics.Data.Matlab;
+using ModelEntities;
 
 namespace CsharpVersion
 {
     public class Disturbance
     {
-
+        Configuration Configuration { get; }
         // 风场扰动参数
 
         bool IsWindEnabled = true; // 是否使能风场扰动 0:不使能 1:使能
@@ -48,8 +49,9 @@ namespace CsharpVersion
         public double wind_actual;
         public double wind_actual_lat;
 
-        public Disturbance()
+        public Disturbance(Configuration config)
         {
+            Configuration = config;
             IsWindEnabled = Configuration.IsWindEnabled;
             if (IsWindEnabled)
             {

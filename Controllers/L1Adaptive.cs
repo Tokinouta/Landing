@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using ModelEntities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,6 +78,9 @@ namespace CsharpVersion.Controllers
 
         // 横侧向双通道
         Vector<double> pr_ad_dot { get; set; }
+
+        public Configuration Configuration { get; }
+
         //Matrix<double> Ampr => mb.DenseOfDiagonalArray(new[] { -1 / T_roll, -1 / T_yaw });
         //Matrix<double> Bmpr => mb.DenseOfDiagonalArray(new[] { Bmp, Bmr });
         //Vector<double> sigma_pr_est => vb.Dense(new[] { sigma_p_est, sigma_r_est });
@@ -90,11 +94,12 @@ namespace CsharpVersion.Controllers
 
         double adap_constraint = 0.5;
 
-        public L1Adaptive(Ship ship, Plane plane, IControlModule module)
+        public L1Adaptive(Ship ship, Plane plane, IControlModule module, Configuration config)
         {
             Ship = ship;
             Plane = plane;
             ControlModule = module;
+            Configuration = config;
             k_pr = mb.DenseOfDiagonalArray(new[] { k_p, k_r });
             Amq = -1 / T_pitch;
             w_cq = 1 / T_cq;

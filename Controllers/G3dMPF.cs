@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModelEntities;
 
 namespace CsharpVersion.Controllers
 {
@@ -12,7 +13,7 @@ namespace CsharpVersion.Controllers
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
-
+        public Configuration Configuration { get; }
         Plane plane;
         Ship ship;
 
@@ -25,8 +26,9 @@ namespace CsharpVersion.Controllers
         double psi_dmc_p2i_z;
         Vector<double> current_deck_position_ship;
 
-        public G3dMPF(Plane plane, Ship ship, IControlModule module)
+        public G3dMPF(Plane plane, Ship ship, IControlModule module, Configuration config)
         {
+            Configuration = config;
             this.plane = plane;
             this.ship = ship;
             ControlModule = module;
@@ -36,6 +38,7 @@ namespace CsharpVersion.Controllers
         public Plane Plane { get => plane; set => plane = value; }
         public Ship Ship { get => ship; set => ship = value; }
         public IControlModule ControlModule { get; set; }
+
 
         public Vector<double> CalculateOutput(double dt, double current_time, int step_count)
         {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using MathNet.Numerics;
+using ModelEntities;
+using ModelEntities.Enumerations;
 
 namespace CsharpVersion
 {
@@ -17,6 +19,7 @@ namespace CsharpVersion
 
         public Ship Ship { get; set; }
         public Plane Plane { get; set; }
+        public Configuration Configuration { get; set; }
         public Disturbance Disturbance { get; set; }
         public AttitudeLoop AttitudeLoop { get; set; }
         public FlightPathLoop FlightPathLoop { get; set; }
@@ -28,15 +31,36 @@ namespace CsharpVersion
         {
             InitializeInitialParameters();
 
-            Ship = new Ship();
-            Plane = new Plane(Ship);
-            Disturbance = new Disturbance();
-            PositionLoop = new PositionLoop(Plane, Ship);
-            FlightPathLoop = new FlightPathLoop(Plane, Ship);
-            AttitudeLoop = new AttitudeLoop(Plane, Ship);
-            AngularRateLoop = new AngularRateLoop(Plane, Ship);
-            Record = new SimulationRecord();
+            Configuration = new()
+            {
+                GuidanceController = GuidanceConfig.G3dMPF,
+                AttitudeController = AttitudeConfig.IDLC,
+                AngularRateController = AngularRateConfig.NDI,
+                DisturbanceObserver = DisturbanceObserverConfig.NONE,
 
+                // 导数滤波器配置参数
+                GuidanceFilter = GuidanceFilters.Command,
+                AttitudeFilter = AttitudeFilters.Command,
+                UseAttitudeTrackingDifferentiator = false, 
+
+                // 轨迹配置
+                TrajactoryConfig = TrajactoryType.TypeII,
+
+                // 扰动类型配置
+                UseDisturbanceTypeI = true, 
+                IsWindEnabled = true, 
+                IsDeckCompensationEnabled = true, 
+                UseL1Adaptive = true,
+            };
+            Ship = new Ship(Configuration);
+            Plane = new Plane(Ship);
+            Disturbance = new Disturbance(Configuration);
+            PositionLoop = new PositionLoop(Plane, Ship, Configuration);
+            FlightPathLoop = new FlightPathLoop(Plane, Ship, Configuration);
+            AttitudeLoop = new AttitudeLoop(Plane, Ship, Configuration);
+            AngularRateLoop = new AngularRateLoop(Plane, Ship, Configuration);
+            Record = new SimulationRecord();
+            HelperFunction.Configuration = Configuration;
             Plane.X1ChangedEvent += PositionLoop.OnUpdateState;
             Plane.X2ChangedEvent += FlightPathLoop.OnUpdateState;
             Plane.X3ChangedEvent += AttitudeLoop.OnUpdateState;

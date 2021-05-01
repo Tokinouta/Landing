@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CsharpVersion.Controllers;
+using ModelEntities.Enumerations;
+using ModelEntities;
 
 namespace CsharpVersion
 {
@@ -13,6 +15,7 @@ namespace CsharpVersion
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+        public Configuration Configuration { get; }
         Plane plane;
         Ship ship;
 
@@ -69,10 +72,11 @@ namespace CsharpVersion
         //event RecordAngularRateLoopEvent;
         //event RecordAngularRateLoopVarEvent
 
-        public AngularRateLoop(Plane plane, Ship ship)
+        public AngularRateLoop(Plane plane, Ship ship, Configuration config)
         {
             this.plane = plane;
             this.ship = ship;
+            Configuration = config;
 
             X4 = vb.Dense(new[]
                 { plane.P, plane.Q, plane.R });
@@ -89,7 +93,7 @@ namespace CsharpVersion
                 case AngularRateConfig.BS:
                     break;
                 case AngularRateConfig.NDI:
-                    controller = new L1Adaptive(this.ship, this.plane, this);
+                    controller = new L1Adaptive(this.ship, this.plane, this, Configuration);
                     break;
                 default:
                     break;

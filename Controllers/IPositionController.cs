@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using ModelEntities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace CsharpVersion.Controllers
 {
     interface IController
     {
+        public Configuration Configuration { get; }
+
         public Plane Plane { get; set; }
         public Ship Ship { get; set; }
         public IControlModule ControlModule { get; set; }

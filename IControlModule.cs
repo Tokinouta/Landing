@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using ModelEntities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace CsharpVersion
 {
     interface IControlModule
     {
+        Configuration Configuration { get; }
+
         void CalculateState(double dt, Vector<double> input);
 
         void CalculateObservation();

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModelEntities.Enumerations;
+using ModelEntities;
 
 namespace CsharpVersion
 {
@@ -13,7 +15,7 @@ namespace CsharpVersion
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
-
+        public Configuration Configuration { get; }
         Plane _plane;
         Ship _ship;
         // Input Variable
@@ -55,8 +57,9 @@ namespace CsharpVersion
         public event EventHandler<EventArgs> RecordPositionLoopEvent;
         public event EventHandler<EventArgs> RecordPositionLoopVarEvent;
 
-        public PositionLoop(Plane plane, Ship ship)
+        public PositionLoop(Plane plane, Ship ship, Configuration config)
         {
+            Configuration = config;
             _plane = plane;
             _ship = ship;
             X1 = plane.Position.SubVector(1, 2);
@@ -88,7 +91,7 @@ namespace CsharpVersion
                     break;
                 case GuidanceConfig.G3dMPF:
                     // Description    : 3D移动路径跟踪制导律
-                    controller = new G3dMPF(plane, ship, this);
+                    controller = new G3dMPF(plane, ship, this, Configuration);
                     break;
                 default:
                     Console.WriteLine("请指定控制器种类 id 12");

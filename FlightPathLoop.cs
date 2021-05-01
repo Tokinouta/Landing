@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModelEntities.Enumerations;
+using ModelEntities;
 
 namespace CsharpVersion
 {
@@ -13,6 +15,7 @@ namespace CsharpVersion
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+        public Configuration Configuration { get; }
 
         Plane plane;
         Ship ship;
@@ -105,8 +108,9 @@ namespace CsharpVersion
         //event RecordFlightPathLoopEvent;
         //event RecordFlightPathLoopVarEvent;
 
-        public FlightPathLoop(Plane jet, Ship ac)
+        public FlightPathLoop(Plane jet, Ship ac, Configuration config)
         {
+            Configuration = config;
             plane = jet;
             ship = ac;
             TFilterBuffer = vb.Dense(sampleNumber, 0);

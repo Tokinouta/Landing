@@ -3,6 +3,8 @@ using static MathNet.Numerics.Trig;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Data.Matlab;
 using System;
+using ModelEntities.Enumerations;
+using ModelEntities;
 
 namespace CsharpVersion
 {
@@ -10,6 +12,7 @@ namespace CsharpVersion
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+        Configuration Configuration { get; }
 
         public double Velocity = 27 * 1.852 * 5 / 18; // 航母速度，27knot
         public double Theta = 9 * Pi / 180; // 斜角甲板角度 9度
@@ -45,8 +48,9 @@ namespace CsharpVersion
 
         // event RecordShipStateEvent;
 
-        public Ship()
+        public Ship(Configuration config)
         {
+            Configuration = config;
             DeckEnable = Configuration.IsDeckCompensationEnabled;
             omega_d_2i = vb.Dense(new double[] { omega_dx_2i, omega_dy_2i, omega_dz_2i });
             DeckPosition = Position;

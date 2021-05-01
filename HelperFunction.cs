@@ -6,11 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModelEntities.Enumerations;
+using ModelEntities;
 
 namespace CsharpVersion
 {
     public static class HelperFunction
     {
+        public static Configuration Configuration { get; set; }
         public static Vector<double> ideal_path(Vector<double> position_a, Vector<double> position_s, double theta_s, double psi_s) // 甲板坐标系下飞机x坐标
         {
             // y_z[0] = 0;                                    // 理想下滑道y坐标

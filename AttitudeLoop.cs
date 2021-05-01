@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModelEntities.Enumerations;
+using ModelEntities;
 
 namespace CsharpVersion
 {
@@ -12,6 +14,7 @@ namespace CsharpVersion
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+        public Configuration Configuration { get; }
         Plane plane;
         Ship ship;
 
@@ -49,8 +52,9 @@ namespace CsharpVersion
 
         //event RecordAttitudeLoopEvent;
 
-        public AttitudeLoop(Plane plane, Ship ship)
+        public AttitudeLoop(Plane plane, Ship ship, Configuration config)
         {
+            Configuration = config;
             this.plane = plane;
             this.ship = ship;
 
