@@ -10,6 +10,7 @@ using System.Timers;
 using System.Threading.Tasks;
 using HistoryDemo.Entities;
 using HistoryDemo;
+using MathNet.Numerics;
 
 namespace CsharpVersion
 {
@@ -96,6 +97,8 @@ namespace CsharpVersion
 
         public void Simulate()
         {
+            Control.UseNativeMKL();
+
             var ini = new Initialization()
             {
                 InitialPositionX = Plane.Position[0],
