@@ -90,8 +90,8 @@ namespace CsharpVersion
 
             position_ship_record = new List<Vector<double>>();
             psi_s_record = new List<double>(); // 航母偏航角记录
-                                               // Data record
 
+            // Data record
             delta_tef_record = new List<double>();
             position_record = new List<Vector<double>>();
             alpha_record = new List<double>();
@@ -117,16 +117,6 @@ namespace CsharpVersion
             //addlistener(varargin{ 6}, "RecordAngularRateLoopEvent", @recordAngularRateLoopEventHandler);
             //addlistener(varargin{ 6}, "RecordAngularRateLoopVarEvent", @recordAngularRateLoopVarEventHandler);
             //addlistener(sim, "PlotEvent", @plotDotEventHandler);
-        }
-
-        async public void SaveToDatabase(Initialization ini, HistoryDemo.Entities.Configuration conf)
-        {
-            string fileName = $"datalog\\{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.mat";
-            await Task.Run(()=> {
-                Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
-                SaveToFile(fileName);
-                DataManipulation.Create(ini, conf, fileName);
-            });
         }
 
         public void SaveToFile(string fileName)
@@ -165,8 +155,6 @@ namespace CsharpVersion
             x_b_2f_record.Add(plane.x_b_2f);
             y_b_2f_record.Add(plane.y_b_2f);
             z_b_2f_record.Add(plane.z_b_2f);
-            //kai_b2f_record.Add(plane.kai_b2f);
-            //gamma_b2f_record.Add(plane.gamma_b2f);
         }
     }
 }

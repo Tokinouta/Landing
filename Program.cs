@@ -17,7 +17,7 @@ namespace CsharpVersion
             Simulation sim = new();
             Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
             var w = Stopwatch.StartNew();
-            sim.Simulate();
+            //sim.Simulate();
             Console.WriteLine(w.Elapsed);
             //Thread.Sleep(5000);
             Console.WriteLine(sim.Plane.Position.ToString("G40"));

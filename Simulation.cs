@@ -1,22 +1,11 @@
-﻿using MathNet.Numerics.Data.Matlab;
-using MathNet.Numerics.LinearAlgebra;
-using Microsoft.AspNetCore.SignalR.Client;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Timers;
-using System.Threading.Tasks;
-using HistoryDemo.Entities;
-using HistoryDemo;
 using MathNet.Numerics;
 
 namespace CsharpVersion
 {
     public class Simulation
     {
-        HubConnection connection;
         double frequency = 400; // 计算频率 Hz
         double dt; // 1 / f
         int step_count = -1;
@@ -34,8 +23,7 @@ namespace CsharpVersion
         public PositionLoop PositionLoop { get; set; }
         public AngularRateLoop AngularRateLoop { get; set; }
         public SimulationRecord Record { get; set; }
-        public ConcurrentQueue<double> DataQueue { get; set; }
-        public Timer DataSendTimer { get; set; }
+
         public Simulation()
         {
             InitializeInitialParameters();
@@ -54,66 +42,13 @@ namespace CsharpVersion
             Plane.X3ChangedEvent += AttitudeLoop.OnUpdateState;
             Plane.X4ChangedEvent += AngularRateLoop.OnUpdateState;
             Plane.RecordPlaneStateEvent += Record.OnRecordPlaneState;
-            DataSendTimer = new Timer(100);
-            DataSendTimer.Elapsed += (sender, e) =>
-            {
-                if (DataQueue.TryDequeue(out double data))
-                {
-                    connection.InvokeAsync("SendData", "user", data);
-                }
-                if (DataQueue.IsEmpty)
-                {
-                    DataSendTimer.Stop();
-                    Console.WriteLine("Timer Stoped");
-                }
-            };
-            DataQueue = new ConcurrentQueue<double>();
+
             Console.WriteLine("text");
         }
 
-        async public void StartHubConnection()
-        {
-            connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:5001/simulationHub")
-                .Build();
-            await connection.StartAsync();
-            Console.WriteLine(connection.State);
-            if (connection.State == HubConnectionState.Connected)
-            {
-                Console.WriteLine("connection started");
-            }
-        }
-
-        public Task SendData()
-        {
-            return new Task(() =>
-            {
-                if (DataQueue.TryDequeue(out double data))
-                {
-                    connection.InvokeAsync("SendData", "user", data);
-                }
-            });
-        }
-
-        public void Simulate()
+        public void Simulate(ConcurrentQueue<double> DataQueue)
         {
             Control.UseNativeMKL();
-
-            var ini = new Initialization()
-            {
-                InitialPositionX = Plane.Position[0],
-                InitialPositionY = Plane.Position[1],
-                InitialPositionZ = Plane.Position[2],
-                InitialAttitudePhi = Plane.Phi,
-                InitialAttitudePsi = Plane.Psi,
-                InitialAttitudeTheta = Plane.Theta
-            };
-            var conf = new HistoryDemo.Entities.Configuration()
-            {
-                GuidanceConfig = (HistoryDemo.Entities.GuidanceConfig)Configuration.GuidanceController
-            };
-
-            DataSendTimer.Start();
             while ((Plane.Position[2] - Ship.Position[2]) < 0)
             {
                 SingleStep();
@@ -122,15 +57,7 @@ namespace CsharpVersion
                     DataQueue.Enqueue(Plane.Alpha);
                 }
             }
-
             Console.WriteLine(step_count);
-            //Record.SaveToDatabase(ini, conf);
-        }
-
-        ~Simulation()
-        {
-            DataSendTimer.Dispose();
-            Console.WriteLine("Timer Disposed");
         }
 
         void SingleStep()
