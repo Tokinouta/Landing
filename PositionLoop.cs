@@ -208,8 +208,9 @@ namespace CsharpVersion
 
         public void Reset()
         {
+            U1 = vb.Dense(2, 0);
             X1 = _plane.Position.SubVector(1, 2);
-            X1Desired = _plane.DesiredPosition.SubVector(1, 2); ;
+            X1Desired = _plane.DesiredPosition.SubVector(1, 2);
             filterdX1Desired = X1Desired;
             deriveX1 = vb.Dense(2, 0); //[y,z]'
             controller.Reset();

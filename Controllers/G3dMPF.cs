@@ -166,7 +166,7 @@ namespace CsharpVersion.Controllers
 
         public void Reset()
         {
-            //l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
+            current_deck_position_ship = ship.Position.Clone();
         }
     }
 }

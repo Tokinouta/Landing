@@ -138,7 +138,7 @@ namespace CsharpVersion
             //notify(obj, "RecordShipStateEvent");
         }
 
-        public void reset()
+        public void Reset()
         {
             Theta = 9 * Pi / 180; // 斜角甲板角度 9度
             Gamma = -3.5 * Pi / 180; // 期望下滑角 3.5度

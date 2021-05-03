@@ -17,8 +17,8 @@ namespace CsharpVersion
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
         public Configuration Configuration { get; }
 
-        Plane plane;
-        Ship ship;
+        readonly Plane plane;
+        readonly Ship ship;
 
         // Input Variable
         Vector<double> U1 = vb.Dense(2, 0);
@@ -30,13 +30,13 @@ namespace CsharpVersion
         public Vector<double> U2;
 
         // Interior Variable
-        Matrix<double> epsilonX2 = mb.DenseDiagonal(2, 0.707);
-        Matrix<double> omegaX2 = mb.DenseDiagonal(2, 50);
+        readonly Matrix<double> epsilonX2 = mb.DenseDiagonal(2, 0.707);
+        readonly Matrix<double> omegaX2 = mb.DenseDiagonal(2, 50);
 
         // 反步法参数
-        Matrix<double> k2_backstepping = mb.DenseDiagonal(2, 0.5); // 0.5
-        double k_alpha_backstepping = 2.8; // 自动油门系数 5
-        double k_Vk_backstepping = 3.0;
+        readonly Matrix<double> k2_backstepping = mb.DenseDiagonal(2, 0.5); // 0.5
+        readonly double k_alpha_backstepping = 2.8; // 自动油门系数 5
+        readonly double k_Vk_backstepping = 3.0;
 
         // 有DMC有omega
         double k_kai_mpf = 0.6; // 用于移动路径跟踪的控制参数
@@ -47,7 +47,7 @@ namespace CsharpVersion
         double k_gamma = 30;
 
         // 滤波器参数
-        int sampleNumber = 1;
+        readonly int sampleNumber = 1;
         int TFilterBufferIndex = 0; // 推力
         Vector<double> TFilterBuffer;
 
@@ -75,12 +75,12 @@ namespace CsharpVersion
         double NDO_d_gamma_b2f_output;
         double NDO_d_Vk_output;
 
-        double NDO_l_chi_b2f = 5;
-        double NDO_l_gamma_b2f = 10;
-        double NDO_l_Vk = 10;
+        readonly double NDO_l_chi_b2f = 5;
+        readonly double NDO_l_gamma_b2f = 10;
+        readonly double NDO_l_Vk = 10;
 
-        double epsilonGamma = 0.000001;
-        double epsilonChi = 0.000001;
+        readonly double epsilonGamma = 0.000001;
+        readonly double epsilonChi = 0.000001;
 
         // 自动油门相关参数
         double err_alpha = 0;

@@ -16,65 +16,49 @@ namespace CsharpVersion.Controllers
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
 
-        double k_p = 2;
-        double k_q = 1;
-        double k_r = 1;
-        Matrix<double> k_pr;
+        readonly double k_p = 2;
+        readonly double k_q = 1;
+        readonly double k_r = 1;
+        readonly Matrix<double> k_pr;
 
         double q_ndi_dot = 0;
         Vector<double> pr_ndi_dot = vb.Dense(2, 0);
 
         // 俯仰轴
-        double T_pitch = 0.5;
-        double Amq;
-        double Bmq = 1;
+        readonly double T_pitch = 0.5;
+        readonly double Amq;
+        readonly double Bmq = 1;
         double sigma_q_est = 0;
         double q_est = 0;
-        //double q_est_dot = 0;
-        //double q_est_err = 0;
-        double T_cq = 1.0 / 5;
-        double w_cq;
+        readonly double T_cq = 1.0 / 5;
+        readonly double w_cq;
         double q_ad_dot = 0;
-        //double q_ad_dot2 = 0;
-        double ksq = 0;
-        double Asq;
+        readonly double ksq = 0;
+        readonly double Asq;
         // lockheed 增强参数
-        //double hq = 0;
-        double k_ad_q = 1.0;
-
-        //double q_mear = 0;
+        readonly double k_ad_q = 1.0;
 
         // 横侧向
-        double T_roll = 2;
-        double T_yaw = 2;
+        readonly double T_roll = 2;
+        readonly double T_yaw = 2;
 
         // 滚转轴
-        double Amp;
-        double Bmp = 1;
+        readonly double Amp;
+        readonly double Bmp = 1;
         double sigma_p_est = 0;
         double p_est = 0;
-        //double p_est_dot = 0;
-        //double p_est_err = 0;
-        double T_cp = 1.0 / 5;
-        double w_cp;
+        readonly double T_cp = 1.0 / 5;
+        readonly double w_cp;
         double p_ad_dot = 0;
-        //double p_ad_dot2 = 0;
-
-        //double p_mear = 0;
 
         // 偏航轴
-        double Amr;
-        double Bmr = 1;
+        readonly double Amr;
+        readonly double Bmr = 1;
         double sigma_r_est = 0;
         double r_est = 0;
-        //double r_est_dot = 0;
-        //double r_est_err = 0;
-        double T_cr = 1.0 / 5;
-        double w_cr;
+        readonly double T_cr = 1.0 / 5;
+        readonly double w_cr;
         double r_ad_dot = 0;
-        //double r_ad_dot2 = 0;
-
-        //double r_mear = 0;
 
         // 横侧向双通道
         Vector<double> pr_ad_dot { get; set; }
@@ -92,7 +76,7 @@ namespace CsharpVersion.Controllers
         //Vector<double> pr_mear => vb.Dense(new[] { p_mear, r_mear });
 
 
-        double adap_constraint = 0.5;
+        readonly double adap_constraint = 0.5;
 
         public L1Adaptive(Ship ship, Plane plane, IControlModule module, Configuration config)
         {
@@ -216,7 +200,24 @@ namespace CsharpVersion.Controllers
 
         public void Reset()
         {
-            throw new NotImplementedException();
+            q_ndi_dot = 0;
+            pr_ndi_dot = vb.Dense(2, 0);
+
+            sigma_q_est = 0;
+            q_est = 0;
+            q_ad_dot = 0;
+
+            sigma_p_est = 0;
+            p_est = 0;
+            p_ad_dot = 0;
+
+            // 偏航轴
+            sigma_r_est = 0;
+            r_est = 0;
+            r_ad_dot = 0;
+
+            // 横侧向双通道
+            pr_ad_dot = vb.Dense(new[] { p_ad_dot, r_ad_dot });
         }
     }
 }

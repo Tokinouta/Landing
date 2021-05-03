@@ -15,8 +15,8 @@ namespace CsharpVersion
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
         public Configuration Configuration { get; }
-        Plane plane;
-        Ship ship;
+        readonly Plane plane;
+        readonly Ship ship;
 
         // Input Variable
         Vector<double> U2;
@@ -28,15 +28,15 @@ namespace CsharpVersion
         public Vector<double> U3 = vb.Dense(3, 0);
 
         // Interior Variable
-        Matrix<double> epsilonX3 = mb.DenseDiagonal(3, 0.707);
-        Matrix<double> omegaX3 = mb.DenseDiagonal(3, 40);
+        readonly Matrix<double> epsilonX3 = mb.DenseDiagonal(3, 0.707);
+        readonly Matrix<double> omegaX3 = mb.DenseDiagonal(3, 40);
 
         // 反步法参数
-        Matrix<double> k3_backstepping =
+        readonly Matrix<double> k3_backstepping =
             mb.DenseOfDiagonalArray(new[] { 0.9, 1, 0.7 }); // 1.0
 
         // 滤波器参数
-        int sampleNumber = 1;
+        readonly int sampleNumber = 1;
         int U3FilterBufferIndex = 1;
         Matrix<double> U3FilterBuffer; // p q r
 
@@ -224,6 +224,7 @@ namespace CsharpVersion
         {
             U3FilterBufferIndex = 1;
             U2 = vb.Dense(new[] { plane.DesiredParameter.Alpha, 0, 0 });
+            U3 = vb.Dense(new double[] { 0, 0, 0 });
             U3FilterBuffer = mb.Dense(sampleNumber, 3, 0); // p q r
             X3 = vb.Dense(new[]
                 { plane.Alpha, plane.Beta, plane.Miu });

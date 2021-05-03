@@ -411,6 +411,7 @@ namespace CsharpVersion
             previousUact = Uact;
             deriveX4 = vb.Dense(3, 0); //[p,q,r]'
             current_NDO_p_omega = vb.Dense(3, 0);
+            controller?.Reset();
         }
 
         public void UpdateState(double dt, Disturbance disturbance)

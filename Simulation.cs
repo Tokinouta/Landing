@@ -26,6 +26,7 @@ namespace CsharpVersion
         public PositionLoop PositionLoop { get; set; }
         public AngularRateLoop AngularRateLoop { get; set; }
         public SimulationRecord Record { get; set; }
+        public int Step_count { get => step_count; }
 
         public Simulation()
         {
@@ -41,15 +42,15 @@ namespace CsharpVersion
                 // 导数滤波器配置参数
                 GuidanceFilter = GuidanceFilters.Command,
                 AttitudeFilter = AttitudeFilters.Command,
-                UseAttitudeTrackingDifferentiator = false, 
+                UseAttitudeTrackingDifferentiator = false,
 
                 // 轨迹配置
                 TrajactoryConfig = TrajactoryType.TypeII,
 
                 // 扰动类型配置
-                UseDisturbanceTypeI = true, 
-                IsWindEnabled = true, 
-                IsDeckCompensationEnabled = true, 
+                UseDisturbanceTypeI = true,
+                IsWindEnabled = true,
+                IsDeckCompensationEnabled = true,
                 UseL1Adaptive = true,
             };
             Ship = new Ship(Configuration);
@@ -135,11 +136,11 @@ namespace CsharpVersion
             }
         }
 
-        void Reset()
+        public void Reset()
         {
-            step_count = 0;
+            step_count = -1;
             current_time = 0;
-            Ship.reset();
+            Ship.Reset();
             Plane.Reset(Ship);
             PositionLoop.Reset();
             FlightPathLoop.Reset();

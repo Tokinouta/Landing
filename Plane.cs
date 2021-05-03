@@ -254,7 +254,6 @@ namespace CsharpVersion
             RecordPlaneStateEvent?.Invoke(this, null);
         }
 
-
         void CalculatePneumaticParameters()
         {
             double WingC = PlaneInertia.WingC;
@@ -480,8 +479,7 @@ namespace CsharpVersion
             //var current_position_ship = ship.Position;
             //double ship.Theta = ship.Theta;
             //double ship.Psi = ship.Psi;
-
-            Alpha = 6.0 * Pi / 180; // 5.0
+            Alpha = 8.0 * Pi / 180; // 5.0
             Miu = 0 * Pi / 180;
             Beta = 0 * Pi / 180;
             Phi = 0; // 欧拉角
@@ -489,13 +487,29 @@ namespace CsharpVersion
             P = 0 * Pi / 180;
             Q = 0 * Pi / 180;
             R = 0 * Pi / 180;
-            Vk = 72; // 70
+            Vk = 65; // 70
             DeltaA = 0 * Pi / 180;
             DeltaE = 0 * Pi / 180;
             DeltaR = 0 * Pi / 180;
             DeltaP = 0.100; // 0.10
-            DeltaLEF = 33 * Pi / 180 * 1; // leading - edge flap
-            DeltaTEF = 45 * Pi / 180 * 1; // tailing - edge flap
+            DeltaLEF = 33 * Pi / 180 * 1; // leading-edge flap
+            DeltaTEF = 25 * Pi / 180 * 1; // tailing-edge flap
+
+            //Alpha = 6.0 * Pi / 180; // 5.0
+            //Miu = 0 * Pi / 180;
+            //Beta = 0 * Pi / 180;
+            //Phi = 0; // 欧拉角
+            //Psi = 0;
+            //P = 0 * Pi / 180;
+            //Q = 0 * Pi / 180;
+            //R = 0 * Pi / 180;
+            //Vk = 72; // 70
+            //DeltaA = 0 * Pi / 180;
+            //DeltaE = 0 * Pi / 180;
+            //DeltaR = 0 * Pi / 180;
+            //DeltaP = 0.100; // 0.10
+            //DeltaLEF = 33 * Pi / 180 * 1; // leading - edge flap
+            //DeltaTEF = 45 * Pi / 180 * 1; // tailing - edge flap
 
             GammaDerive = 0;
             ChiDerive = 0;
