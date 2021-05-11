@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using MathNet.Numerics;
 using ModelEntities;
 using ModelEntities.Enumerations;
@@ -16,6 +18,7 @@ namespace CsharpVersion
         bool landing_gear = false; // 1放起落架
         bool tail_hook = false; // 1放尾钩
         bool wing_damage = false; //1机翼损伤
+        bool land_flag = false;
 
         public Ship Ship { get; set; }
         public Plane Plane { get; set; }
@@ -27,6 +30,43 @@ namespace CsharpVersion
         public AngularRateLoop AngularRateLoop { get; set; }
         public SimulationRecord Record { get; set; }
         public int Step_count { get => step_count; }
+        public Action DataSending;
+        public byte[] DataToSend
+        {
+            get
+            {
+                var t = new DataForUdpDatagram()
+                {
+                    current_deck_position_shipx = (float)Ship.DeckPosition[0],
+                    current_deck_position_shipy = (float)Ship.DeckPosition[1],
+                    current_deck_position_shipz = (float)Ship.DeckPosition[2],
+                    current_positionx = (float)Plane.Position[0],
+                    current_positiony = (float)PositionLoop.X1[0],
+                    current_positionz = (float)PositionLoop.X1[1],
+                    current_phi = (float)Plane.Phi,
+                    current_theta = (float)Plane.Theta,
+                    current_psi = (float)Plane.Psi,
+                    filter_Uact1l = (float)AngularRateLoop.filteredUact[0],
+                    filter_Uact1r = (float)-AngularRateLoop.filteredUact[0],
+                    filter_Uact2l = (float)AngularRateLoop.filteredUact[1],
+                    filter_Uact2r = (float)AngularRateLoop.filteredUact[1],
+                    filter_Uact3l = (float)AngularRateLoop.filteredUact[2],
+                    filter_Uact3r = (float)AngularRateLoop.filteredUact[2],
+                    current_delta_tefl = (float)Plane.DeltaTEF,
+                    current_delta_tefr = (float)Plane.DeltaTEF,
+                    current_Tl = (float)Plane.T / 2,
+                    current_Tr = (float)Plane.T / 2,
+                    landing_gear = landing_gear,
+                    tail_hook = tail_hook,
+                    wing_damage = wing_damage,
+                    land_flag = land_flag
+                };
+                //BinaryFormatter bf = new();
+                //using var ms = new MemoryStream();
+                //bf.Serialize(ms, t);
+                return t.ToBytes();
+            }
+        }
 
         public Simulation()
         {
@@ -71,7 +111,30 @@ namespace CsharpVersion
             Console.WriteLine("text");
         }
 
-        public void Simulate(ConcurrentQueue<double> DataQueue)
+        public Simulation(Configuration configuration)
+        {
+            InitializeInitialParameters();
+
+            Configuration = configuration;
+            Ship = new Ship(Configuration);
+            Plane = new Plane(Ship);
+            Disturbance = new Disturbance(Configuration);
+            PositionLoop = new PositionLoop(Plane, Ship, Configuration);
+            FlightPathLoop = new FlightPathLoop(Plane, Ship, Configuration);
+            AttitudeLoop = new AttitudeLoop(Plane, Ship, Configuration);
+            AngularRateLoop = new AngularRateLoop(Plane, Ship, Configuration);
+            Record = new SimulationRecord();
+            HelperFunction.Configuration = Configuration;
+            Plane.X1ChangedEvent += PositionLoop.OnUpdateState;
+            Plane.X2ChangedEvent += FlightPathLoop.OnUpdateState;
+            Plane.X3ChangedEvent += AttitudeLoop.OnUpdateState;
+            Plane.X4ChangedEvent += AngularRateLoop.OnUpdateState;
+            Plane.RecordPlaneStateEvent += Record.OnRecordPlaneState;
+
+            Console.WriteLine("text");
+        }
+
+        public void Simulate(ConcurrentQueue<DataToSend> DataQueue)
         {
             Control.UseNativeMKL();
             while ((Plane.Position[2] - Ship.Position[2]) < 0)
@@ -79,10 +142,30 @@ namespace CsharpVersion
                 SingleStep();
                 if (step_count % 50 == 0)
                 {
-                    DataQueue.Enqueue(Plane.Alpha);
+                    DataSending?.Invoke();
+                    DataQueue.Enqueue(new DataToSend()
+                    {
+                        Time = current_time,
+                        X = Plane.Position[0],
+                        Y = Plane.Position[1],
+                        Z = Plane.Position[2],
+                        Phi = Plane.Phi,
+                        Psi = Plane.Psi,
+                        Theta = Plane.Theta,
+                        Alpha = Plane.Alpha,
+                        P = Plane.P,
+                        Q = Plane.Q,
+                        R = Plane.R,
+                        Chi = Plane.Chi,
+                        Gamma = Plane.Gamma,
+                        Vk = Plane.Vk,
+                        Miu = Plane.Miu
+                    });
                 }
             }
             Console.WriteLine(step_count);
+            land_flag = true;
+            DataSending?.Invoke();
         }
 
         void SingleStep()
