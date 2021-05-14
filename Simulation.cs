@@ -8,6 +8,9 @@ using ModelEntities.Enumerations;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 仿真的顶层类，用于管理仿真过程中用到的所有资源
+    /// </summary>
     public class Simulation
     {
         double frequency = 400; // 计算频率 Hz
@@ -20,17 +23,78 @@ namespace CsharpVersion
         bool wing_damage = false; //1机翼损伤
         bool land_flag = false;
 
+        /// <summary>
+        /// 航母对象，主要作为仿真中的参考对象，没有大的变动需要特别处理
+        /// </summary>
         public Ship Ship { get; set; }
+
+        /// <summary>
+        /// 舰载机对象，这是仿真过程中的控制对象，需要为其他对象提供状态信息
+        /// </summary>
         public Plane Plane { get; set; }
+
+        /// <summary>
+        /// 仿真配置对象，存储仿真配置
+        /// </summary>
+        /// <remarks>
+        /// 现有版本中这个是一个仿真类型的实例，旧版本中用的是静态类，因此有的地方传进去的参数会比以前多一个<c>Configuration</c>
+        /// </remarks>
         public Configuration Configuration { get; set; }
+
+        /// <summary>
+        /// 扰动对象，提供风场扰动信息
+        /// </summary>
         public Disturbance Disturbance { get; set; }
+
+        /// <summary>
+        /// 姿态环控制器
+        /// </summary>
         public AttitudeLoop AttitudeLoop { get; set; }
+
+        /// <summary>
+        /// 航迹环控制器
+        /// </summary>
         public FlightPathLoop FlightPathLoop { get; set; }
+
+        /// <summary>
+        /// 位置环控制器
+        /// </summary>
         public PositionLoop PositionLoop { get; set; }
+
+        /// <summary>
+        /// 角速度环控制器
+        /// </summary>
         public AngularRateLoop AngularRateLoop { get; set; }
+
+        /// <summary>
+        /// 数据记录对象，用于缓存仿真中产生的数据，并提供将数据存入磁盘的功能
+        /// </summary>
         public SimulationRecord Record { get; set; }
+
+        /// <summary>
+        /// 当前仿真步数，用于外部引用
+        /// </summary>
+        /// <remarks>
+        /// 只读属性，实际操作通过内部私有字段进行
+        /// </remarks>
         public int Step_count { get => step_count; }
+
+        /// <summary>
+        /// 用于处理数据发送的委托
+        /// </summary>
+        /// <remarks>
+        /// 需要发送的数据包括两部分
+        /// <list type="bullet">
+        /// <item>通过SignalR发到前端进行实时绘图</item>
+        /// <item>通过UDP协议发送至视景软件</item>
+        /// </list>
+        /// 这里需要控制的是第二类数据
+        /// </remarks>
         public Action DataSending;
+
+        /// <summary>
+        /// 提供向视景软件发送的字节流
+        /// </summary>
         public byte[] DataToSend
         {
             get
@@ -68,6 +132,9 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 创建仿真类型的实例
+        /// </summary>
         public Simulation()
         {
             InitializeInitialParameters();
@@ -111,6 +178,10 @@ namespace CsharpVersion
             Console.WriteLine("text");
         }
 
+        /// <summary>
+        /// 创建仿真类型的实例
+        /// </summary>
+        /// <param name="configuration">创建本实例需要使用仿真配置</param>
         public Simulation(Configuration configuration)
         {
             InitializeInitialParameters();
@@ -134,6 +205,10 @@ namespace CsharpVersion
             Console.WriteLine("text");
         }
 
+        /// <summary>
+        /// 进行仿真
+        /// </summary>
+        /// <param name="DataQueue">数据队列，用于存储仿真过程中产生的数据并用于实时数据发送</param>
         public void Simulate(ConcurrentQueue<DataToSend> DataQueue)
         {
             Control.UseNativeMKL();
@@ -219,6 +294,9 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 重置仿真状态，以便进行下一次仿真
+        /// </summary>
         public void Reset()
         {
             step_count = -1;

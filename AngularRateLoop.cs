@@ -11,21 +11,34 @@ using ModelEntities;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 角速度环
+    /// </summary>
     public class AngularRateLoop : IControlModule
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+
+        /// <summary>
+        /// 仿真配置
+        /// </summary>
         public Configuration Configuration { get; }
         Plane plane;
         Ship ship;
 
-        // Input Variable
+        /// <summary>
+        /// 输入变量，舰载机的p、q和r
+        /// </summary>
         Vector<double> U3 = vb.Dense(3, 0);
 
-        // State Variable
+        /// <summary>
+        /// 状态变量，舰载机的p、q和r
+        /// </summary>
         public Vector<double> X4;
 
-        // Output Variable
+        /// <summary>
+        /// 输出变量，舰载机的δa，δe和δr
+        /// </summary>
         public Vector<double> Uact;
 
         // Interior Variable
@@ -39,6 +52,10 @@ namespace CsharpVersion
         int sampleNumber = 1; // 3
         int UactFilterBufferIndex = 0;
         Matrix<double> UactFilterBuffer; // delta_a delta_e delta_r
+
+        /// <summary>
+        /// 别问这个变量为什么需要暴露出去，问就是我已经尽力了
+        /// </summary>
         public Vector<double> filteredUact;
         Vector<double> filteredUactPrevious;
 
@@ -62,16 +79,40 @@ namespace CsharpVersion
 
         IController controller;
 
+        /// <summary>
+        /// 只读属性，用于控制器算法计算输出
+        /// </summary>
         public Vector<double> FilteredU3 { get => filteredU3; }
+        /// <summary>
+        /// 只读属性，用于控制器算法计算输出
+        /// </summary>
         public Vector<double> DeriveX4 { get => deriveX4; }
+        /// <summary>
+        /// 只读属性，用于控制器算法计算输出
+        /// </summary>
         public double Fq { get => _Fq; }
+        /// <summary>
+        /// 只读属性，用于控制器算法计算输出
+        /// </summary>
         public double Gq { get => _Gq; }
+        /// <summary>
+        /// 只读属性，用于控制器算法计算输出
+        /// </summary>
         public Matrix<double> Gpr { get => _Gpr; }
+        /// <summary>
+        /// 只读属性，用于控制器算法计算输出
+        /// </summary>
         public Vector<double> Fpr { get => _Fpr; }
 
         //event RecordAngularRateLoopEvent;
         //event RecordAngularRateLoopVarEvent
 
+        /// <summary>
+        /// 创建位置环类型的实例
+        /// </summary>
+        /// <param name="plane">舰载机对象引用</param>
+        /// <param name="ship">航母对象引用</param>
+        /// <param name="config">仿真配置对象引用</param>
         public AngularRateLoop(Plane plane, Ship ship, Configuration config)
         {
             this.plane = plane;
@@ -101,6 +142,11 @@ namespace CsharpVersion
             //addlistener(plane, 'X4ChangedEvent', @updateState);
         }
 
+        /// <summary>
+        /// 计算输出变量滤波
+        /// </summary>
+        /// <remarks>目前未使用</remarks>
+        /// <param name="dt">仿真时间步长</param>
         public void CalculateFilter(double dt)
         {
             filteredUactPrevious = filteredUact;
@@ -125,6 +171,10 @@ namespace CsharpVersion
             plane.DeltaR = filteredUact[2];
         }
 
+        /// <summary>
+        /// 计算输出变量限幅
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
         public void CalculateLimiter(double dt)
         {
             // 舵面偏转角度限幅
@@ -182,6 +232,11 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 计算输出变量限幅
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="step_count">仿真时间步数，用于调试输出</param>
         public void CalculateLimiter(double dt, int step_count)
         {
             // 舵面偏转角度限幅
@@ -246,6 +301,12 @@ namespace CsharpVersion
 
         }
 
+        /// <summary>
+        /// 计算非线性观测器参数
+        /// </summary>
+        /// <remarks>目前未使用</remarks>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">风场扰动</param>
         public void CalculateNonlinearObserver(double dt, Disturbance disturbance)
         {
             Matrix<double> NDO_l_omega = mb.DenseOfDiagonalArray(new double[] { 10, 20, 10 });
@@ -259,6 +320,9 @@ namespace CsharpVersion
             //notify(obj, "RecordAngularRateLoopVarEvent", ev);
         }
 
+        /// <summary>
+        /// 计算反步法参数
+        /// </summary>
         public void CalculateObservation()
         {
             double Ixx = plane.PlaneInertia.Ixx;
@@ -318,10 +382,20 @@ namespace CsharpVersion
             });
         }
 
+        /// <summary>
+        /// 计算输出变量
+        /// </summary>
         public void CalculateOutput()
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// 计算输出变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="current_time">当前仿真时间</param>
+        /// <param name="step_count">当前仿真步数</param>
         public void CalculateOutput(double dt, double current_time, int step_count)
         {
             if (Configuration.AttitudeController == AttitudeConfig.IDLC)
@@ -363,6 +437,11 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 计算状态变量和误差
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="input"></param>
         public void CalculateState(double dt, Vector<double> input)
         {
             U3 = input;
@@ -383,12 +462,20 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 记录位置环变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        [Obsolete("这个函数本是用于移植旧版本的记录，现在发现控制器变量暂时不用记录")]
         public void Record(double dt)
         {
             //ev = XChangedEventArgs(dt, e4, filter_Uact, derive_X4);
             //notify(obj, "RecordAngularRateLoopEvent", ev);
         }
 
+        /// <summary>
+        /// 重置控制器，将相关变量恢复至初始状态
+        /// </summary>
         public void Reset()
         {
             X4 = vb.Dense(new[]
@@ -414,6 +501,12 @@ namespace CsharpVersion
             controller?.Reset();
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">仿真配置对象</param>
+        [Obsolete("这个函数本是用于移植旧版本的更新状态，请用OnUpdateState", true)]
         public void UpdateState(double dt, Disturbance disturbance)
         {
             //dt = e.data{ 1};
@@ -421,6 +514,11 @@ namespace CsharpVersion
             //current_X4 = current_X4 + current_X4_dot * dt;
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="sender">发送数据的对象</param>
+        /// <param name="e">接受的数据，用于计算更新</param>
         public void OnUpdateState(object sender, XChangedEventArgs e)
         {
             X4 += e.Data * e.Dt;

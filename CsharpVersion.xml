@@ -1,0 +1,1552 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CsharpVersion</name>
+    </assembly>
+    <members>
+        <member name="T:CsharpVersion.AngularRateLoop">
+            <summary>
+            角速度环
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.AngularRateLoop.Configuration">
+            <summary>
+            仿真配置
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.AngularRateLoop.U3">
+            <summary>
+            输入变量，舰载机的p、q和r
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.AngularRateLoop.X4">
+            <summary>
+            状态变量，舰载机的p、q和r
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.AngularRateLoop.Uact">
+            <summary>
+            输出变量，舰载机的δa，δe和δr
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.AngularRateLoop.filteredUact">
+            <summary>
+            别问这个变量为什么需要暴露出去，问就是我已经尽力了
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.AngularRateLoop.FilteredU3">
+            <summary>
+            只读属性，用于控制器算法计算输出
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.AngularRateLoop.DeriveX4">
+            <summary>
+            只读属性，用于控制器算法计算输出
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.AngularRateLoop.Fq">
+            <summary>
+            只读属性，用于控制器算法计算输出
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.AngularRateLoop.Gq">
+            <summary>
+            只读属性，用于控制器算法计算输出
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.AngularRateLoop.Gpr">
+            <summary>
+            只读属性，用于控制器算法计算输出
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.AngularRateLoop.Fpr">
+            <summary>
+            只读属性，用于控制器算法计算输出
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.#ctor(CsharpVersion.Plane,CsharpVersion.Ship,ModelEntities.Configuration)">
+            <summary>
+            创建位置环类型的实例
+            </summary>
+            <param name="plane">舰载机对象引用</param>
+            <param name="ship">航母对象引用</param>
+            <param name="config">仿真配置对象引用</param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.CalculateFilter(System.Double)">
+            <summary>
+            计算输出变量滤波
+            </summary>
+            <remarks>目前未使用</remarks>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.CalculateLimiter(System.Double)">
+            <summary>
+            计算输出变量限幅
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.CalculateLimiter(System.Double,System.Int32)">
+            <summary>
+            计算输出变量限幅
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="step_count">仿真时间步数，用于调试输出</param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.CalculateNonlinearObserver(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            计算非线性观测器参数
+            </summary>
+            <remarks>目前未使用</remarks>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">风场扰动</param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.CalculateObservation">
+            <summary>
+            计算反步法参数
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.CalculateOutput">
+            <summary>
+            计算输出变量
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.CalculateOutput(System.Double,System.Double,System.Int32)">
+            <summary>
+            计算输出变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="current_time">当前仿真时间</param>
+            <param name="step_count">当前仿真步数</param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.CalculateState(System.Double,MathNet.Numerics.LinearAlgebra.Vector{System.Double})">
+            <summary>
+            计算状态变量和误差
+            </summary>
+            <param name="dt"></param>
+            <param name="input"></param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.Record(System.Double)">
+            <summary>
+            记录位置环变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.Reset">
+            <summary>
+            重置控制器，将相关变量恢复至初始状态
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.UpdateState(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">仿真配置对象</param>
+        </member>
+        <member name="M:CsharpVersion.AngularRateLoop.OnUpdateState(System.Object,CsharpVersion.XChangedEventArgs)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="sender">发送数据的对象</param>
+            <param name="e">接受的数据，用于计算更新</param>
+        </member>
+        <member name="T:CsharpVersion.AttitudeLoop">
+            <summary>
+            姿态环
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.AttitudeLoop.Configuration">
+            <summary>
+            仿真配置
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.AttitudeLoop.U2">
+            <summary>
+            输入变量，舰载机的α、β和μ
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.AttitudeLoop.X3">
+            <summary>
+            状态变量，舰载机的α、β和μ
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.AttitudeLoop.U3">
+            <summary>
+            输出变量，舰载机的p、q和r
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.#ctor(CsharpVersion.Plane,CsharpVersion.Ship,ModelEntities.Configuration)">
+            <summary>
+            创建位置环类型的实例
+            </summary>
+            <param name="plane">舰载机对象引用</param>
+            <param name="ship">航母对象引用</param>
+            <param name="config">仿真配置对象引用</param>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.CalculateFilter(System.Double)">
+            <summary>
+            计算输出变量滤波
+            </summary>
+            <remarks>目前未使用</remarks>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.CalculateLimiter(System.Double)">
+            <summary>
+            计算输出变量限幅
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.CalculateNonlinearObserver(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            计算非线性观测器参数
+            </summary>
+            <remarks>目前未使用</remarks>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">风场扰动</param>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.CalculateObservation">
+            <summary>
+            计算反步法参数
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.CalculateOutput">
+            <summary>
+            计算输出变量
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.CalculateState(System.Double,MathNet.Numerics.LinearAlgebra.Vector{System.Double})">
+            <summary>
+            计算状态变量和误差
+            </summary>
+            <param name="dt"></param>
+            <param name="input"></param>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.CalculateState(System.Double,MathNet.Numerics.LinearAlgebra.Vector{System.Double},System.Double)">
+            <summary>
+            计算状态变量和误差
+            </summary>
+            <param name="dt"></param>
+            <param name="input"></param>
+            <param name="derive"></param>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.Record(System.Double)">
+            <summary>
+            记录位置环变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.Reset">
+            <summary>
+            重置控制器，将相关变量恢复至初始状态
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.UpdateState(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">仿真配置对象</param>
+        </member>
+        <member name="M:CsharpVersion.AttitudeLoop.OnUpdateState(System.Object,CsharpVersion.XChangedEventArgs)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="sender">发送数据的对象</param>
+            <param name="e">接受的数据，用于计算更新</param>
+        </member>
+        <member name="T:CsharpVersion.Disturbance">
+            <summary>
+            扰动类，所有关于舰尾流和风场扰动的计算包含于此
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.IsWindDisturbanceStarted">
+            <summary>
+            标记风场扰动开始的参数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.disturbance_kai">
+            <summary>
+            扰动引起的舰载机χ变化
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.disturbance_gamma">
+            <summary>
+            扰动引起的舰载机γ变化
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.disturbance_Vk">
+            <summary>
+            扰动引起的舰载机Vk变化
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.disturbance_alpha">
+            <summary>
+            扰动引起的舰载机α变化
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.disturbance_p">
+            <summary>
+            扰动引起的舰载机p变化
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.disturbance_q">
+            <summary>
+            扰动引起的舰载机q变化
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.disturbance_r">
+            <summary>
+            扰动引起的舰载机r变化
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.wind_actual">
+            <summary>
+            实际风速
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Disturbance.wind_actual_lat">
+            <summary>
+            实际侧向风速
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.Disturbance.#ctor(ModelEntities.Configuration)">
+            <summary>
+            构造扰动类型实例
+            </summary>
+            <param name="config">仿真配置对象引用</param>
+        </member>
+        <member name="M:CsharpVersion.Disturbance.reset">
+            <summary>
+            重置扰动状态，将相关变量恢复至初始状态
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.Disturbance.updateWind(CsharpVersion.Plane,CsharpVersion.Ship,System.Int32)">
+            <summary>
+            更新风场扰动变量
+            </summary>
+            <param name="plane">舰载机对象</param>
+            <param name="ship">航母对象</param>
+            <param name="step_count">当前仿真步数</param>
+        </member>
+        <member name="M:CsharpVersion.Disturbance.updateState(CsharpVersion.Plane)">
+            <summary>
+            更新扰动变量
+            </summary>
+            <param name="plane">舰载机对象</param>
+        </member>
+        <member name="T:CsharpVersion.FlightPathLoop">
+            <summary>
+            航迹环
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.FlightPathLoop.Configuration">
+            <summary>
+            仿真配置
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.FlightPathLoop.U1">
+            <summary>
+            输入变量，舰载机的χ和γ
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.FlightPathLoop.X2">
+            <summary>
+            状态变量，舰载机的χ和γ
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.FlightPathLoop.U2">
+            <summary>
+            输出变量，舰载机的α、β和μ
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.FlightPathLoop.DeriveX2">
+            <summary>
+            别问这个变量为什么需要暴露出去，问就是我已经尽力了
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.#ctor(CsharpVersion.Plane,CsharpVersion.Ship,ModelEntities.Configuration)">
+            <summary>
+            创建航迹环类型的实例
+            </summary>
+            <param name="jet">舰载机对象引用</param>
+            <param name="ac">航母对象引用</param>
+            <param name="config">仿真配置对象引用</param>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.CalculateFilter(System.Double)">
+            <summary>
+            计算输出变量滤波，此处只用于油门
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.CalculateLimiter(System.Double)">
+            <summary>
+            计算输出变量限幅
+            </summary>
+            <remarks>这里需要计算的变量较多，包括输出变量，前后缘襟翼和油门</remarks>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.CalculateNonlinearObserver(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            计算非线性观测器参数
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">风场扰动</param>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.CalculateObservation">
+            <summary>
+            计算反步法参数
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.CalculateOutput">
+            <summary>
+            计算输出变量
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.CalculateState(System.Double,MathNet.Numerics.LinearAlgebra.Vector{System.Double})">
+            <summary>
+            计算状态变量和误差
+            </summary>
+            <param name="dt"></param>
+            <param name="input"></param>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.Record(System.Double)">
+            <summary>
+            记录位置环变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.Reset">
+            <summary>
+            重置控制器，将相关变量恢复至初始状态
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.UpdateState(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">仿真配置对象</param>
+        </member>
+        <member name="M:CsharpVersion.FlightPathLoop.OnUpdateState(System.Object,CsharpVersion.XChangedEventArgs)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="sender">发送数据的对象</param>
+            <param name="e">接受的数据，用于计算更新</param>
+        </member>
+        <member name="T:CsharpVersion.HelperFunction">
+            <summary>
+            辅助函数，用于特定计算场景
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.HelperFunction.Configuration">
+            <summary>
+            仿真配置
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.HelperFunction.ideal_path(MathNet.Numerics.LinearAlgebra.Vector{System.Double},MathNet.Numerics.LinearAlgebra.Vector{System.Double},System.Double,System.Double)">
+            <summary>
+            计算理想下滑道下的着舰点，仅计算y，z坐标
+            </summary>
+            <param name="position_a">飞机当前位置</param>
+            <param name="position_s">航母当前位置</param>
+            <param name="theta_s">斜角甲板角度</param>
+            <param name="psi_s">航母偏转角度</param>
+            <returns>理想着舰点</returns>
+        </member>
+        <member name="M:CsharpVersion.HelperFunction.vector_filed_trac(MathNet.Numerics.LinearAlgebra.Vector{System.Double},MathNet.Numerics.LinearAlgebra.Vector{System.Double})">
+            <summary>
+            【说实话这个算的是个啥我也不知道】
+            </summary>
+            <param name="position_a">飞机当前位置</param>
+            <param name="position_s">航母当前位置</param>
+            <returns>一个跟轨迹追踪有关系的东西</returns>
+        </member>
+        <member name="T:CsharpVersion.IControlModule">
+            <summary>
+            <para>仿真控制器接口，创建的控制器都需要实现下面的函数</para>
+            <para>用于控制一下控制器格式</para>
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.IControlModule.Configuration">
+            <summary>
+            仿真配置
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.CalculateState(System.Double,MathNet.Numerics.LinearAlgebra.Vector{System.Double})">
+            <summary>
+            计算状态变量和误差
+            </summary>
+            <param name="dt"></param>
+            <param name="input"></param>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.CalculateObservation">
+            <summary>
+            计算反步法参数
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.CalculateNonlinearObserver(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            计算非线性观测器参数
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">风场扰动</param>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.CalculateOutput">
+            <summary>
+            计算输出变量
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.CalculateLimiter(System.Double)">
+            <summary>
+            计算输出变量限幅
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.CalculateFilter(System.Double)">
+            <summary>
+            计算输出变量滤波
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.UpdateState(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            更新状态变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">仿真配置对象</param>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.Record(System.Double)">
+            <summary>
+            记录变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.IControlModule.Reset">
+            <summary>
+            重置控制器，将相关变量恢复至初始状态
+            </summary>
+        </member>
+        <member name="T:CsharpVersion.InertiaParameter">
+            <summary>
+            舰载机惯性参数，结构体
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.Ixx">
+            <summary>
+            xx转动惯量，单位kg/m2
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.Iyy">
+            <summary>
+            yy转动惯量，单位kg/m2
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.Izz">
+            <summary>
+            zz转动惯量，单位kg/m2
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.Ixz">
+            <summary>
+            xz转动惯量，单位kg/m2
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.WingS">
+            <summary>
+            翼面积
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.WingC">
+            <summary>
+            平均气动弦长
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.WingL">
+            <summary>
+            翼展
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.Mass">
+            <summary>
+            空重，单位kg
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.TMax">
+            <summary>
+            军用推力（两台）
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.Rou">
+            <summary>
+            空气密度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.InertiaParameter.G">
+            <summary>
+            重力加速度
+            </summary>
+        </member>
+        <member name="T:CsharpVersion.DesiredParameter">
+            <summary>
+            期望控制参数，结构体
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.DesiredParameter.Alpha">
+            <summary>
+            期望迎角
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.DesiredParameter.Chi">
+            <summary>
+            期望航向角
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.DesiredParameter.Gamma">
+            <summary>
+            期望爬升角
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.DesiredParameter.Vk">
+            <summary>
+            期望速度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.DesiredParameter.EngineDelta">
+            <summary>
+            发动机安装角
+            </summary>
+        </member>
+        <member name="T:CsharpVersion.Plane">
+            <summary>
+            舰载机类
+            </summary>
+            <remarks>所有角度、角速度均以弧度为单位</remarks>
+        </member>
+        <member name="F:CsharpVersion.Plane.PlaneInertia">
+            <summary>
+            舰载机惯性参数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DesiredParameter">
+            <summary>
+            期望控制参数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaERange">
+            <summary>
+            升降舵角度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaERateRange">
+            <summary>
+            升降舵角速度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaARange">
+            <summary>
+            副翼角度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaARateRange">
+            <summary>
+            副翼角速度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaRRange">
+            <summary>
+            方向舵角度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaRRateRange">
+            <summary>
+            方向舵角速度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaTEFRange">
+            <summary>
+            后缘襟翼角度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaTEFRateRange">
+            <summary>
+            后缘襟翼角速度范围
+            </summary>
+            <remarks>调整后缘襟翼偏转速率，改善纵向轨迹跟踪性能</remarks>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaPRange">
+            <summary>
+            油门杆角度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaPRateRange">
+            <summary>
+            油门杆角速度范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.ThrustRange">
+            <summary>
+            油门范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.ThrustRateRange">
+            <summary>
+            油门变化速率范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.PRange">
+            <summary>
+            角速度p范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.QRange">
+            <summary>
+            角速度q范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.RRange">
+            <summary>
+            角速度r范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.GammaRange">
+            <summary>
+            爬升角范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.ChiRange">
+            <summary>
+            航向角范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.ThetaRange">
+            <summary>
+            θ范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.MiuRange">
+            <summary>
+            μ范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.PRateRange">
+            <summary>
+            角速度p变化速率范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.QRateRange">
+            <summary>
+            角速度q变化速率范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.RRateRange">
+            <summary>
+            角速度r变化速率范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.GammaRateRange">
+            <summary>
+            爬升角变化速率范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.ChiRateRange">
+            <summary>
+            航向角变化速率范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.ThetaRateRange">
+            <summary>
+            θ变化速率范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.MiuRateRange">
+            <summary>
+            μ变化速率范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CY">
+            <summary>
+            升力系数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CD">
+            <summary>
+            阻力系数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CC">
+            <summary>
+            侧力系数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CL">
+            <summary>
+            滚转力矩系数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CM">
+            <summary>
+            俯仰力矩系数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CN">
+            <summary>
+            偏航力矩系数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Position">
+            <summary>
+            舰载机位置
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Chi">
+            <summary>
+            航向角
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Gamma">
+            <summary>
+            爬升角
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Alpha">
+            <summary>
+            迎角
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Miu">
+            <summary>
+            滚转角
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Beta">
+            <summary>
+            侧滑角
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Theta">
+            <summary>
+            欧拉角θ
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Phi">
+            <summary>
+            欧拉角φ
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Psi">
+            <summary>
+            欧拉角ψ
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.P">
+            <summary>
+            滚转角速度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Q">
+            <summary>
+            俯仰角速度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.R">
+            <summary>
+            偏航角速度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Vk">
+            <summary>
+            空速
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaA">
+            <summary>
+            副翼角度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaE">
+            <summary>
+            升降舵角度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaR">
+            <summary>
+            方向舵角度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaP">
+            <summary>
+            油门杆角度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaLEF">
+            <summary>
+            前缘襟翼角度，leading-edge flap
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaTEF">
+            <summary>
+            后缘襟翼角度，tailing-edge flap
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DeltaTEFDesired">
+            <summary>
+            期望后缘襟翼角度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Flow">
+            <summary>
+            气流
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.T">
+            <summary>
+            发动机推力
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.DesiredPosition">
+            <summary>
+            期望位置
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.GammaDerive">
+            <summary>
+            爬升角导数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.ChiDerive">
+            <summary>
+            航向角导数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.l_path_0">
+            <summary>
+            期望路径参数，初始路径长度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.l_path">
+            <summary>
+            期望路径参数，路径长度参数
+            </summary>
+            <remarks>特别注意，l_path初始值必须为0</remarks>
+        </member>
+        <member name="F:CsharpVersion.Plane.omega_fx_2f">
+            <summary>
+            暂存于此处的，控制器计算又有用的变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.omega_fy_2f">
+            <summary>
+            暂存于此处的，控制器计算又有用的变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.omega_fz_2f">
+            <summary>
+            暂存于此处的，控制器计算又有用的变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.x_b_2f">
+            <summary>
+            暂存于此处的，控制器计算又有用的变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.y_b_2f">
+            <summary>
+            暂存于此处的，控制器计算又有用的变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.z_b_2f">
+            <summary>
+            暂存于此处的，控制器计算又有用的变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.kai_b2f">
+            <summary>
+            暂存于此处的，控制器计算又有用的变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.gamma_b2f">
+            <summary>
+            暂存于此处的，控制器计算又有用的变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.Y">
+            <summary>
+            升力
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.D">
+            <summary>
+            阻力
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.C">
+            <summary>
+            侧力
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.L">
+            <summary>
+            滚转力矩
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.M">
+            <summary>
+            俯仰力矩
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.N">
+            <summary>
+            偏航力矩
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CY_alpha">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CY_delta_tef">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CL_delta_a">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CL_delta_r">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CM_delta_e">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CN_delta_a">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CN_delta_r">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CC_beta">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CD_alpha">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CL_beta">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CM_alpha1">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CM_alpha2">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CM_alpha">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Plane.CN_beta">
+            <summary>
+            计算气动参数的中间变量
+            </summary>
+        </member>
+        <member name="E:CsharpVersion.Plane.X1ChangedEvent">
+            <summary>
+            更新位置环状态变量的事件
+            </summary>
+        </member>
+        <member name="E:CsharpVersion.Plane.X2ChangedEvent">
+            <summary>
+            更新航迹环状态变量的事件
+            </summary>
+        </member>
+        <member name="E:CsharpVersion.Plane.X3ChangedEvent">
+            <summary>
+            更新姿态环状态变量的事件
+            </summary>
+        </member>
+        <member name="E:CsharpVersion.Plane.X4ChangedEvent">
+            <summary>
+            更新角速度环状态变量的事件
+            </summary>
+        </member>
+        <member name="E:CsharpVersion.Plane.RecordPlaneStateEvent">
+            <summary>
+            记录舰载机状态变量的事件
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.Plane.#ctor(CsharpVersion.Ship)">
+            <summary>
+            构造舰载机类型的实例
+            </summary>
+            <param name="ship">航母对象</param>
+        </member>
+        <member name="M:CsharpVersion.Plane.Record">
+            <summary>
+            记录舰载机变量变化
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.Plane.UpdateState(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">仿真配置对象</param>
+        </member>
+        <member name="M:CsharpVersion.Plane.Reset(CsharpVersion.Ship)">
+            <summary>
+            重置舰载机，将相关变量恢复至初始状态
+            </summary>
+        </member>
+        <member name="T:CsharpVersion.PositionLoop">
+            <summary>
+            位置环
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.PositionLoop.Configuration">
+            <summary>
+            仿真配置
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.PositionLoop.X1Desired">
+            <summary>
+            输入变量，期待的着舰位置
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.PositionLoop.X1">
+            <summary>
+            状态变量，舰载机的y和z
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.PositionLoop.U1">
+            <summary>
+            输出变量，舰载机的χ和γ
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.PositionLoop.deriveX1">
+            <summary>
+            别问这个变量为什么需要暴露出去，问就是我已经尽力了
+            </summary>
+        </member>
+        <member name="E:CsharpVersion.PositionLoop.RecordPositionLoopEvent">
+            <summary>
+            记录位置环状态变量的事件
+            </summary>
+        </member>
+        <member name="E:CsharpVersion.PositionLoop.RecordPositionLoopVarEvent">
+            <summary>
+            记录位置环状态变量意外的变量的事件
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.#ctor(CsharpVersion.Plane,CsharpVersion.Ship,ModelEntities.Configuration)">
+            <summary>
+            创建位置环类型的实例
+            </summary>
+            <param name="plane">舰载机对象引用</param>
+            <param name="ship">航母对象引用</param>
+            <param name="config">仿真配置对象引用</param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.CalculateFilter(System.Double)">
+            <summary>
+            计算输出变量滤波
+            </summary>
+            <remarks>目前未使用</remarks>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.CalculateLimiter(System.Double)">
+            <summary>
+            计算输出变量限幅
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.CalculateNonlinearObserver(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            计算非线性观测器参数
+            </summary>
+            <remarks>目前未使用</remarks>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">风场扰动</param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.CalculateObservation">
+            <summary>
+            计算反步法参数
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.CalculateOutput">
+            <summary>
+            计算输出变量
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.CalculateOutput(System.Double,System.Double,System.Int32)">
+            <summary>
+            计算输出变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="current_time">当前仿真时间</param>
+            <param name="step_count">当前仿真步数</param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.CalculateState(System.Double,MathNet.Numerics.LinearAlgebra.Vector{System.Double})">
+            <summary>
+            计算状态变量和误差
+            </summary>
+            <param name="dt"></param>
+            <param name="input"></param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.Record(System.Double)">
+            <summary>
+            记录位置环变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.Reset">
+            <summary>
+            重置控制器，将相关变量恢复至初始状态
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.UpdateState(System.Double,CsharpVersion.Disturbance)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="disturbance">仿真配置对象</param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.OnUpdateState(System.Object,CsharpVersion.XChangedEventArgs)">
+            <summary>
+            更新位置环状态变量
+            </summary>
+            <param name="sender">发送数据的对象</param>
+            <param name="e">接受的数据，用于计算更新</param>
+        </member>
+        <member name="M:CsharpVersion.PositionLoop.CalculatePrescribedParameter">
+            <summary>
+            计算期望参数
+            </summary>
+        </member>
+        <member name="T:CsharpVersion.Ship">
+            <summary>
+            航母类
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.Velocity">
+            <summary>
+            航母速度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.Theta">
+            <summary>
+            斜角甲板角度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.Gamma">
+            <summary>
+            期望下滑角
+            </summary>
+            <remarks>可能会随舰载机机型不同有变化</remarks>
+        </member>
+        <member name="F:CsharpVersion.Ship.Psi">
+            <summary>
+            航母初始偏转角度
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.omega_dx_2i">
+            <summary>
+            航母转动角速度x分量，惯性系下表示
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.omega_dy_2i">
+            <summary>
+            航母转动角速度y分量，惯性系下表示
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.omega_dz_2i">
+            <summary>
+            航母转动角速度z分量，惯性系下表示
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.omega_d_2i">
+            <summary>
+            航母转动角速度，惯性系下表示
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.Position">
+            <summary>
+            航母位置
+            </summary>
+            <remarks>特别注意，current_position_ship仅代表航母直线前进位置，未考虑甲板起伏与侧向偏移</remarks>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckPosition">
+            <summary>
+            航母甲板位置
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckEnable">
+            <summary>
+            是否使能甲板运动补偿
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckMotionCount">
+            <summary>
+            【作用不明】
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckMotionLateralCount">
+            <summary>
+            【作用不明】
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckCompensationPosition">
+            <summary>
+            甲板运动补偿开始作用距离
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckCompensationStartRange">
+            <summary>
+            甲板运动补偿开始作用范围
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckCompensationStartCount">
+            <summary>
+            1开启DMC 0关闭DMC，等待补偿指令足够小
+            </summary>
+            <remarks>上面的描述感觉不太对，这个东西实际上是需要加到阈值以上才会起作用</remarks>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckCompensationLateralStartCount">
+            <summary>
+            1开启DMC 0关闭DMC，等待补偿指令足够小，用于横侧向补偿
+            </summary>
+            <remarks>上面的描述感觉不太对，这个东西实际上是需要加到阈值以上才会起作用</remarks>
+        </member>
+        <member name="F:CsharpVersion.Ship.CurrentDeckControl">
+            <summary>
+            由补偿模型计算出的当前甲板控制量，用于位置计算
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.CurrentDeckLateralControl">
+            <summary>
+            由补偿模型计算出的当前甲板侧向控制量，用于位置计算
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeriveDeckControl">
+            <summary>
+            甲板控制导数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeriveDeckLateralControl">
+            <summary>
+            甲板侧向控制导数
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckCompensationStartThreshold">
+            <summary>
+            甲板补偿开始作用的阈值
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.Ship.DeckCompensationLateralStartThreshold">
+            <summary>
+            甲板侧向补偿开始作用的阈值
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.Ship.#ctor(ModelEntities.Configuration)">
+            <summary>
+            构造航母类型的实例
+            </summary>
+            <param name="config">仿真配置对象</param>
+        </member>
+        <member name="M:CsharpVersion.Ship.UpdateState(System.Double)">
+            <summary>
+            更新扰动变量
+            </summary>
+            <param name="dt">舰载机对象</param>
+        </member>
+        <member name="M:CsharpVersion.Ship.CalculateCompensation(System.Double,CsharpVersion.Plane,CsharpVersion.PositionLoop,System.Int32)">
+            <summary>
+            计算甲板补偿
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="plane">舰载机对象</param>
+            <param name="positionLoop">位置环对象</param>
+            <param name="step_count">当前仿真步数</param>
+        </member>
+        <member name="M:CsharpVersion.Ship.record">
+            <summary>
+            记录航母变量
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.Ship.Reset">
+            <summary>
+            重置航母，将相关变量恢复至初始状态
+            </summary>
+        </member>
+        <member name="T:CsharpVersion.Simulation">
+            <summary>
+            仿真的顶层类，用于管理仿真过程中用到的所有资源
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.Ship">
+            <summary>
+            航母对象，主要作为仿真中的参考对象，没有大的变动需要特别处理
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.Plane">
+            <summary>
+            舰载机对象，这是仿真过程中的控制对象，需要为其他对象提供状态信息
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.Configuration">
+            <summary>
+            仿真配置对象，存储仿真配置
+            </summary>
+            <remarks>
+            现有版本中这个是一个仿真类型的实例，旧版本中用的是静态类，因此有的地方传进去的参数会比以前多一个<c>Configuration</c>
+            </remarks>
+        </member>
+        <member name="P:CsharpVersion.Simulation.Disturbance">
+            <summary>
+            扰动对象，提供风场扰动信息
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.AttitudeLoop">
+            <summary>
+            姿态环控制器
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.FlightPathLoop">
+            <summary>
+            航迹环控制器
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.PositionLoop">
+            <summary>
+            位置环控制器
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.AngularRateLoop">
+            <summary>
+            角速度环控制器
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.Record">
+            <summary>
+            数据记录对象，用于缓存仿真中产生的数据，并提供将数据存入磁盘的功能
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.Simulation.Step_count">
+            <summary>
+            当前仿真步数，用于外部引用
+            </summary>
+            <remarks>
+            只读属性，实际操作通过内部私有字段进行
+            </remarks>
+        </member>
+        <member name="F:CsharpVersion.Simulation.DataSending">
+            <summary>
+            用于处理数据发送的委托
+            </summary>
+            <remarks>
+            需要发送的数据包括两部分
+            <list type="bullet">
+            <item>通过SignalR发到前端进行实时绘图</item>
+            <item>通过UDP协议发送至视景软件</item>
+            </list>
+            这里需要控制的是第二类数据
+            </remarks>
+        </member>
+        <member name="P:CsharpVersion.Simulation.DataToSend">
+            <summary>
+            提供向视景软件发送的字节流
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.Simulation.#ctor">
+            <summary>
+            创建仿真类型的实例
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.Simulation.#ctor(ModelEntities.Configuration)">
+            <summary>
+            创建仿真类型的实例
+            </summary>
+            <param name="configuration">创建本实例需要使用仿真配置</param>
+        </member>
+        <member name="M:CsharpVersion.Simulation.Simulate(System.Collections.Concurrent.ConcurrentQueue{ModelEntities.DataToSend})">
+            <summary>
+            进行仿真
+            </summary>
+            <param name="DataQueue">数据队列，用于存储仿真过程中产生的数据并用于实时数据发送</param>
+        </member>
+        <member name="M:CsharpVersion.Simulation.Reset">
+            <summary>
+            重置仿真状态，以便进行下一次仿真
+            </summary>
+        </member>
+        <member name="T:CsharpVersion.SimulationRecord">
+            <summary>
+            用于缓存仿真数据的类，同时提供存储至磁盘的功能。
+            </summary>
+        </member>
+        <member name="F:CsharpVersion.SimulationRecord.time_record">
+            <summary>
+            仿真时间记录，这个东西是直接在外面控制添加的
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.SimulationRecord.#ctor">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.SimulationRecord.SaveToFile(System.String)">
+            <summary>
+            将缓存的仿真数据存储至磁盘
+            </summary>
+            <param name="fileName">存储的文件名</param>
+        </member>
+        <member name="M:CsharpVersion.SimulationRecord.OnRecordPlaneState(System.Object,System.EventArgs)">
+            <summary>
+            在舰载机状态更新的时候调用此函数进行数据记录
+            </summary>
+            <param name="sender">传入的对象应为舰载机对象</param>
+            <param name="e"></param>
+        </member>
+        <member name="T:CsharpVersion.XChangedEventArgs">
+            <summary>
+            传递数据更新时用到的变量
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.XChangedEventArgs.Dt">
+            <summary>
+            仿真时间步长
+            </summary>
+        </member>
+        <member name="P:CsharpVersion.XChangedEventArgs.Data">
+            <summary>
+            变量变化量
+            </summary>
+        </member>
+        <member name="M:CsharpVersion.XChangedEventArgs.#ctor(System.Double,MathNet.Numerics.LinearAlgebra.Vector{System.Double})">
+            <summary>
+            构造变化参数实例
+            </summary>
+            <param name="dt">仿真时间步长</param>
+            <param name="data">变量变化量</param>
+        </member>
+    </members>
+</doc>

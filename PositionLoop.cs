@@ -11,20 +11,34 @@ using ModelEntities;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 位置环
+    /// </summary>
     public class PositionLoop : IControlModule
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+
+        /// <summary>
+        /// 仿真配置
+        /// </summary>
         public Configuration Configuration { get; }
         Plane _plane;
         Ship _ship;
-        // Input Variable
+
+        /// <summary>
+        /// 输入变量，期待的着舰位置
+        /// </summary>
         public Vector<double> X1Desired;
 
-        // State Variable
+        /// <summary>
+        /// 状态变量，舰载机的y和z
+        /// </summary>
         public Vector<double> X1;
 
-        // Output Variable
+        /// <summary>
+        /// 输出变量，舰载机的χ和γ
+        /// </summary>
         public Vector<double> U1 = vb.Dense(2, 0);
 
         // Interior Variable
@@ -47,16 +61,33 @@ namespace CsharpVersion
         // 中间变量
         Vector<double> epp;
         Vector<double> epc;
-        // filter_u3;
+
+        /// <summary>
+        /// 别问这个变量为什么需要暴露出去，问就是我已经尽力了
+        /// </summary>
         public Vector<double> deriveX1 = vb.Dense(2, 0); //[y,z]'
         Vector<double> previousU1;
         Vector<double> previousX1Desired;
         Vector<double> filterdX1Desired;
         readonly IController controller;
 
+        /// <summary>
+        /// 记录位置环状态变量的事件
+        /// </summary>
+        [Obsolete("这个事件本是用于移植旧版本的记录，现在发现控制器变量暂时不用记录", true)]
         public event EventHandler<EventArgs> RecordPositionLoopEvent;
+        /// <summary>
+        /// 记录位置环状态变量意外的变量的事件
+        /// </summary>
+        [Obsolete("这个事件本是用于移植旧版本的记录，现在发现这些变量暂时不用记录", true)]
         public event EventHandler<EventArgs> RecordPositionLoopVarEvent;
 
+        /// <summary>
+        /// 创建位置环类型的实例
+        /// </summary>
+        /// <param name="plane">舰载机对象引用</param>
+        /// <param name="ship">航母对象引用</param>
+        /// <param name="config">仿真配置对象引用</param>
         public PositionLoop(Plane plane, Ship ship, Configuration config)
         {
             Configuration = config;
@@ -100,6 +131,11 @@ namespace CsharpVersion
             //addlistener(plane, 'X1ChangedEvent', @updateState);
         }
 
+        /// <summary>
+        /// 计算输出变量滤波
+        /// </summary>
+        /// <remarks>目前未使用</remarks>
+        /// <param name="dt">仿真时间步长</param>
         public void CalculateFilter(double dt)
         {
             U1FilterBuffer.SetRow(U1FilterBufferIndex, U1);
@@ -112,6 +148,10 @@ namespace CsharpVersion
             U1 = U1FilterBuffer.ColumnSums() / sampleNumber;
         }
 
+        /// <summary>
+        /// 计算输出变量限幅
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
         public void CalculateLimiter(double dt)
         {
             // chi gamma变化幅度限制
@@ -153,11 +193,20 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 计算非线性观测器参数
+        /// </summary>
+        /// <remarks>目前未使用</remarks>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">风场扰动</param>
         public void CalculateNonlinearObserver(double dt, Disturbance disturbance)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// 计算反步法参数
+        /// </summary>
         public void CalculateObservation()
         {
             // 位置控制环
@@ -167,17 +216,31 @@ namespace CsharpVersion
             B1 = mb.DenseOfDiagonalArray(new double[] { _plane.Vk, -_plane.Vk });
         }
 
+        /// <summary>
+        /// 计算输出变量
+        /// </summary>
         public void CalculateOutput()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// 计算输出变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="current_time">当前仿真时间</param>
+        /// <param name="step_count">当前仿真步数</param>
         public void CalculateOutput(double dt, double current_time, int step_count)
         {
             U1 = controller.CalculateOutput(dt, current_time, step_count);
             controller.InvokeRecordEvent();
         }
 
+        /// <summary>
+        /// 计算状态变量和误差
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="input"></param>
         public void CalculateState(double dt, Vector<double> input)
         {
             switch (Configuration.GuidanceFilter)// 判断使用何种滤波器
@@ -199,6 +262,11 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 记录位置环变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        [Obsolete("这个函数本是用于移植旧版本的记录，现在发现控制器变量暂时不用记录")]
         public void Record(double dt)
         {
             //ev = XChangedEventArgs(epc, derive_X1, previous_desired_X1, ...
@@ -206,6 +274,9 @@ namespace CsharpVersion
             //notify(obj, "RecordPositionLoopEvent", ev);
         }
 
+        /// <summary>
+        /// 重置控制器，将相关变量恢复至初始状态
+        /// </summary>
         public void Reset()
         {
             U1 = vb.Dense(2, 0);
@@ -216,6 +287,12 @@ namespace CsharpVersion
             controller.Reset();
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">仿真配置对象</param>
+        [Obsolete("这个函数本是用于移植旧版本的更新状态，请用OnUpdateState", true)]
         public void UpdateState(double dt, Disturbance disturbance)
         {
             //dt = e.data{ 1};
@@ -223,11 +300,19 @@ namespace CsharpVersion
             //current_X1 = current_X1 + current_X1_dot * dt;
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="sender">发送数据的对象</param>
+        /// <param name="e">接受的数据，用于计算更新</param>
         public void OnUpdateState(object sender, XChangedEventArgs e)
         {
             X1 += e.Data * e.Dt;
         }
 
+        /// <summary>
+        /// 计算期望参数
+        /// </summary>
         public void CalculatePrescribedParameter()
         {
             previousX1Desired = X1Desired;

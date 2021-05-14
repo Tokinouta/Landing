@@ -11,11 +11,17 @@ using System.Threading.Tasks;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 用于缓存仿真数据的类，同时提供存储至磁盘的功能。
+    /// </summary>
     public class SimulationRecord
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
 
+        /// <summary>
+        /// 仿真时间记录，这个东西是直接在外面控制添加的
+        /// </summary>
         public List<double> time_record;
 
         // Data record
@@ -82,6 +88,9 @@ namespace CsharpVersion
         readonly List<Vector<double>> derive_X4_record;
         readonly List<double> NDO_d_omega_record;
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public SimulationRecord()
         {
             time_record = new List<double>();
@@ -119,6 +128,10 @@ namespace CsharpVersion
             //addlistener(sim, "PlotEvent", @plotDotEventHandler);
         }
 
+        /// <summary>
+        /// 将缓存的仿真数据存储至磁盘
+        /// </summary>
+        /// <param name="fileName">存储的文件名</param>
         public void SaveToFile(string fileName)
         {
             // add simulation date and time
@@ -137,6 +150,11 @@ namespace CsharpVersion
             MatlabWriter.Store(fileName, matrices);
         }
 
+        /// <summary>
+        /// 在舰载机状态更新的时候调用此函数进行数据记录
+        /// </summary>
+        /// <param name="sender">传入的对象应为舰载机对象</param>
+        /// <param name="e"></param>
         public void OnRecordPlaneState(object sender, EventArgs e)
         {
             Plane plane = (Plane)sender;

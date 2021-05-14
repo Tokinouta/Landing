@@ -9,150 +9,502 @@ using System.Threading.Tasks;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 舰载机惯性参数，结构体
+    /// </summary>
     public struct InertiaParameter
     {
-        public double Ixx; // 转动惯量 kg/m2
+        /// <summary>
+        /// xx转动惯量，单位kg/m2
+        /// </summary>
+        public double Ixx;
+        /// <summary>
+        /// yy转动惯量，单位kg/m2
+        /// </summary>
         public double Iyy;
+        /// <summary>
+        /// zz转动惯量，单位kg/m2
+        /// </summary>
         public double Izz;
+        /// <summary>
+        /// xz转动惯量，单位kg/m2
+        /// </summary>
         public double Ixz;
-        public double WingS; // 翼面积
-        public double WingC;  // 平均气动弦长
-        public double WingL;  // 翼展
-        public double Mass; // 空重 kg
-        public double TMax;  // 军用推力（两台）
-        public double Rou;  // 空气密度
+        /// <summary>
+        /// 翼面积
+        /// </summary>
+        public double WingS;
+        /// <summary>
+        /// 平均气动弦长
+        /// </summary>
+        public double WingC;
+        /// <summary>
+        /// 翼展
+        /// </summary>
+        public double WingL;
+        /// <summary>
+        /// 空重，单位kg
+        /// </summary>
+        public double Mass;
+        /// <summary>
+        /// 军用推力（两台）
+        /// </summary>
+        public double TMax;
+        /// <summary>
+        /// 空气密度
+        /// </summary>
+        public double Rou;
+        /// <summary>
+        /// 重力加速度
+        /// </summary>
         public double G;
     }
 
+    /// <summary>
+    /// 期望控制参数，结构体
+    /// </summary>
     public struct DesiredParameter
     {
-        public double Alpha; // 期望迎角 9.1
-        public double Chi; // 期望航向角
-        public double Gamma; // 期望爬升角
-        public double Vk; // 期望速度 71
-        public double EngineDelta; // 发动机安装角
+        /// <summary>
+        /// 期望迎角
+        /// </summary>
+        public double Alpha;
+        /// <summary>
+        /// 期望航向角
+        /// </summary>
+        public double Chi;
+        /// <summary>
+        /// 期望爬升角
+        /// </summary>
+        public double Gamma;
+        /// <summary>
+        /// 期望速度
+        /// </summary>
+        public double Vk;
+        /// <summary>
+        /// 发动机安装角
+        /// </summary>
+        public double EngineDelta;
     }
 
+    /// <summary>
+    /// 舰载机类
+    /// </summary>
+    /// <remarks>所有角度、角速度均以弧度为单位</remarks>
     public class Plane
     {
+        /// <summary>
+        /// 舰载机惯性参数
+        /// </summary>
         public InertiaParameter PlaneInertia;
+        /// <summary>
+        /// 期望控制参数
+        /// </summary>
         public DesiredParameter DesiredParameter;
 
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
-        // 舵面角度及角速度限幅
-        // 所有角度、角速度均以弧度为单位
-        public Vector<double> DeltaERange = vb.Dense(new double[] { -24, 10.5 }) * Pi / 180; // 升降舵角度范围
-        public Vector<double> DeltaERateRange = vb.Dense(new double[] { -40, 40 }) * Pi / 180; // 升降舵角速度范围
+        #region 舰载机参数
+
+        #region 舵面角度及角速度限幅
+        /// <summary>
+        /// 升降舵角度范围
+        /// </summary>
+        public Vector<double> DeltaERange = vb.Dense(new double[] { -24, 10.5 }) * Pi / 180;
+        /// <summary>
+        /// 升降舵角速度范围
+        /// </summary>
+        public Vector<double> DeltaERateRange = vb.Dense(new double[] { -40, 40 }) * Pi / 180;
+        /// <summary>
+        /// 副翼角度范围
+        /// </summary>
         public Vector<double> DeltaARange = vb.Dense(new double[] { -25, 45 }) * Pi / 180;
+        /// <summary>
+        /// 副翼角速度范围
+        /// </summary>
         public Vector<double> DeltaARateRange = vb.Dense(new double[] { -100, 100 }) * Pi / 180;
+        /// <summary>
+        /// 方向舵角度范围
+        /// </summary>
         public Vector<double> DeltaRRange = vb.Dense(new double[] { -30, 30 }) * Pi / 180;
+        /// <summary>
+        /// 方向舵角速度范围
+        /// </summary>
         public Vector<double> DeltaRRateRange = vb.Dense(new double[] { -61, 61 }) * Pi / 180;
-
+        /// <summary>
+        /// 后缘襟翼角度范围
+        /// </summary>
         public Vector<double> DeltaTEFRange = vb.Dense(new double[] { -8, 45 }) * Pi / 180;
-        public Vector<double> DeltaTEFRateRange = vb.Dense(new double[] { -40, 40 }) * Pi / 180; // 调整后缘襟翼偏转速率，改善纵向轨迹跟踪性能
-
+        /// <summary>
+        /// 后缘襟翼角速度范围
+        /// </summary>
+        /// <remarks>调整后缘襟翼偏转速率，改善纵向轨迹跟踪性能</remarks>
+        public Vector<double> DeltaTEFRateRange = vb.Dense(new double[] { -40, 40 }) * Pi / 180;
+        /// <summary>
+        /// 油门杆角度范围
+        /// </summary>
         public Vector<double> DeltaPRange = vb.Dense(new double[] { 0.01, 1.0 });
+        /// <summary>
+        /// 油门杆角速度范围
+        /// </summary>
         public Vector<double> DeltaPRateRange = vb.Dense(new double[] { -0.01, 0.01 }) * 100000;
+        /// <summary>
+        /// 油门范围
+        /// </summary>
         public Vector<double> ThrustRange;
+        /// <summary>
+        /// 油门变化速率范围
+        /// </summary>
         public Vector<double> ThrustRateRange;
 
+        /// <summary>
+        /// 角速度p范围
+        /// </summary>
         public Vector<double> PRange = vb.Dense(new double[] { -179, 179 }) * Pi / 180 * 10;
+        /// <summary>
+        /// 角速度q范围
+        /// </summary>
         public Vector<double> QRange = vb.Dense(new double[] { -179, 179 }) * Pi / 180 * 10;
+        /// <summary>
+        /// 角速度r范围
+        /// </summary>
         public Vector<double> RRange = vb.Dense(new double[] { -179, 179 }) * Pi / 180 * 10;
+        /// <summary>
+        /// 爬升角范围
+        /// </summary>
         public Vector<double> GammaRange = vb.Dense(new double[] { -89, 89 }) * Pi / 180;
+        /// <summary>
+        /// 航向角范围
+        /// </summary>
         public Vector<double> ChiRange = vb.Dense(new double[] { -89, 89 }) * Pi / 180;
+        /// <summary>
+        /// θ范围
+        /// </summary>
         public Vector<double> ThetaRange = vb.Dense(new double[] { -89, 89 }) * Pi / 180;
+        /// <summary>
+        /// μ范围
+        /// </summary>
         public Vector<double> MiuRange = vb.Dense(new double[] { -89, 89 }) * Pi / 180;
 
+        /// <summary>
+        /// 角速度p变化速率范围
+        /// </summary>
         public Vector<double> PRateRange = vb.Dense(new double[] { -20, 20 }) * Pi / 180 * 100;
+        /// <summary>
+        /// 角速度q变化速率范围
+        /// </summary>
         public Vector<double> QRateRange = vb.Dense(new double[] { -20, 20 }) * Pi / 180 * 100;
+        /// <summary>
+        /// 角速度r变化速率范围
+        /// </summary>
         public Vector<double> RRateRange = vb.Dense(new double[] { -20, 20 }) * Pi / 180 * 100;
+        /// <summary>
+        /// 爬升角变化速率范围
+        /// </summary>
         public Vector<double> GammaRateRange = vb.Dense(new double[] { -20, 20 }) * Pi / 180 * 100;
+        /// <summary>
+        /// 航向角变化速率范围
+        /// </summary>
         public Vector<double> ChiRateRange = vb.Dense(new double[] { -20, 20 }) * Pi / 180 * 100;
+        /// <summary>
+        /// θ变化速率范围
+        /// </summary>
         public Vector<double> ThetaRateRange = vb.Dense(new double[] { -20, 20 }) * Pi / 180 * 100;
+        /// <summary>
+        /// μ变化速率范围
+        /// </summary>
         public Vector<double> MiuRateRange = vb.Dense(new double[] { -20, 20 }) * Pi / 180 * 100;
 
-        // 飞机气动参数
-        public double CY; // 升力系数 弧度制
-        public double CD; // 阻力系数 弧度制 drag coefficient
-        public double CC; // 侧力系数 弧度制
-        public double CL; // 滚转力矩 弧度制 rolling moment coefficient
-        public double CM; // 俯仰力矩 弧度制 pitching moment coefficient
-        public double CN; // 偏航力矩 弧度制 yawing moment coefficient
+        #endregion
 
+        #region 飞机气动参数
+        /// <summary>
+        /// 升力系数
+        /// </summary>
+        public double CY;
+        /// <summary>
+        /// 阻力系数
+        /// </summary>
+        public double CD;
+        /// <summary>
+        /// 侧力系数
+        /// </summary>
+        public double CC;
+        /// <summary>
+        /// 滚转力矩系数
+        /// </summary>
+        public double CL;
+        /// <summary>
+        /// 俯仰力矩系数
+        /// </summary>
+        public double CM;
+        /// <summary>
+        /// 偏航力矩系数
+        /// </summary>
+        public double CN;
 
-        // 飞机状态
+        #endregion
+
+        #region 飞机状态
+        /// <summary>
+        /// 舰载机位置
+        /// </summary>
         public Vector<double> Position;
+        /// <summary>
+        /// 航向角
+        /// </summary>
         public double Chi;
+        /// <summary>
+        /// 爬升角
+        /// </summary>
         public double Gamma;
-        public double Alpha = 8.0 * Pi / 180; // 5.0
+        /// <summary>
+        /// 迎角
+        /// </summary>
+        public double Alpha = 8.0 * Pi / 180; 
+        /// <summary>
+        /// 滚转角
+        /// </summary>
         public double Miu = 0 * Pi / 180;
+        /// <summary>
+        /// 侧滑角
+        /// </summary>
         public double Beta = 0 * Pi / 180;
+        /// <summary>
+        /// 欧拉角θ
+        /// </summary>
         public double Theta;
-        public double Phi = 0; // 欧拉角
+        /// <summary>
+        /// 欧拉角φ
+        /// </summary>
+        public double Phi = 0;
+        /// <summary>
+        /// 欧拉角ψ
+        /// </summary>
         public double Psi = 0;
+        /// <summary>
+        /// 滚转角速度
+        /// </summary>
         public double P = 0 * Pi / 180;
+        /// <summary>
+        /// 俯仰角速度
+        /// </summary>
         public double Q = 0 * Pi / 180;
+        /// <summary>
+        /// 偏航角速度
+        /// </summary>
         public double R = 0 * Pi / 180;
-        public double Vk = 65; // 70
+        /// <summary>
+        /// 空速
+        /// </summary>
+        public double Vk = 65;
+        /// <summary>
+        /// 副翼角度
+        /// </summary>
         public double DeltaA = 0 * Pi / 180;
+        /// <summary>
+        /// 升降舵角度
+        /// </summary>
         public double DeltaE = 0 * Pi / 180;
+        /// <summary>
+        /// 方向舵角度
+        /// </summary>
         public double DeltaR = 0 * Pi / 180;
-        public double DeltaP = 0.100; // 0.10
-        public double DeltaLEF = 33 * Pi / 180 * 1; // leading-edge flap
-        public double DeltaTEF = 25 * Pi / 180 * 1; // tailing-edge flap
+        /// <summary>
+        /// 油门杆角度
+        /// </summary>
+        public double DeltaP = 0.100;
+        /// <summary>
+        /// 前缘襟翼角度，leading-edge flap
+        /// </summary>
+        public double DeltaLEF = 33 * Pi / 180 * 1;
+        /// <summary>
+        /// 后缘襟翼角度，tailing-edge flap
+        /// </summary>
+        public double DeltaTEF = 25 * Pi / 180 * 1;
+        /// <summary>
+        /// 期望后缘襟翼角度
+        /// </summary>
         public double DeltaTEFDesired;
+        /// <summary>
+        /// 气流
+        /// </summary>
         public double Flow;
+        /// <summary>
+        /// 发动机推力
+        /// </summary>
         public double T;
+        /// <summary>
+        /// 期望位置
+        /// </summary>
         public Vector<double> DesiredPosition;
+        /// <summary>
+        /// 爬升角导数
+        /// </summary>
         public double GammaDerive = 0;
+        /// <summary>
+        /// 航向角导数
+        /// </summary>
         public double ChiDerive = 0;
-        public double l_path_0 = 3500; // 期望路径参数，初始路径长度
-        public double l_path = 0; // 期望路径参数，路径长度参数->特别注意，l_path初始值必须为0
+        /// <summary>
+        /// 期望路径参数，初始路径长度
+        /// </summary>
+        public double l_path_0 = 3500;
+        /// <summary>
+        /// 期望路径参数，路径长度参数
+        /// </summary>
+        /// <remarks>特别注意，l_path初始值必须为0</remarks>
+        public double l_path = 0;
 
+        /// <summary>
+        /// 暂存于此处的，控制器计算又有用的变量
+        /// </summary>
         public double omega_fx_2f;
+        /// <summary>
+        /// 暂存于此处的，控制器计算又有用的变量
+        /// </summary>
         public double omega_fy_2f;
+        /// <summary>
+        /// 暂存于此处的，控制器计算又有用的变量
+        /// </summary>
         public double omega_fz_2f;
+        /// <summary>
+        /// 暂存于此处的，控制器计算又有用的变量
+        /// </summary>
         public double x_b_2f;
+        /// <summary>
+        /// 暂存于此处的，控制器计算又有用的变量
+        /// </summary>
         public double y_b_2f;
+        /// <summary>
+        /// 暂存于此处的，控制器计算又有用的变量
+        /// </summary>
         public double z_b_2f;
+        /// <summary>
+        /// 暂存于此处的，控制器计算又有用的变量
+        /// </summary>
         public double kai_b2f;
+        /// <summary>
+        /// 暂存于此处的，控制器计算又有用的变量
+        /// </summary>
         public double gamma_b2f;
+        #endregion
 
-        // 气动力和力矩
+        #region 气动力和力矩
+        /// <summary>
+        /// 升力
+        /// </summary>
         public double Y;
+        /// <summary>
+        /// 阻力
+        /// </summary>
         public double D;
+        /// <summary>
+        /// 侧力
+        /// </summary>
         public double C;
+        /// <summary>
+        /// 滚转力矩
+        /// </summary>
         public double L;
+        /// <summary>
+        /// 俯仰力矩
+        /// </summary>
         public double M;
+        /// <summary>
+        /// 偏航力矩
+        /// </summary>
         public double N;
+        #endregion
 
-        //properties(SetAccess = private)
+        #region 计算气动参数的中间变量
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CY_alpha;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CY_delta_tef;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CL_delta_a;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CL_delta_r;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CM_delta_e;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CN_delta_a;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CN_delta_r;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CC_beta;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CD_alpha;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CL_beta;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CM_alpha1;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CM_alpha2;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CM_alpha;
+        /// <summary>
+        /// 计算气动参数的中间变量
+        /// </summary>
         public double CN_beta;
+        #endregion
 
+        #endregion
 
-        // 着舰过程中期望参量
-
+        #region Events
+        /// <summary>
+        /// 更新位置环状态变量的事件
+        /// </summary>
         public event EventHandler<XChangedEventArgs> X1ChangedEvent;
+        /// <summary>
+        /// 更新航迹环状态变量的事件
+        /// </summary>
         public event EventHandler<XChangedEventArgs> X2ChangedEvent;
+        /// <summary>
+        /// 更新姿态环状态变量的事件
+        /// </summary>
         public event EventHandler<XChangedEventArgs> X3ChangedEvent;
+        /// <summary>
+        /// 更新角速度环状态变量的事件
+        /// </summary>
         public event EventHandler<XChangedEventArgs> X4ChangedEvent;
+        /// <summary>
+        /// 记录舰载机状态变量的事件
+        /// </summary>
         public event EventHandler RecordPlaneStateEvent;
+        #endregion
 
+        /// <summary>
+        /// 构造舰载机类型的实例
+        /// </summary>
+        /// <param name="ship">航母对象</param>
         public Plane(Ship ship)
         {
             PlaneInertia = new()
@@ -249,6 +601,9 @@ namespace CsharpVersion
             gamma_b2f = Gamma - gamma_f;
         }
 
+        /// <summary>
+        /// 记录舰载机变量变化
+        /// </summary>
         public void Record()
         {
             RecordPlaneStateEvent?.Invoke(this, null);
@@ -356,6 +711,11 @@ namespace CsharpVersion
             N = Flow * PlaneInertia.WingS * PlaneInertia.WingL * CN;
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">仿真配置对象</param>
         public void UpdateState(double dt, Disturbance disturbance)
         {
             CalculatePneumaticParameters();
@@ -474,6 +834,9 @@ namespace CsharpVersion
             X1ChangedEvent?.Invoke(this, new XChangedEventArgs(dt, current_X1_dot));
         }
 
+        /// <summary>
+        /// 重置舰载机，将相关变量恢复至初始状态
+        /// </summary>
         public void Reset(Ship ship)
         {
             //var current_position_ship = ship.Position;

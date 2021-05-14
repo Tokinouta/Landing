@@ -11,22 +11,35 @@ using ModelEntities;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 航迹环
+    /// </summary>
     public class FlightPathLoop : IControlModule
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+
+        /// <summary>
+        /// 仿真配置
+        /// </summary>
         public Configuration Configuration { get; }
 
         readonly Plane plane;
         readonly Ship ship;
 
-        // Input Variable
+        /// <summary>
+        /// 输入变量，舰载机的χ和γ
+        /// </summary>
         Vector<double> U1 = vb.Dense(2, 0);
 
-        // State Variable
+        /// <summary>
+        /// 状态变量，舰载机的χ和γ
+        /// </summary>
         public Vector<double> X2;
 
-        // Output Variable
+        /// <summary>
+        /// 输出变量，舰载机的α、β和μ
+        /// </summary>
         public Vector<double> U2;
 
         // Interior Variable
@@ -103,11 +116,20 @@ namespace CsharpVersion
         double filteredDeltaTEF;
         double previousT;
 
+        /// <summary>
+        /// 别问这个变量为什么需要暴露出去，问就是我已经尽力了
+        /// </summary>
         public Vector<double> DeriveX2 { get => deriveX2; }
 
         //event RecordFlightPathLoopEvent;
         //event RecordFlightPathLoopVarEvent;
 
+        /// <summary>
+        /// 创建航迹环类型的实例
+        /// </summary>
+        /// <param name="jet">舰载机对象引用</param>
+        /// <param name="ac">航母对象引用</param>
+        /// <param name="config">仿真配置对象引用</param>
         public FlightPathLoop(Plane jet, Ship ac, Configuration config)
         {
             Configuration = config;
@@ -124,6 +146,10 @@ namespace CsharpVersion
             filteredDeltaTEF = desiredDeltaTEF;
         }
 
+        /// <summary>
+        /// 计算输出变量滤波，此处只用于油门
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
         public void CalculateFilter(double dt)
         {
             TFilterBuffer[TFilterBufferIndex] = plane.T;
@@ -137,6 +163,11 @@ namespace CsharpVersion
             plane.T = TFilterBuffer.Sum() / sampleNumber;
         }
 
+        /// <summary>
+        /// 计算输出变量限幅
+        /// </summary>
+        /// <remarks>这里需要计算的变量较多，包括输出变量，前后缘襟翼和油门</remarks>
+        /// <param name="dt">仿真时间步长</param>
         public void CalculateLimiter(double dt)
         {
             // Description    : 后缘襟翼变化幅度限制
@@ -231,6 +262,11 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 计算非线性观测器参数
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">风场扰动</param>
         public void CalculateNonlinearObserver(double dt, Disturbance disturbance)
         {
             double WingS = plane.PlaneInertia.WingS;
@@ -284,6 +320,9 @@ namespace CsharpVersion
             //notify(obj, "RecordFlightPathLoopVarEvent", ev);
         }
 
+        /// <summary>
+        /// 计算反步法参数
+        /// </summary>
         public void CalculateObservation()
         {
             double WingS = plane.PlaneInertia.WingS;
@@ -347,6 +386,9 @@ namespace CsharpVersion
             B_gamma_b2f = B_gamma;
         }
 
+        /// <summary>
+        /// 计算输出变量
+        /// </summary>
         public void CalculateOutput()
         {
             // 直接升力控制
@@ -439,6 +481,11 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 计算状态变量和误差
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="input"></param>
         public void CalculateState(double dt, Vector<double> input)
         {
             U1 = input;
@@ -473,12 +520,20 @@ namespace CsharpVersion
             err_alpha = plane.DesiredParameter.Alpha - plane.Alpha;
         }
 
+        /// <summary>
+        /// 记录位置环变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        [Obsolete("这个函数本是用于移植旧版本的记录，现在发现控制器变量暂时不用记录")]
         public void Record(double dt)
         {
             //ev = XChangedEventArgs(dt, e2, current_err_alpha, derive_X2, previous_u2);
             //notify(obj, "RecordFlightPathLoopEvent", ev);
         }
 
+        /// <summary>
+        /// 重置控制器，将相关变量恢复至初始状态
+        /// </summary>
         public void Reset()
         {
             U1 = vb.Dense(2, 0);
@@ -518,6 +573,12 @@ namespace CsharpVersion
             current_NDO_p_Vk = 0;
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">仿真配置对象</param>
+        [Obsolete("这个函数本是用于移植旧版本的更新状态，请用OnUpdateState", true)]
         public void UpdateState(double dt, Disturbance disturbance)
         {
             //dt = e.data{ 1};
@@ -525,6 +586,11 @@ namespace CsharpVersion
             //current_X2 = current_X2 + current_X2_dot * dt;
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="sender">发送数据的对象</param>
+        /// <param name="e">接受的数据，用于计算更新</param>
         public void OnUpdateState(object sender, XChangedEventArgs e)
         {
             X2 += e.Data * e.Dt;

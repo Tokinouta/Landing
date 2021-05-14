@@ -10,21 +10,34 @@ using ModelEntities;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 姿态环
+    /// </summary>
     public class AttitudeLoop : IControlModule
     {
         static readonly VectorBuilder<double> vb = Vector<double>.Build;
         static readonly MatrixBuilder<double> mb = Matrix<double>.Build;
+
+        /// <summary>
+        /// 仿真配置
+        /// </summary>
         public Configuration Configuration { get; }
         readonly Plane plane;
         readonly Ship ship;
 
-        // Input Variable
+        /// <summary>
+        /// 输入变量，舰载机的α、β和μ
+        /// </summary>
         Vector<double> U2;
 
-        // State Variable
+        /// <summary>
+        /// 状态变量，舰载机的α、β和μ
+        /// </summary>
         public Vector<double> X3;
 
-        // Output Variable
+        /// <summary>
+        /// 输出变量，舰载机的p、q和r
+        /// </summary>
         public Vector<double> U3 = vb.Dense(3, 0);
 
         // Interior Variable
@@ -52,6 +65,12 @@ namespace CsharpVersion
 
         //event RecordAttitudeLoopEvent;
 
+        /// <summary>
+        /// 创建位置环类型的实例
+        /// </summary>
+        /// <param name="plane">舰载机对象引用</param>
+        /// <param name="ship">航母对象引用</param>
+        /// <param name="config">仿真配置对象引用</param>
         public AttitudeLoop(Plane plane, Ship ship, Configuration config)
         {
             Configuration = config;
@@ -67,6 +86,11 @@ namespace CsharpVersion
             //addlistener(plane, 'X3ChangedEvent', @updateState);
         }
 
+        /// <summary>
+        /// 计算输出变量滤波
+        /// </summary>
+        /// <remarks>目前未使用</remarks>
+        /// <param name="dt">仿真时间步长</param>
         public void CalculateFilter(double dt)
         {
             U3FilterBuffer.SetRow(U3FilterBufferIndex, U3);
@@ -79,6 +103,10 @@ namespace CsharpVersion
             U3 = U3FilterBuffer.ColumnSums() / sampleNumber;
         }
 
+        /// <summary>
+        /// 计算输出变量限幅
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
         public void CalculateLimiter(double dt)
         {
             if (U3[0] < plane.PRange[0])
@@ -135,11 +163,20 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 计算非线性观测器参数
+        /// </summary>
+        /// <remarks>目前未使用</remarks>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">风场扰动</param>
         public void CalculateNonlinearObserver(double dt, Disturbance disturbance)
         {
             return;
         }
 
+        /// <summary>
+        /// 计算反步法参数
+        /// </summary>
         public void CalculateObservation()
         {
             double current_alpha = plane.Alpha;
@@ -161,6 +198,9 @@ namespace CsharpVersion
                 { Cos(current_alpha) / Cos(current_beta), 0, Sin(current_alpha) / Cos(current_beta) }});
         }
 
+        /// <summary>
+        /// 计算输出变量
+        /// </summary>
         public void CalculateOutput()
         {
             if (Configuration.AttitudeController == AttitudeConfig.IDLC)
@@ -192,9 +232,21 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 计算状态变量和误差
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="input"></param>
+        [Obsolete("旧版控制器变量计算函数", true)]
         public void CalculateState(double dt, Vector<double> input)
         { }
-        public void CalculateState(double dt, Vector<double> input, double derive)
+        /// <summary>
+        /// 计算状态变量和误差
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="input"></param>
+        /// <param name="derive"></param>
+        public void CalculateState(double dt, Vector<double> input, double derive = 0)
         {
             U2 = input;
 
@@ -214,12 +266,20 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 记录位置环变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        [Obsolete("这个函数本是用于移植旧版本的记录，现在发现控制器变量暂时不用记录")]
         public void Record(double dt)
         {
             //ev = XChangedEventArgs(dt, e3, derive_X3, previous_u3);
             //notify(obj, "RecordAttitudeLoopEvent", ev);
         }
 
+        /// <summary>
+        /// 重置控制器，将相关变量恢复至初始状态
+        /// </summary>
         public void Reset()
         {
             U3FilterBufferIndex = 1;
@@ -234,6 +294,12 @@ namespace CsharpVersion
             deriveX3 = vb.Dense(3, 0); //[theta,beta,miu]'
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="dt">仿真时间步长</param>
+        /// <param name="disturbance">仿真配置对象</param>
+        [Obsolete("这个函数本是用于移植旧版本的更新状态，请用OnUpdateState", true)]
         public void UpdateState(double dt, Disturbance disturbance)
         {
             // plane.current_v = [Sin(plane.current_miu), plane.current_alpha * Cos(plane.current_miu)]';
@@ -242,6 +308,11 @@ namespace CsharpVersion
             //current_X3 = current_X3 + current_X3_dot * dt;
         }
 
+        /// <summary>
+        /// 更新位置环状态变量
+        /// </summary>
+        /// <param name="sender">发送数据的对象</param>
+        /// <param name="e">接受的数据，用于计算更新</param>
         public void OnUpdateState(object sender, XChangedEventArgs e)
         {
             X3 += e.Data * e.Dt;

@@ -10,6 +10,9 @@ using ModelEntities;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 扰动类，所有关于舰尾流和风场扰动的计算包含于此
+    /// </summary>
     public class Disturbance
     {
         Configuration Configuration { get; }
@@ -20,6 +23,9 @@ namespace CsharpVersion
         double WindAlpha = 0; // angle of attck caused by wind
         double WindBeta = 0; // new added in mk4.1
         double WindActPosition = -800; // 考虑风场作用的距离，修改风场作用距离，要在此处和.m文件中同时修改
+        /// <summary>
+        /// 标记风场扰动开始的参数
+        /// </summary>
         public bool IsWindDisturbanceStarted = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
 
         Vector<double> CalCount;
@@ -31,12 +37,33 @@ namespace CsharpVersion
         double wind_estimation_NDO_lat;
 
         // 扰动参数
+        /// <summary>
+        /// 扰动引起的舰载机χ变化
+        /// </summary>
         public double disturbance_kai = 0;
+        /// <summary>
+        /// 扰动引起的舰载机γ变化
+        /// </summary>
         public double disturbance_gamma = 0;
+        /// <summary>
+        /// 扰动引起的舰载机Vk变化
+        /// </summary>
         public double disturbance_Vk = 0;
+        /// <summary>
+        /// 扰动引起的舰载机α变化
+        /// </summary>
         public double disturbance_alpha = 0;
+        /// <summary>
+        /// 扰动引起的舰载机p变化
+        /// </summary>
         public double disturbance_p = 0;
+        /// <summary>
+        /// 扰动引起的舰载机q变化
+        /// </summary>
         public double disturbance_q = 0;
+        /// <summary>
+        /// 扰动引起的舰载机r变化
+        /// </summary>
         public double disturbance_r = 0;
 
 
@@ -46,9 +73,21 @@ namespace CsharpVersion
         List<double> d_Vk_record;
         List<double[]> d_omega_record;
 
+        /// <summary>
+        /// 实际风速
+        /// </summary>
+        [Obsolete("实际这个东西也没有在记录，并不知道他为啥会有")]
         public double wind_actual;
+        /// <summary>
+        /// 实际侧向风速
+        /// </summary>
+        [Obsolete("实际这个东西也没有在记录，并不知道他为啥会有")]
         public double wind_actual_lat;
 
+        /// <summary>
+        /// 构造扰动类型实例
+        /// </summary>
+        /// <param name="config">仿真配置对象引用</param>
         public Disturbance(Configuration config)
         {
             Configuration = config;
@@ -62,6 +101,9 @@ namespace CsharpVersion
             }
         }
 
+        /// <summary>
+        /// 重置扰动状态，将相关变量恢复至初始状态
+        /// </summary>
         public void reset()
         {
             disturbance_kai = 0;
@@ -78,6 +120,12 @@ namespace CsharpVersion
             IsWindDisturbanceStarted = false; // 标记风场扰动开始的参数，1->系统加入风场扰动
         }
 
+        /// <summary>
+        /// 更新风场扰动变量
+        /// </summary>
+        /// <param name="plane">舰载机对象</param>
+        /// <param name="ship">航母对象</param>
+        /// <param name="step_count">当前仿真步数</param>
         public void updateWind(Plane plane, Ship ship, int step_count)
         {
             if (IsWindEnabled)
@@ -100,9 +148,11 @@ namespace CsharpVersion
                 }
             }
         }
-        // METHOD1 此处显示有关此方法的摘要
-        // 此处显示详细说明
 
+        /// <summary>
+        /// 更新扰动变量
+        /// </summary>
+        /// <param name="plane">舰载机对象</param>
         public void updateState(Plane plane)
         {
             double CC_beta = plane.CC_beta;

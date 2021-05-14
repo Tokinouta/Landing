@@ -11,9 +11,24 @@ using ModelEntities;
 
 namespace CsharpVersion
 {
+    /// <summary>
+    /// 辅助函数，用于特定计算场景
+    /// </summary>
     public static class HelperFunction
     {
+        /// <summary>
+        /// 仿真配置
+        /// </summary>
         public static Configuration Configuration { get; set; }
+
+        /// <summary>
+        /// 计算理想下滑道下的着舰点，仅计算y，z坐标
+        /// </summary>
+        /// <param name="position_a">飞机当前位置</param>
+        /// <param name="position_s">航母当前位置</param>
+        /// <param name="theta_s">斜角甲板角度</param>
+        /// <param name="psi_s">航母偏转角度</param>
+        /// <returns>理想着舰点</returns>
         public static Vector<double> ideal_path(Vector<double> position_a, Vector<double> position_s, double theta_s, double psi_s) // 甲板坐标系下飞机x坐标
         {
             // y_z[0] = 0;                                    // 理想下滑道y坐标
@@ -50,6 +65,12 @@ namespace CsharpVersion
             return Vector<double>.Build.Dense(new[] { yd, zd });
         }
 
+        /// <summary>
+        /// 【说实话这个算的是个啥我也不知道】
+        /// </summary>
+        /// <param name="position_a">飞机当前位置</param>
+        /// <param name="position_s">航母当前位置</param>
+        /// <returns>一个跟轨迹追踪有关系的东西</returns>
         public static Vector<double> vector_filed_trac(Vector<double> position_a, Vector<double> position_s)
         {
             Vector<double> trac_err = Vector<double>.Build.Dense(2);
