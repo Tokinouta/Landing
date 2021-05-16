@@ -133,6 +133,34 @@ namespace CsharpVersion
         }
 
         /// <summary>
+        /// 获取仿真的初始状态
+        /// </summary>
+        public Initialization SimulationInitialization
+        {
+            get
+            {
+                return new Initialization()
+                {
+                    X = Plane.Position[0],
+                    Y = Plane.Position[1],
+                    Z = Plane.Position[2],
+                    Phi = Plane.Phi,
+                    Psi = Plane.Psi,
+                    Theta = Plane.Theta,
+                    P = Plane.P,
+                    Q = Plane.Q,
+                    R = Plane.R,
+                    Alpha = Plane.Alpha,
+                    Vk = Plane.Vk,
+                    XShip = Ship.Position[0],
+                    YShip = Ship.Position[1],
+                    ZShip = Ship.Position[2],
+                    PsiShip = Ship.Psi
+                };
+            }
+        }
+
+        /// <summary>
         /// 创建仿真类型的实例
         /// </summary>
         public Simulation()

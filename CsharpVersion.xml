@@ -1476,6 +1476,11 @@
             提供向视景软件发送的字节流
             </summary>
         </member>
+        <member name="P:CsharpVersion.Simulation.SimulationInitialization">
+            <summary>
+            获取仿真的初始状态
+            </summary>
+        </member>
         <member name="M:CsharpVersion.Simulation.#ctor">
             <summary>
             创建仿真类型的实例
