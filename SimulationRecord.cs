@@ -35,6 +35,12 @@ namespace CsharpVersion
         readonly List<double> Vk_record;
         readonly List<double> current_Q_record;
         readonly List<double> current_T_record;
+        readonly List<double> p_record;
+        readonly List<double> q_record;
+        readonly List<double> r_record;
+        readonly List<double> delta_a_record;
+        readonly List<double> delta_e_record;
+        readonly List<double> delta_r_record;
 
         // 欧拉角记录
         readonly List<double> phi_record;
@@ -116,6 +122,13 @@ namespace CsharpVersion
             x_b_2f_record = new List<double>();
             y_b_2f_record = new List<double>();
             z_b_2f_record = new List<double>();
+
+            p_record = new();
+            q_record = new();
+            r_record = new();
+            delta_a_record = new();
+            delta_e_record = new();
+            delta_r_record = new();
             //addlistener(varargin{ 1}, "RecordShipStateEvent", @recordShipStateEventHandler);
             //addlistener(varargin{ 2}, "RecordPlaneStateEvent", @recordPlaneStateEventHandler);
             //addlistener(varargin{ 3}, "RecordPositionLoopEvent", @recordPositionLoopEventHandler);
@@ -173,6 +186,33 @@ namespace CsharpVersion
             x_b_2f_record.Add(plane.x_b_2f);
             y_b_2f_record.Add(plane.y_b_2f);
             z_b_2f_record.Add(plane.z_b_2f);
+
+            p_record.Add(plane.P);
+            q_record.Add(plane.Q);
+            r_record.Add(plane.R);
+            delta_a_record.Add(plane.DeltaA);
+            delta_e_record.Add(plane.DeltaE);
+            delta_r_record.Add(plane.DeltaR);
+        }
+
+        public Matrix<double> DataForDetection()
+        {
+            if (theta_record.Count<5)
+            {
+                throw new Exception("元素数量过少");
+            }
+            Vector<double> res = Vector<double>.Build.Dense(50);
+            res.SetSubVector(0, 5, Vector<double>.Build.DenseOfEnumerable(theta_record.TakeLast(5)));
+            res.SetSubVector(5, 5, Vector<double>.Build.DenseOfEnumerable(phi_record.TakeLast(5)));
+            res.SetSubVector(10, 5, Vector<double>.Build.DenseOfEnumerable(alpha_record.TakeLast(5)));
+            res.SetSubVector(15, 5, Vector<double>.Build.DenseOfEnumerable(p_record.TakeLast(5)));
+            res.SetSubVector(20, 5, Vector<double>.Build.DenseOfEnumerable(q_record.TakeLast(5)));
+            res.SetSubVector(25, 5, Vector<double>.Build.DenseOfEnumerable(r_record.TakeLast(5)));
+            res.SetSubVector(30, 5, Vector<double>.Build.DenseOfEnumerable(delta_a_record.TakeLast(5)));
+            res.SetSubVector(35, 5, Vector<double>.Build.DenseOfEnumerable(delta_e_record.TakeLast(5)));
+            res.SetSubVector(40, 5, Vector<double>.Build.DenseOfEnumerable(delta_r_record.TakeLast(5)));
+            res.SetSubVector(45, 5, Vector<double>.Build.DenseOfEnumerable(delta_p_record.TakeLast(5)));
+            return Matrix<double>.Build.DenseOfRowVectors(res);
         }
     }
 }

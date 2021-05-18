@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using MathNet.Numerics;
+using MathNet.Numerics.Data.Text;
 using ModelEntities;
 using ModelEntities.Enumerations;
 
@@ -160,11 +161,25 @@ namespace CsharpVersion
             }
         }
 
+
+        NeuronNetwork neuronNetwork;
         /// <summary>
         /// 创建仿真类型的实例
         /// </summary>
         public Simulation()
         {
+            var opts = new Options()
+            {
+                BatchSize = 5,
+                NumberEpochs = 500,
+            };
+            neuronNetwork = new(new int[] { 50, 512, 256, 128, 64, 19 }, opts);
+            neuronNetwork.W[0] = DelimitedReader.Read<double>("W1,n=5.csv", delimiter: ",");
+            neuronNetwork.W[1] = DelimitedReader.Read<double>("W2,n=5.csv", delimiter: ",");
+            neuronNetwork.W[2] = DelimitedReader.Read<double>("W3,n=5.csv", delimiter: ",");
+            neuronNetwork.W[3] = DelimitedReader.Read<double>("W4,n=5.csv", delimiter: ",");
+            neuronNetwork.W[4] = DelimitedReader.Read<double>("W5,n=5.csv", delimiter: ",");
+
             InitializeInitialParameters();
 
             Configuration = new()
@@ -212,6 +227,18 @@ namespace CsharpVersion
         /// <param name="configuration">创建本实例需要使用仿真配置</param>
         public Simulation(Configuration configuration)
         {
+            var opts = new Options()
+            {
+                BatchSize = 5,
+                NumberEpochs = 500,
+            };
+            neuronNetwork = new(new int[] { 50, 512, 256, 128, 64, 19 }, opts);
+            neuronNetwork.W[0] = DelimitedReader.Read<double>("W1,n=5.csv", delimiter: ",");
+            neuronNetwork.W[1] = DelimitedReader.Read<double>("W2,n=5.csv", delimiter: ",");
+            neuronNetwork.W[2] = DelimitedReader.Read<double>("W3,n=5.csv", delimiter: ",");
+            neuronNetwork.W[3] = DelimitedReader.Read<double>("W4,n=5.csv", delimiter: ",");
+            neuronNetwork.W[4] = DelimitedReader.Read<double>("W5,n=5.csv", delimiter: ",");
+
             InitializeInitialParameters();
 
             Configuration = configuration;
@@ -298,6 +325,13 @@ namespace CsharpVersion
                 Miu = Plane.Miu
             });
             return (Plane.Position[2] - Ship.Position[2]) < 0;
+        }
+
+        public int Detect()
+        {
+            var data = Record.DataForDetection();
+            //Console.WriteLine(data);
+            return (int)neuronNetwork.Predict(data)[0];
         }
 
         void SingleStep()

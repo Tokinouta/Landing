@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
     <PackageReference Include="MathNet.Numerics.Data.Matlab" Version="4.1.0" />
+    <PackageReference Include="MathNet.Numerics.Data.Text" Version="4.1.0" />
     <PackageReference Include="MathNet.Numerics.MKL.Win-x64" Version="2.5.0" />
   </ItemGroup>
 
@@ -26,6 +27,21 @@
     </None>
     <None Update="matlab.mat">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="W1,n=5.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="W2,n=5.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="W3,n=5.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="W4,n=5.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="W5,n=5.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="WindModel.mat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
