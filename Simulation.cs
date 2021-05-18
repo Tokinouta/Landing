@@ -271,6 +271,35 @@ namespace CsharpVersion
             DataSending?.Invoke();
         }
 
+        public bool Simulate50(ConcurrentQueue<DataToSend> DataQueue)
+        {
+            int oldStep = step_count;
+            while ((Plane.Position[2] - Ship.Position[2]) < 0 && step_count - oldStep < 50)
+            {
+                SingleStep();
+            }
+            DataSending?.Invoke();
+            DataQueue.Enqueue(new DataToSend()
+            {
+                Time = current_time,
+                X = Plane.Position[0],
+                Y = Plane.Position[1],
+                Z = Plane.Position[2],
+                Phi = Plane.Phi,
+                Psi = Plane.Psi,
+                Theta = Plane.Theta,
+                Alpha = Plane.Alpha,
+                P = Plane.P,
+                Q = Plane.Q,
+                R = Plane.R,
+                Chi = Plane.Chi,
+                Gamma = Plane.Gamma,
+                Vk = Plane.Vk,
+                Miu = Plane.Miu
+            });
+            return (Plane.Position[2] - Ship.Position[2]) < 0;
+        }
+
         void SingleStep()
         {
             step_count++;
